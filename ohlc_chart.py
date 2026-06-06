@@ -69,6 +69,15 @@ def build_series(ohlc, machine_nums, start_date):
         l = sum(ohlc[m][date][2] for m in active)
         c = sum(ohlc[m][date][3] for m in active)
         result.append({'time': iso(date), 'open':o, 'high':h, 'low':l, 'close':c})
+
+    # 前日Closeを翌日Openに合わせる（ギャップレスローソク足）
+    for i in range(1, len(result)):
+        prev_close = result[i-1]['close']
+        result[i]['open'] = prev_close
+        # High/Low も open を考慮して再調整
+        result[i]['high'] = max(result[i]['high'], prev_close, result[i]['close'])
+        result[i]['low']  = min(result[i]['low'],  prev_close, result[i]['close'])
+
     return result
 
 print("CSV読み込み中...")
