@@ -1,0 +1,21 @@
+# ===================================
+# pachi_analysis .gitignore
+# ===================================
+
+# CSVデータ (約9GB → 絶対に除外)
+csv/
+
+# キャッシュ・デバッグ画像
+__pycache__/
+*.pyc
+ocr_debug.png
+
+# 中間ファイル
+last_folder.json
+adjust.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+charts/
