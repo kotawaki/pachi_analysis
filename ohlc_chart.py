@@ -28,7 +28,9 @@ def load_ohlc(csv_dir):
         with open(path, encoding='utf-8-sig') as f:
             for row in csv.DictReader(f):
                 kind = row.get('種別','')
-                if '稼働なし' in kind or not kind.strip():
+                # ※「稼働なし」も当日の差玉位置情報として使う(当日の最終差玉を正確に取るため)。
+                #   伝播分析では当たり判定から除外するが、OHLCではスランプ位置の記録として有効。
+                if not kind.strip():
                     continue
                 m = row.get('Machine', row.get('machine','')).strip()
                 if not m:
@@ -38,7 +40,8 @@ def load_ohlc(csv_dir):
                     sb = int(row.get('開始差玉', 0) or 0)
                     eb = int(row.get('終了差玉', 0) or 0)
                     st = (row.get('開始時刻','') or '00:00').strip() or '00:00'
-                    sess[m][date].append((st, sb, eb))
+                    et = (row.get('終了時刻','') or st).strip() or st
+                    sess[m][date].append((st, et, sb, eb))
                 except:
                     pass
     # 台別・日別の「当日メトリクス」を作る
@@ -48,10 +51,11 @@ def load_ohlc(csv_dir):
     for m, days in sess.items():
         daily[m] = {}
         for date, sl in days.items():
-            sl.sort()                       # 開始時刻順
-            net = sl[-1][2]                 # 当日の最終終了差玉 = 当日収支(0基準)
-            pts = [0]                       # 当日は必ず差玉0からスタート
-            for _, a, b in sl:
+            sl.sort()                                  # 開始時刻順
+            last = max(sl, key=lambda x: x[1])         # 終了時刻が最も遅い行
+            net = last[3]                              # 当日の最終終了差玉 = 当日収支(0基準)
+            pts = [0]                                  # 当日は必ず差玉0からスタート
+            for st, et, a, b in sl:
                 pts.append(a); pts.append(b)
             daily[m][date] = (net, max(pts), min(pts))
     return daily
