@@ -61,10 +61,20 @@ def main():
     print("  完了")
 
     iso = [f"{d[:4]}-{d[4:6]}-{d[6:8]}" for d in dates]
+
+    # 収集範囲が縮小した境界日を自動検出(稼働台数が大きく落ちる最初の日)
+    mcount = [sum(len(v) for v in dgf[d].values()) for d in dates]
+    boundary = ""
+    for i in range(1, len(dates)):
+        if mcount[i] < 100 <= mcount[i - 1]:
+            boundary = iso[i]
+            print(f"  収集範囲の縮小を検出: {iso[i]} ({mcount[i-1]}台 → {mcount[i]}台)")
+            break
+
     payload = json.dumps({"dates": iso, "z": zser}, ensure_ascii=False, separators=(',', ':'))
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    html = HTML.replace('__DATA__', payload)
+    html = HTML.replace('__DATA__', payload).replace('__BOUNDARY__', boundary)
     with open(OUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"\n✅ 生成完了: {OUT_FILE}  ({os.path.getsize(OUT_FILE)/1024:.0f} KB)")
@@ -110,7 +120,8 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
 <h1>🏆 グループ強さランキング推移</h1>
 <div class="sub">
   各グループの「グループ内クラスタリング強度(z値)」の日次ランク(1=その日いちばん引っ張り合っていた)。<br>
-  ※相対的な強さの推移を見るためのもの。翌日の強グループを予測できるという意味ではない（検証結果はネガティブ）。
+  ※相対的な強さの推移を見るためのもの。翌日の強グループを予測できるという意味ではない（検証結果はネガティブ）。<br>
+  <span style="color:#e3b341">⚠ 黄色の境界線より右は収集範囲が34-77番のみ（各グループ約5台）に縮小。それ以前の全ホール（各約42台）とは母集団が異なり連続比較できません。</span>
 </div>
 
 <div class="controls">
@@ -147,7 +158,25 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
 
 <script>
 const DATA = __DATA__;
+const BOUNDARY = "__BOUNDARY__";                 // 収集範囲縮小の境界日(ISO) または ""
+const BIDX = BOUNDARY ? DATA.dates.indexOf(BOUNDARY) : -1;
 const GROUPS = ["1","2","3","4","5","6","7","8","9"];
+
+// バンプチャートに境界の縦線を描くプラグイン
+const vlinePlugin = {
+  id:'vline',
+  afterDraw(chart){
+    if (BIDX < 0) return;
+    const x = chart.scales.x.getPixelForValue(BIDX);
+    const {top,bottom} = chart.chartArea;
+    const ctx = chart.ctx; ctx.save();
+    ctx.strokeStyle='#e3b341'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(x,top); ctx.lineTo(x,bottom); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle='#e3b341'; ctx.font='10px sans-serif';
+    ctx.fillText('▼ここから34-77のみ', x+4, top+11);
+    ctx.restore();
+  }
+};
 const GCOLOR = {
   "1":"#f85149","2":"#db61a2","3":"#d29922","4":"#3fb950","5":"#2ea043",
   "6":"#1f6feb","7":"#58a6ff","8":"#a371f7","9":"#ff7b72"
@@ -195,6 +224,7 @@ function render(){
   chart = new Chart(document.getElementById('bump'), {
     type:'line',
     data:{ labels: DATA.dates.map(d=>d.slice(5)), datasets },
+    plugins:[vlinePlugin],
     options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:'nearest',intersect:false},
@@ -216,13 +246,14 @@ function render(){
     const hue = 0 + t*210;                     // 赤→青
     return `hsl(${hue},65%,${48-t*8}%)`;
   };
+  const bdr = ci => (ci===BIDX) ? 'border-left:2px solid #e3b341;' : '';
   let html='<table><thead><tr><th>G\\日</th>';
-  DATA.dates.forEach(d=>html+=`<th>${d.slice(5).replace('-','/')}</th>`);
+  DATA.dates.forEach((d,ci)=>html+=`<th style="${bdr(ci)}">${d.slice(5).replace('-','/')}</th>`);
   html+='</tr></thead><tbody>';
   GROUPS.forEach(g=>{
     html+=`<tr><td class="gl" style="color:${GCOLOR[g]}">G${g}</td>`;
-    rankRaw[g].forEach(r=>{
-      html+=`<td class="cell" style="background:${heatColor(r)}">${r!=null?r:''}</td>`;
+    rankRaw[g].forEach((r,ci)=>{
+      html+=`<td class="cell" style="${bdr(ci)}background:${heatColor(r)}">${r!=null?r:''}</td>`;
     });
     html+='</tr>';
   });
