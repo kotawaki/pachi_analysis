@@ -6,8 +6,8 @@ import csv, os, glob, datetime, json
 from collections import defaultdict
 
 CSV_DIR = 'csv/analyze'
-WINDOW_MIN = 30
-LEARN_DAYS = 40   # 学習期間
+WINDOW_MIN = 5
+LEARN_DAYS = 60   # 学習期間
 TARGET = set(str(i).zfill(3) for i in range(39, 78))
 
 # =============================================
@@ -140,7 +140,7 @@ for key, p in top_pairs:
                 successes += 1
 
     success_rate = successes / chances * 100 if chances > 0 else 0
-    base = baseline_prob(B, test_dates)
+    base = baseline_prob(B, test_dates, window_min=WINDOW_MIN)
     base_pct = base * 100
     actual_lift = (successes / chances) / base if chances > 0 and base > 0 else 0
 

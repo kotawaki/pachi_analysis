@@ -8,7 +8,7 @@ from collections import defaultdict
 
 CSV_DIR   = 'csv/analyze'
 OUT_DIR   = 'docs'          # GitHub Pages は docs/ フォルダを認識する
-OUT_FILE  = os.path.join(OUT_DIR, 'index.html')
+OUT_FILE  = os.path.join(OUT_DIR, 'ohlc.html')   # トップ(index.html)から選択する1ページ
 
 RANGES = [
     {'id':'r34_38',   'label':'34〜38番',  'machines':list(range(34,39)),   'start':'20250604'},
@@ -163,7 +163,7 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
 </head>
 <body>
 <div id="header">
-  <h1>🎰 パチンコ 差玉チャート &nbsp;|&nbsp; 日足OHLC &nbsp;/&nbsp; MA5・20・75 &nbsp;/&nbsp; Fibonacci &nbsp;/&nbsp; Golden Cross (75→20) &nbsp;/&nbsp; Swing H/L &nbsp;/&nbsp; R/R</h1>
+  <h1><a href="index.html" style="color:#8b949e;text-decoration:none">🏠 トップ</a> &nbsp;｜&nbsp; <a href="groups.html" style="color:#58a6ff;text-decoration:none">🏆 グループ強さランキング</a> &nbsp;｜&nbsp; 🎰 差玉チャート &nbsp;/&nbsp; 日足OHLC &nbsp;/&nbsp; MA5・20・75 &nbsp;/&nbsp; Fibonacci &nbsp;/&nbsp; Golden Cross (75→20) &nbsp;/&nbsp; Swing H/L &nbsp;/&nbsp; R/R</h1>
 </div>
 <div id="tabs"></div>
 <div id="sub-tabs"></div>
