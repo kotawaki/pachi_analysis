@@ -41,43 +41,49 @@ def load_ohlc(csv_dir):
                     sess[m][date].append((st, sb, eb))
                 except:
                     pass
-    ohlc = {}
+    # 台別・日別の「当日メトリクス」を作る
+    #   net = 当日収支(その日の最終差玉。スランプグラフは毎朝0スタート)
+    #   day_high / day_low = 当日の差玉レンジ(0始点を必ず含む)
+    daily = {}
     for m, days in sess.items():
-        ohlc[m] = {}
+        daily[m] = {}
         for date, sl in days.items():
-            sl.sort()
-            o = sl[0][1];  c = sl[-1][2]
-            h = max(max(a,b) for _,a,b in sl)
-            l = min(min(a,b) for _,a,b in sl)
-            h = max(h, o, c);  l = min(l, o, c)
-            ohlc[m][date] = (o, h, l, c)
-    return ohlc
+            sl.sort()                       # 開始時刻順
+            net = sl[-1][2]                 # 当日の最終終了差玉 = 当日収支(0基準)
+            pts = [0]                       # 当日は必ず差玉0からスタート
+            for _, a, b in sl:
+                pts.append(a); pts.append(b)
+            daily[m][date] = (net, max(pts), min(pts))
+    return daily
 
 def iso(d):
     return f"{d[:4]}-{d[4:6]}-{d[6:8]}"
 
-def build_series(ohlc, machine_nums, start_date):
+def build_series(daily, machine_nums, start_date):
+    """
+    累積スランプ・ローソク足を生成。
+      open  = 前日までの累積差玉（窓なし＝連続）
+      close = open + 当日収支（net）
+      → 色は「当日が勝ちか負けか」を正しく表す（前日比ではない）
+      high/low = 当日レンジを累積値に乗せたもの
+    """
     ms = [str(m).zfill(3) for m in machine_nums]
-    dates = sorted({d for m in ms if m in ohlc for d in ohlc[m] if d >= start_date})
+    dates = sorted({d for m in ms if m in daily for d in daily[m] if d >= start_date})
     result = []
+    cum = 0                                  # 累積差玉
     for date in dates:
-        active = [m for m in ms if m in ohlc and date in ohlc[m]]
+        active = [m for m in ms if m in daily and date in daily[m]]
         if not active:
             continue
-        o = sum(ohlc[m][date][0] for m in active)
-        h = sum(ohlc[m][date][1] for m in active)
-        l = sum(ohlc[m][date][2] for m in active)
-        c = sum(ohlc[m][date][3] for m in active)
+        net = sum(daily[m][date][0] for m in active)   # 当日収支の合計
+        dh  = sum(daily[m][date][1] for m in active)   # 当日高値(0基準)の合計
+        dl  = sum(daily[m][date][2] for m in active)   # 当日安値(0基準)の合計
+        o = cum
+        c = cum + net
+        h = max(cum + dh, o, c)
+        l = min(cum + dl, o, c)
         result.append({'time': iso(date), 'open':o, 'high':h, 'low':l, 'close':c})
-
-    # 前日Closeを翌日Openに合わせる（ギャップレスローソク足）
-    for i in range(1, len(result)):
-        prev_close = result[i-1]['close']
-        result[i]['open'] = prev_close
-        # High/Low も open を考慮して再調整
-        result[i]['high'] = max(result[i]['high'], prev_close, result[i]['close'])
-        result[i]['low']  = min(result[i]['low'],  prev_close, result[i]['close'])
-
+        cum = c                              # 翌日のopenに引き継ぐ（窓なし）
     return result
 
 print("CSV読み込み中...")
