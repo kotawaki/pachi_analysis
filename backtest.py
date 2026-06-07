@@ -6,8 +6,8 @@ import csv, os, glob, datetime, json
 from collections import defaultdict
 
 CSV_DIR = 'csv/analyze'
-WINDOW_MIN = 5
-LEARN_DAYS = 60   # 学習期間
+WINDOW_MIN = 30
+LEARN_DAYS = 120   # 学習期間
 TARGET = set(str(i).zfill(3) for i in range(39, 78))
 
 # =============================================
