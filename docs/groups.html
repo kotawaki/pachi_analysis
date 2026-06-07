@@ -41,7 +41,7 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
 </div>
 
 <div class="controls">
-  <label>平滑化(移動平均):</label>
+  <label>平滑化(①の折れ線のみ):</label>
   <button data-roll="1" class="active">なし</button>
   <button data-roll="3">3日</button>
   <button data-roll="7">7日</button>
@@ -56,7 +56,7 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
 </div>
 
 <div class="card">
-  <h2>② ヒートマップ（日次ランク）</h2>
+  <h2>② ヒートマップ（日次ランク・生データ）</h2>
   <div id="heat"></div>
   <div class="legend">
     <span class="lg"><span class="sw" style="background:#f85149"></span>1位(強)</span>
@@ -64,7 +64,12 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
     <span class="lg"><span class="sw" style="background:#2f81f7"></span>9位(弱)</span>
     <span class="lg"><span class="sw" style="background:#30363d"></span>データ不足</span>
   </div>
-  <div class="note">セル内数字 = その日の順位。横スクロールで全期間。</div>
+  <div class="note">
+    セル内数字 = その日の順位。横スクロールで全期間。<br>
+    ⚠ <b>このヒートマップは常に生データ（平滑化なし）で表示</b>します（上の平滑化ボタンは①の折れ線だけに効きます）。
+    7日移動平均をかけると強グループが「数日維持」して見えますが、それは<b>移動平均が隣接日のデータを共有することで生じる見せかけ</b>です
+    （持続性ゼロのデータでも同じ縞模様が出ることを検証済み）。実際の日次トップはほぼ毎日入れ替わり、翌日の予測には使えません。
+  </div>
 </div>
 
 <script>
@@ -102,7 +107,8 @@ function ranksByDay(zsm){
 let chart=null;
 function render(){
   const zsm = {}; GROUPS.forEach(g=>zsm[g]=smooth(DATA.z[g], roll));
-  const rank = ranksByDay(zsm);
+  const rank = ranksByDay(zsm);          // バンプチャート用(平滑化を反映)
+  const rankRaw = ranksByDay(DATA.z);    // ヒートマップ用(常に生データ=事実)
 
   // バンプチャート
   const datasets = GROUPS.map(g=>({
@@ -142,7 +148,7 @@ function render(){
   html+='</tr></thead><tbody>';
   GROUPS.forEach(g=>{
     html+=`<tr><td class="gl" style="color:${GCOLOR[g]}">G${g}</td>`;
-    rank[g].forEach(r=>{
+    rankRaw[g].forEach(r=>{
       html+=`<td class="cell" style="background:${heatColor(r)}">${r!=null?r:''}</td>`;
     });
     html+='</tr>';
