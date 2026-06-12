@@ -145,6 +145,9 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
 .sub-tab.provisional{color:#7ee787;border-color:#56d364;background:#153b23;box-shadow:inset 0 0 0 1px #56d36455}
 .sub-tab.fib-blue.active{color:#fff;background:#1f6feb}.sub-tab.fib-yellow.active{color:#161b22;background:#ffd33d}.sub-tab.fib-red.active{color:#fff;background:#da3633}.sub-tab.fib-green.active{color:#fff;background:#238636}
 .sub-tab.provisional.active{color:#0d1117;background:#7ee787;border-color:#7ee787}
+#analysis-controls{display:flex;gap:16px;align-items:center;background:#0d1117;border-bottom:1px solid #30363d;padding:7px 10px;flex-shrink:0;min-height:36px}
+.analysis-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;font-size:12px;color:#c9d1d9}
+.analysis-toggle input{margin:0;width:15px;height:15px}
 #fourier-controls{display:flex;gap:7px 14px;align-items:center;flex-wrap:wrap;background:#161b22;border-bottom:1px solid #30363d;padding:6px 10px;flex-shrink:0;min-height:34px}
 .fourier-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;font-size:11px;color:#c9d1d9}
 .fourier-toggle input{margin:0}.fourier-swatch{width:17px;height:3px;display:inline-block}.fourier-empty{color:#6e7681;font-size:11px}
@@ -171,6 +174,24 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
 .ma5c{color:#ffeb3b}
 .ma20c{color:#42a5f5}
 .ma75c{color:#ff7043}
+@media(max-width:720px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  body{display:block;font-size:12px}
+  #header{padding:7px 9px}
+  #header h1{font-size:11px}
+  #tabs,#sub-tabs,#analysis-controls,#fourier-controls{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
+  #tabs{padding:0 4px}.tab{padding:7px 10px}
+  #sub-tabs{padding:5px 6px}.sub-tab{padding:4px 9px}
+  #analysis-controls{padding:7px 8px;gap:14px}
+  #fourier-controls{padding:6px 8px;min-height:33px}
+  #main{display:flex;flex-direction:column;min-height:0}
+  #chart-container{width:100%;height:58vh;min-height:430px;max-height:620px;flex:none;border-bottom:1px solid #30363d}
+  #info-panel{width:100%;padding:0 10px 18px;border-left:0;border-top:1px solid #30363d;overflow:visible;font-size:12px}
+  #info-panel .sec{margin:0;padding:12px 2px;border-bottom:1px solid #30363d}
+  #info-panel .sec-title{font-size:11px;margin-bottom:8px}
+  #info-panel .row{margin:6px 0}
+  .fib-line-label{font-size:9px;padding:2px 4px}
+}
 </style>
 </head>
 <body>
@@ -179,16 +200,14 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
 </div>
 <div id="tabs"></div>
 <div id="sub-tabs"></div>
+<div id="analysis-controls">
+  <label class="analysis-toggle"><input id="fib-local-toggle" type="checkbox"><span id="fib-local-label">SL2→SH2</span></label>
+  <label class="analysis-toggle"><input id="fib-global-toggle" type="checkbox"><span>全期間フィボ</span></label>
+</div>
 <div id="fourier-controls"></div>
 <div id="main">
   <div id="chart-container"></div>
   <div id="info-panel">
-    <div class="sec">
-      <div class="sec-title">Golden Cross</div>
-      <div id="gc-badge" class="badge gc-off" style="margin-bottom:5px">未検出</div>
-      <div class="row"><span class="lbl">確定日</span><span class="val" id="gc-date">-</span></div>
-      <div class="row"><span class="lbl">総検出回数</span><span class="val" id="gc-count">-</span></div>
-    </div>
     <div class="sec">
       <div class="sec-title">Swing High / Low</div>
       <div class="row"><span class="lbl" style="color:#ef5350">▲ SH1</span><span class="val" id="sh1">-</span></div>
@@ -199,14 +218,12 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
     <div class="sec">
       <div class="sec-title">Risk / Reward</div>
       <div class="row"><span class="lbl">エントリー</span><span class="val" id="rr-entry">-</span></div>
-      <div class="row"><span class="lbl">ストップ(SL1)</span><span class="val" id="rr-stop">-</span></div>
+      <div class="row"><span class="lbl">ストップ(SL2)</span><span class="val" id="rr-stop">-</span></div>
       <div class="row"><span class="lbl">目標(Fib1.618)</span><span class="val" id="rr-target">-</span></div>
       <div class="row"><span class="lbl">R/R 比率</span><span class="val" id="rr-ratio">-</span></div>
     </div>
     <div class="sec">
       <div class="sec-title">Fibonacci</div>
-      <label class="row" style="cursor:pointer"><span class="lbl" id="fib-local-label">SL2→SH2</span><input id="fib-local-toggle" type="checkbox"></label>
-      <label class="row" style="cursor:pointer"><span class="lbl">全期間 High→Low</span><input id="fib-global-toggle" type="checkbox"></label>
       <div id="fib-panel"><span class="flbl">上昇構造の成立時に表示</span></div>
     </div>
     <div class="sec">
@@ -214,6 +231,12 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
       <div class="row"><span class="lbl ma5c">■ MA5</span><span class="val" id="ma5v">-</span></div>
       <div class="row"><span class="lbl ma20c">■ MA20</span><span class="val" id="ma20v">-</span></div>
       <div class="row"><span class="lbl ma75c">■ MA75</span><span class="val" id="ma75v">-</span></div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">Golden Cross</div>
+      <div id="gc-badge" class="badge gc-off" style="margin-bottom:5px">未検出</div>
+      <div class="row"><span class="lbl">確定日</span><span class="val" id="gc-date">-</span></div>
+      <div class="row"><span class="lbl">総検出回数</span><span class="val" id="gc-count">-</span></div>
     </div>
   </div>
 </div>
