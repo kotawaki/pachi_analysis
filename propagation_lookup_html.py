@@ -140,6 +140,9 @@ button{{font:inherit}}
 .machine.candidate-mid{{background:#075c4a;border-color:var(--mid);color:#b7ffe9}}
 .machine.candidate-weak{{background:#174e7b;border-color:var(--weak);color:#d5edff}}
 .rank-badge{{position:absolute!important;left:5px;right:auto!important;top:4px!important;display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#fff;color:#07111d!important;font-size:10px!important;font-weight:900!important}}
+.rank-high{{background:#ef4444!important;color:#fff!important;box-shadow:0 0 10px rgba(239,68,68,.55)}}
+.rank-mid{{background:#facc15!important;color:#2b2100!important;box-shadow:0 0 8px rgba(250,204,21,.35)}}
+.rank-low{{background:#fff!important;color:#07111d!important}}
 .legend{{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:11px}}
 .dot{{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}}
 .selected-summary{{min-height:46px;padding:10px 12px;background:#091624;border-radius:10px;margin-bottom:12px;color:var(--muted)}}
@@ -147,7 +150,7 @@ button{{font:inherit}}
 .ranking h2{{font-size:16px;margin:0 0 10px}}
 .candidate-list{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
 .candidate-card{{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px}}
-.candidate-card .no{{font-size:20px;font-weight:900;text-align:center}}
+.candidate-card .no{{display:grid;place-items:center;width:32px;height:32px;margin:auto;border-radius:50%;font-size:18px;font-weight:900;text-align:center}}
 .candidate-card b{{font-size:16px}}
 .candidate-card p{{margin:2px 0 0;color:var(--muted);font-size:11px;line-height:1.45}}
 .metrics{{text-align:right;font-size:12px}}
@@ -207,6 +210,11 @@ function level(row) {{
   if (row.count >= 10 && row.lift >= 1.2) return 'mid';
   return 'weak';
 }}
+function rankClass(rank) {{
+  if (rank <= 3) return 'rank-high';
+  if (rank <= 6) return 'rank-mid';
+  return 'rank-low';
+}}
 function buildIsland(id, values) {{
   document.getElementById(id).innerHTML = values.map(machine =>
     `<button class="machine" data-machine="${{machine}}" aria-pressed="false">${{machine}}<small>G${{((machine - 1) % 9) + 1}}</small></button>`
@@ -247,7 +255,7 @@ function render() {{
     if (!row) return;
     button.classList.add(`candidate-${{level(row.best)}}`);
     const rank = rankByMachine.get(machine);
-    if (rank) button.insertAdjacentHTML('afterbegin', `<small class="rank-badge">${{rank}}</small>`);
+    if (rank) button.insertAdjacentHTML('afterbegin', `<small class="rank-badge ${{rankClass(rank)}}">${{rank}}</small>`);
   }});
   const sources = [...selected].sort((a,b)=>a-b);
   document.getElementById('summary').innerHTML = sources.length
@@ -266,7 +274,7 @@ function render() {{
     const best = row.best;
     const sourcesText = row.evidence.map(item => item.source).join('・');
     return `<div class="candidate-card">
-      <div class="no">${{index + 1}}</div>
+      <div class="no ${{rankClass(index + 1)}}">${{index + 1}}</div>
       <div><b>${{row.machine}}番台</b><p>${{sourcesText}}番台から支持（${{row.supporters}}台）<br>最強ペア: ${{best.source}} → ${{row.machine}}</p></div>
       <div class="metrics"><strong>${{best.pct.toFixed(1)}}%</strong>lift ${{best.lift.toFixed(2)}}<br>count ${{best.count}}</div>
     </div>`;
