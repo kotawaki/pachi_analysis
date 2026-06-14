@@ -9,6 +9,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+from prediction_daily import parse_locked_forecasts
 from propagation import extract_starts, load_snaps
 
 
@@ -88,12 +89,35 @@ def html_escape_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
+def load_daily_prediction():
+    paths = sorted(
+        path for path in (ROOT / "docs").glob("prediction_20*.html")
+        if path.stem.removeprefix("prediction_").isdigit()
+    )
+    if not paths:
+        return {"date": "", "picks": {"main": [], "next": [], "watch": []}, "cycles": {}}
+    path = paths[-1]
+    rows, cycles = parse_locked_forecasts(path)
+    rank_keys = {"本命": "main", "次点": "next", "監視": "watch"}
+    picks = {"main": [], "next": [], "watch": []}
+    for row in rows:
+        key = rank_keys.get(row.get("rank"))
+        if key:
+            picks[key].append(row["machine"])
+    return {
+        "date": path.stem.removeprefix("prediction_"),
+        "picks": picks,
+        "cycles": {machine: cycles[machine] for machine in range(39, 78)},
+    }
+
+
 def main():
     snaps = load_snaps()
     if not snaps:
         raise SystemExit("snapshotがありません。daily_ingest.py を先に実行してください。")
 
     dates = sorted(snaps.keys())
+    prediction = load_daily_prediction()
     payload = {
         "meta": {
             "from": dates[0],
@@ -175,6 +199,7 @@ button{{font:inherit}}
     <span>{payload["meta"]["days"]}日分</span>
     <span>伝播窓 {payload["meta"]["windowMin"]}分</span>
     <span>生成 {payload["meta"]["generated"]}</span>
+    <span>日次候補 {prediction["date"]}</span>
   </div>
 </header>
 <main>
@@ -207,8 +232,8 @@ button{{font:inherit}}
 <script>
 const DATA = {html_escape_json(payload)};
 const selected = new Set();
-const DAILY_PICKS = {{main:[64,40,61], next:[65,41], watch:[]}};
-const CYCLE_ESTIMATE = {{39:681,40:-727,41:-832,42:-5758,43:3130,44:-4074,45:4869,46:-2738,47:3655,48:2733,49:2486,50:-4927,51:-2432,52:-299,53:860,54:-2532,55:-2473,56:5089,57:607,58:-1418,59:-1521,60:596,61:6701,62:7237,63:-5147,64:1095,65:4089,66:5549,67:434,68:3386,69:325,70:-1460,71:3152,72:5735,73:-2978,74:3921,75:313,76:1737,77:4940}};
+const DAILY_PICKS = {html_escape_json(prediction["picks"])};
+const CYCLE_ESTIMATE = {html_escape_json(prediction["cycles"])};
 const CYCLE_MAX = Math.max(...Object.values(CYCLE_ESTIMATE));
 const CYCLE_MIN = Math.min(...Object.values(CYCLE_ESTIMATE));
 const machines = [
