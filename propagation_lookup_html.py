@@ -131,7 +131,7 @@ button{{font:inherit}}
 .aisle{{height:100%;min-height:650px;display:grid;place-items:center;color:#52718d;font-size:11px;writing-mode:vertical-rl;letter-spacing:.35em}}
 .island-title{{text-align:center;color:#b9d7ef;font-weight:800;margin-bottom:8px}}
 .machine-list{{display:grid;gap:5px}}
-.machine-row{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:5px}}
+.machine-row{{display:grid;grid-template-columns:24px 34px minmax(0,1fr);gap:4px}}
 .chart-link{{display:grid;place-items:center;min-height:29px;border:1px solid #34546e;border-radius:6px;background:#091b2b;color:#80c7ff;text-decoration:none;font-size:13px;font-weight:800;transition:background .12s,border-color .12s,transform .12s}}
 .chart-link:hover{{background:#173b58;border-color:#80c7ff;transform:scale(1.04)}}
 .machine{{position:relative;width:100%;min-width:0;min-height:29px;border:1px solid #34546e;border-radius:6px;background:#11283d;color:#eaf6ff;cursor:pointer;font-weight:800;transition:transform .12s,background .12s,border-color .12s,box-shadow .12s}}
@@ -160,7 +160,8 @@ button{{font:inherit}}
 .metrics strong{{display:block;color:#fff;font-size:15px}}
 .empty{{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px;line-height:1.8}}
 .warning{{margin-top:12px;color:#829bb0;font-size:11px;line-height:1.6}}
-.daily-badge{{position:absolute;left:29px;top:4px;padding:1px 5px;border-radius:8px;font-size:9px;font-weight:800;line-height:18px}}
+.daily-badge{{display:grid;place-items:center;min-height:29px;border-radius:6px;font-size:11px;font-weight:900}}
+.daily-empty{{background:transparent}}
 .daily-main{{background:#238636;color:#fff}}.daily-next{{background:#9e6a03;color:#fff}}.daily-watch{{background:#57606a;color:#fff}}
 @media(max-width:760px){{main{{padding:12px}}.map-panel{{padding:12px}}.aisle{{min-height:620px}}.guide{{align-items:flex-start}}.candidate-list{{grid-template-columns:1fr}}}}
 </style>
@@ -226,7 +227,7 @@ function rankClass(rank) {{
 }}
 function buildIsland(id, values) {{
   document.getElementById(id).innerHTML = values.map(machine =>
-    `<div class="machine-row"><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false">${{dailyKind(machine) ? `<span class="daily-badge daily-${{dailyKind(machine)}}">${{{{main:'本命',next:'次点',watch:'監視'}}[dailyKind(machine)]}}</span>` : ''}}${{machine}}<small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
+    `<div class="machine-row"><span class="daily-badge ${{dailyKind(machine) ? `daily-${{dailyKind(machine)}}` : 'daily-empty'}}">${{{{main:'本',next:'次',watch:'監'}}[dailyKind(machine)] || ''}}</span><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false">${{machine}}<small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
   ).join('');
 }}
 function candidateRows() {{
