@@ -135,6 +135,7 @@ button{{font:inherit}}
 .chart-link{{display:grid;place-items:center;min-height:29px;border:1px solid #34546e;border-radius:6px;background:#091b2b;color:#80c7ff;text-decoration:none;font-size:13px;font-weight:800;transition:background .12s,border-color .12s,transform .12s}}
 .chart-link:hover{{background:#173b58;border-color:#80c7ff;transform:scale(1.04)}}
 .machine{{position:relative;width:100%;min-width:0;min-height:29px;border:1px solid #34546e;border-radius:6px;background:#11283d;color:#eaf6ff;cursor:pointer;font-weight:800;transition:transform .12s,background .12s,border-color .12s,box-shadow .12s}}
+.machine-no{{font-weight:900}}
 .machine:hover{{transform:scale(1.025);border-color:#80c7ff}}
 .machine small{{position:absolute;right:7px;top:5px;color:#8fb0c9;font-size:10px;font-weight:500}}
 .machine.source{{background:var(--source);border-color:#ff8787;color:white;box-shadow:0 0 0 2px rgba(251,75,75,.2),0 0 18px rgba(251,75,75,.35)}}
@@ -207,6 +208,9 @@ button{{font:inherit}}
 const DATA = {html_escape_json(payload)};
 const selected = new Set();
 const DAILY_PICKS = {{main:[64,40,61], next:[65,41], watch:[]}};
+const CYCLE_ESTIMATE = {{39:681,40:-727,41:-832,42:-5758,43:3130,44:-4074,45:4869,46:-2738,47:3655,48:2733,49:2486,50:-4927,51:-2432,52:-299,53:860,54:-2532,55:-2473,56:5089,57:607,58:-1418,59:-1521,60:596,61:6701,62:7237,63:-5147,64:1095,65:4089,66:5549,67:434,68:3386,69:325,70:-1460,71:3152,72:5735,73:-2978,74:3921,75:313,76:1737,77:4940}};
+const CYCLE_MAX = Math.max(...Object.values(CYCLE_ESTIMATE));
+const CYCLE_MIN = Math.min(...Object.values(CYCLE_ESTIMATE));
 const machines = [
   ...Array.from({{length: 19}}, (_, i) => 77 - i),
   ...Array.from({{length: 19}}, (_, i) => 39 + i)
@@ -214,6 +218,13 @@ const machines = [
 function z3(value) {{ return String(value).padStart(3, '0'); }}
 function dailyKind(machine) {{
   return Object.entries(DAILY_PICKS).find(([, values]) => values.includes(machine))?.[0] || '';
+}}
+function cycleColor(machine) {{
+  const value=CYCLE_ESTIMATE[machine] || 0;
+  const ratio=value>=0 ? value/CYCLE_MAX : value/CYCLE_MIN;
+  const target=value>=0 ? [46,220,92] : [255,82,82];
+  const rgb=target.map(channel=>Math.round(255+(channel-255)*ratio));
+  return {{color:`rgb(${{rgb.join(',')}})`,value}};
 }}
 function level(row) {{
   if (row.count >= 30 && row.lift >= 1.5 && row.pct >= 10) return 'strong';
@@ -227,7 +238,7 @@ function rankClass(rank) {{
 }}
 function buildIsland(id, values) {{
   document.getElementById(id).innerHTML = values.map(machine =>
-    `<div class="machine-row"><span class="daily-badge ${{dailyKind(machine) ? `daily-${{dailyKind(machine)}}` : 'daily-empty'}}">${{{{main:'本',next:'次',watch:'監'}}[dailyKind(machine)] || ''}}</span><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false">${{machine}}<small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
+    `<div class="machine-row"><span class="daily-badge ${{dailyKind(machine) ? `daily-${{dailyKind(machine)}}` : 'daily-empty'}}">${{{{main:'本',next:'次',watch:'監'}}[dailyKind(machine)] || ''}}</span><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false" title="周期推定 ${{cycleColor(machine).value>=0?'+':''}}${{cycleColor(machine).value.toLocaleString()}}"><span class="machine-no" style="color:${{cycleColor(machine).color}}">${{machine}}</span><small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
   ).join('');
 }}
 function candidateRows() {{
