@@ -28,7 +28,7 @@
     <div class="stat"><span>本命候補</span><b class="positive">8台</b></div>
     <div class="stat"><span>次点候補</span><b class="warning">2台</b></div>
     <div class="stat"><span>監視</span><b>3台</b></div>
-    <div class="stat"><span>予測対象日</span><b>6/13</b></div>
+    <div class="stat"><span>全13台の方向一致</span><b class="warning">6/13</b></div>
   </section>
 
   <section class="panel">
@@ -53,7 +53,8 @@
 
   <section class="panel">
     <h2>候補台の固定記録・答え合わせ</h2>
-    <div class="actions"><button id="save">入力値を保存して集計</button><button id="clear" style="background:#30363d">入力を消去</button><span id="overall" class="muted">実績待ち</span></div>
+    <div class="actions"><button id="save">入力値を保存して再集計</button><button id="clear" style="background:#30363d">入力を実績値へ戻す</button><span id="overall" class="muted">集計中</span></div>
+    <p class="small">2026年6月13日のCSVから、各台の最終終了差玉を実績値として入力済みです。</p>
     <table id="candidate-table"><thead><tr><th>台</th><th>範囲</th><th>区分</th><th>スコア</th><th>直近3日平均</th><th>直近5日平均</th><th>10日陽線率</th><th>周期推定</th><th>6/13実績差玉</th><th>答え</th></tr></thead><tbody></tbody></table>
   </section>
 
@@ -67,28 +68,28 @@
 </main>
 <script>
 const rows=[
- {m:40,g:'39〜77',rank:'本命',s:.939,a3:16911,a5:9870,wr:70,f:5038},
- {m:57,g:'39〜77',rank:'本命',s:.803,a3:15231,a5:10863,wr:50,f:1087},
- {m:64,g:'39〜77',rank:'本命',s:.721,a3:13101,a5:14907,wr:80,f:-1830},
- {m:72,g:'39〜77',rank:'次点',s:.620,a3:13113,a5:7030,wr:70,f:1158},
- {m:65,g:'39〜77',rank:'次点',s:.615,a3:2389,a5:12457,wr:50,f:5240},
- {m:35,g:'35〜38',rank:'本命',s:.393,a3:1655,a5:778,wr:60,f:2323},
- {m:37,g:'35〜38',rank:'本命',s:.345,a3:2452,a5:1878,wr:40,f:1830},
- {m:158,g:'154〜158',rank:'本命',s:.336,a3:10023,a5:3574,wr:30,f:3110},
- {m:121,g:'118〜123',rank:'本命',s:.245,a3:940,a5:1915,wr:60,f:2402},
- {m:123,g:'118〜123',rank:'本命',s:.232,a3:16499,a5:5550,wr:40,f:-5221},
- {m:150,g:'148〜153',rank:'監視',s:.002,a3:4369,a5:8444,wr:30,f:-9689},
- {m:153,g:'148〜153',rank:'監視',s:-.019,a3:-2066,a5:-4057,wr:40,f:1509},
- {m:1174,g:'1173〜1180',rank:'監視',s:.110,a3:-1776,a5:-349,wr:40,f:3044}
+ {m:40,g:'39〜77',rank:'本命',s:.939,a3:16911,a5:9870,wr:70,f:5038,actual:17254},
+ {m:57,g:'39〜77',rank:'本命',s:.803,a3:15231,a5:10863,wr:50,f:1087,actual:-11560},
+ {m:64,g:'39〜77',rank:'本命',s:.721,a3:13101,a5:14907,wr:80,f:-1830,actual:23615},
+ {m:72,g:'39〜77',rank:'次点',s:.620,a3:13113,a5:7030,wr:70,f:1158,actual:-18750},
+ {m:65,g:'39〜77',rank:'次点',s:.615,a3:2389,a5:12457,wr:50,f:5240,actual:10916},
+ {m:35,g:'35〜38',rank:'本命',s:.393,a3:1655,a5:778,wr:60,f:2323,actual:6092},
+ {m:37,g:'35〜38',rank:'本命',s:.345,a3:2452,a5:1878,wr:40,f:1830,actual:-3936},
+ {m:158,g:'154〜158',rank:'本命',s:.336,a3:10023,a5:3574,wr:30,f:3110,actual:-6914},
+ {m:121,g:'118〜123',rank:'本命',s:.245,a3:940,a5:1915,wr:60,f:2402,actual:11198},
+ {m:123,g:'118〜123',rank:'本命',s:.232,a3:16499,a5:5550,wr:40,f:-5221,actual:-5000},
+ {m:150,g:'148〜153',rank:'監視',s:.002,a3:4369,a5:8444,wr:30,f:-9689,actual:-11844},
+ {m:153,g:'148〜153',rank:'監視',s:-.019,a3:-2066,a5:-4057,wr:40,f:1509,actual:-8972},
+ {m:1174,g:'1173〜1180',rank:'監視',s:.110,a3:-1776,a5:-349,wr:40,f:3044,actual:10686}
 ];
 const fmt=n=>(n>=0?'+':'')+Math.round(n).toLocaleString();
 const body=document.querySelector('#candidate-table tbody');
-body.innerHTML=rows.map(r=>`<tr data-machine="${r.m}"><td><b>${r.m}</b></td><td>${r.g}</td><td><span class="badge ${r.rank==='本命'?'primary':r.rank==='次点'?'secondary':'watch'}">${r.rank}</span></td><td class="${r.s>=0?'positive':'negative'}">${r.s>=0?'+':''}${r.s.toFixed(3)}</td><td>${fmt(r.a3)}</td><td>${fmt(r.a5)}</td><td>${r.wr}%</td><td class="${r.f>=0?'positive':'negative'}">${fmt(r.f)}</td><td><input type="number" step="1" aria-label="${r.m}番の実績差玉"></td><td class="answer muted">未入力</td></tr>`).join('');
+body.innerHTML=rows.map(r=>`<tr data-machine="${r.m}"><td><b>${r.m}</b></td><td>${r.g}</td><td><span class="badge ${r.rank==='本命'?'primary':r.rank==='次点'?'secondary':'watch'}">${r.rank}</span></td><td class="${r.s>=0?'positive':'negative'}">${r.s>=0?'+':''}${r.s.toFixed(3)}</td><td>${fmt(r.a3)}</td><td>${fmt(r.a5)}</td><td>${r.wr}%</td><td class="${r.f>=0?'positive':'negative'}">${fmt(r.f)}</td><td><input type="number" step="1" value="${r.actual}" aria-label="${r.m}番の実績差玉"></td><td class="answer muted">未入力</td></tr>`).join('');
 const key='prediction-20260613-results';
 function evaluate(){let entered=0,hits=0;document.querySelectorAll('#candidate-table tbody tr').forEach(tr=>{const input=tr.querySelector('input'),ans=tr.querySelector('.answer');if(input.value===''){ans.className='answer muted';ans.textContent='未入力';return}entered++;const actual=Number(input.value),hit=actual>0;if(hit)hits++;ans.className='answer '+(hit?'judge-hit':'judge-miss');ans.textContent=hit?'陽線・一致':actual<0?'陰線・不一致':'同値・不一致'});document.getElementById('overall').textContent=entered?`入力 ${entered}台 / 陽線 ${hits}台 / 方向一致率 ${(hits/entered*100).toFixed(1)}%`:'実績待ち'}
 function save(){const values={};document.querySelectorAll('#candidate-table tbody tr').forEach(tr=>{const v=tr.querySelector('input').value;if(v!=='')values[tr.dataset.machine]=v});localStorage.setItem(key,JSON.stringify(values));evaluate()}
 document.getElementById('save').addEventListener('click',save);
-document.getElementById('clear').addEventListener('click',()=>{localStorage.removeItem(key);document.querySelectorAll('input').forEach(x=>x.value='');evaluate()});
+document.getElementById('clear').addEventListener('click',()=>{localStorage.removeItem(key);document.querySelectorAll('#candidate-table tbody tr').forEach((tr,i)=>tr.querySelector('input').value=rows[i].actual);evaluate()});
 try{const saved=JSON.parse(localStorage.getItem(key)||'{}');document.querySelectorAll('#candidate-table tbody tr').forEach(tr=>{if(saved[tr.dataset.machine]!==undefined)tr.querySelector('input').value=saved[tr.dataset.machine]})}catch(e){}evaluate();
 </script>
 </body>

@@ -867,6 +867,16 @@ function selectSeries(rid, key) {
 }
 
 buildMainTabs();
+const requestedMachine = new URLSearchParams(location.search).get('machine');
+if (requestedMachine) {
+  const machine = String(Number(requestedMachine));
+  const range = RANGES_INFO.find(item => ALL_DATA[item.id]?.machines?.[machine]);
+  if (range) {
+    selectRange(range.id);
+    const target = document.querySelector(`.sub-tab[data-key="m_${machine}"]`);
+    if (target) target.click();
+  }
+}
 </script>
 </body>
 </html>"""
