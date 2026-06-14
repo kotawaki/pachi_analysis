@@ -15,7 +15,8 @@
     .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700}.primary{background:#238636;color:#fff}.secondary{background:#9e6a03;color:#fff}.watch{background:#30363d;color:#c9d1d9}.skip{color:#6e7681}
     input[type=number]{width:110px;padding:6px;background:#0d1117;color:#c9d1d9;border:1px solid #30363d;border-radius:5px;text-align:right}button{padding:9px 15px;border:0;border-radius:6px;background:#238636;color:#fff;font-weight:700;cursor:pointer}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .formula{background:#0d1117;border:1px solid #30363d;padding:12px;border-radius:7px;font-family:Consolas,monospace;overflow:auto}.small{font-size:12px}.judge-hit{color:#3fb950;font-weight:700}.judge-miss{color:#f85149;font-weight:700}
-    @media(max-width:720px){.summary{grid-template-columns:1fr 1fr}h1{font-size:20px}}
+    .cycle-switch{display:flex;gap:6px;margin-bottom:10px}.cycle-switch button{background:#21262d;color:#8b949e;border:1px solid #30363d;padding:6px 13px}.cycle-switch button.active{background:#1f6feb;color:#fff;border-color:#58a6ff}.cycle-view[hidden]{display:none}.sortable{cursor:pointer;user-select:none}.sortable:hover{color:#79c0ff}.cycle-floor{display:grid;gap:6px;min-width:900px}.floor-top{display:flex;align-items:flex-start;justify-content:flex-start;gap:7px;position:relative}.island-pair,.island-single{display:flex;align-items:flex-start;gap:4px}.sl1-offset{position:absolute;left:0;top:744px}.island-column{width:112px}.island-title{text-align:center;color:#8b949e;font-size:12px;font-weight:800;margin-bottom:5px}.island-stack{display:grid;gap:4px}.cycle-table-link{color:#58a6ff;text-decoration:none;font-weight:800}.cycle-table-link:hover{text-decoration:underline}.direction-hit{color:#3fb950;font-weight:700}.direction-miss{color:#f85149;font-weight:700}.floor-aisle{width:5px;align-self:stretch;min-height:120px;border-left:1px dashed #30363d;border-right:1px dashed #30363d;color:#484f58;font-size:9px;writing-mode:vertical-rl;text-align:center;padding-top:8px}.cycle-card{display:block;height:58px;padding:5px 7px;border:1px solid #30363d;border-radius:6px;background:#0d1117;color:#c9d1d9;text-decoration:none}.cycle-card:hover{border-color:#58a6ff}.cycle-card.hit{border-left:4px solid #3fb950}.cycle-card.miss{border-left:4px solid #f85149}.cycle-machine{font-weight:800;color:#58a6ff;line-height:18px}.cycle-values{display:grid;gap:0;margin-top:1px;font-size:10px;line-height:15px}.cycle-up{color:#3fb950}.cycle-down{color:#f85149}.cycle-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:#8b949e}
+    @media(max-width:720px){.summary{grid-template-columns:1fr 1fr}h1{font-size:20px}.cycle-floor{min-width:820px}.island-column{width:100px}.floor-top{gap:4px}}
   </style>
 </head>
 <body>
@@ -59,6 +60,14 @@
   </section>
 
   <section class="panel">
+    <h2>全68台 周期推定・答え合わせ</h2>
+    <div class="cycle-switch"><button type="button" data-cycle-view="map">島図</button><button type="button" data-cycle-view="list" class="active">リスト</button></div>
+    <div class="cycle-legend"><span class="positive">緑枠: 方向一致 40台</span><span class="negative">赤枠: 方向不一致 28台</span><span>周期プラス群の陽線: 18/31台（58.1%）</span></div>
+    <div class="cycle-view" id="cycle-map" hidden><div class="cycle-floor" id="cycle-floor"></div></div>
+    <div class="cycle-view" id="cycle-list"></div>
+  </section>
+
+  <section class="panel">
     <h2>採点方法</h2>
     <div class="formula">score = 周期推定×30% + 3日平均×20% + 5日平均×15% + 10日平均×10% + MA5傾き×10% + MA20傾き×5% + 10日陽線率×10%</div>
     <p class="small">金額系の値は各台の直近20日「日次差玉の絶対値平均」で標準化しています。スコアは陽線確率ではなく、2026年6月12日時点で上向き条件がどれだけ重なったかを表す比較値です。</p>
@@ -83,6 +92,32 @@ const rows=[
  {m:1174,g:'1173〜1180',rank:'監視',s:.110,a3:-1776,a5:-349,wr:40,f:3044,actual:10686}
 ];
 const fmt=n=>(n>=0?'+':'')+Math.round(n).toLocaleString();
+const cycleIslands={
+ s2:[[38,-989,11338],[37,1830,-3936],[36,-704,-9114],[35,2323,6092]],
+ s3:[[39,-5292,13277],[40,5038,17254],[41,296,4860],[42,-2985,-7412],[43,-3058,14155],[44,-6404,13333],[45,1894,1726],[46,-2133,-15710],[47,7119,2606],[48,-1589,-11986],[49,9049,29846],[50,-4014,34154],[51,-498,634],[52,1950,6373],[53,-2975,8380],[54,-5817,1584],[55,2091,7094],[56,3559,598],[57,1087,-11560]],
+ s4:[[77,1258,-7305],[76,-1140,-15674],[75,2004,29026],[74,1318,-1808],[73,-816,-16241],[72,1158,-18750],[71,2128,-15506],[70,1511,-2482],[69,2155,1760],[68,2114,-922],[67,-554,-29494],[66,1359,-8006],[65,5240,10916],[64,-1830,23615],[63,3264,23210],[62,2787,1584],[61,-1255,36616],[60,3626,5528],[59,-123,-21182],[58,-1948,11198]],
+ s7:[[118,420,-16383],[119,-13511,-3156],[120,-6974,-6206],[121,2402,11198],[122,-14826,-14681],[123,-5221,-5000]],
+ s8:[[153,1509,-8972],[152,5196,14436],[151,-10209,-5638],[150,-9689,-11844],[149,-13836,-15674],[148,-5493,9788]],
+ s9:[[154,-12096,3732],[155,-17554,-3936],[156,-17134,-7872],[157,-14271,10493],[158,3110,-6914]],
+ sl1:[[1173,1758,-4303],[1174,3044,10686],[1175,-5450,-3646],[1176,-2668,-5154],[1177,-3880,-4166],[1178,-3130,9347],[1179,-221,-3362],[1180,-4552,-2114]]
+};
+const cycleCard=([m,f,a])=>{const hit=(f>0)===(a>0);return `<a class="cycle-card ${hit?'hit':'miss'}" href="ohlc.html?machine=${m}"><div class="cycle-machine">${m}番</div><div class="cycle-values"><span class="${f>=0?'cycle-up':'cycle-down'}">周期 ${fmt(f)}</span><span class="${a>=0?'cycle-up':'cycle-down'}">実績 ${fmt(a)}</span></div></a>`};
+const island=name=>`<div class="island-column"><div class="island-title">${name.toUpperCase()}</div><div class="island-stack">${cycleIslands[name].map(cycleCard).join('')}</div></div>`;
+const aisle='<div class="floor-aisle">通路</div>';
+document.getElementById('cycle-floor').innerHTML=`<div class="floor-top"><div class="island-pair">${island('s9')}${island('s8')}</div><div class="island-single">${island('s7')}</div><div class="island-single sl1-offset">${island('sl1')}</div><div class="island-single">${island('s4')}</div><div class="island-pair">${island('s3')}${island('s2')}</div></div>`;
+const listGroups=[['35〜38番',['s2']],['39〜77番',['s3','s4']],['118〜123番',['s7']],['148〜153番',['s8']],['154〜158番',['s9']],['1173〜1180番',['sl1']]];
+const cycleRows=listGroups.flatMap(([range,names])=>names.flatMap(name=>cycleIslands[name]).map(row=>[range,...row])).sort((a,b)=>a[1]-b[1]);
+let cycleSort={key:'machine',dir:1};
+function renderCycleTable(){const labels={machine:'台',range:'範囲',forecast:'周期推定',forecastDir:'周期方向',actual:'6/13実績差玉',actualDir:'実績',hit:'方向判定'};const keys=Object.keys(labels);const sorted=cycleRows.slice().sort((x,y)=>{const a={machine:x[1],range:x[0],forecast:x[2],forecastDir:x[2]>0?1:0,actual:x[3],actualDir:x[3]>0?1:0,hit:(x[2]>0)===(x[3]>0)?1:0}[cycleSort.key],b={machine:y[1],range:y[0],forecast:y[2],forecastDir:y[2]>0?1:0,actual:y[3],actualDir:y[3]>0?1:0,hit:(y[2]>0)===(y[3]>0)?1:0}[cycleSort.key];return (typeof a==='string'?a.localeCompare(b,'ja'):a-b)*cycleSort.dir});document.getElementById('cycle-list').innerHTML=`<table><thead><tr>${keys.map(key=>`<th class="sortable" data-sort="${key}">${labels[key]}${cycleSort.key===key?(cycleSort.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${sorted.map(([range,m,f,a])=>{const hit=(f>0)===(a>0);return `<tr><td><a class="cycle-table-link" href="ohlc.html?machine=${m}">${m}</a></td><td>${range}</td><td class="${f>=0?'positive':'negative'}">${fmt(f)}</td><td>${f>0?'陽線方向':'陰線方向'}</td><td class="${a>=0?'positive':'negative'}">${fmt(a)}</td><td>${a>0?'陽線':'陰線'}</td><td class="${hit?'direction-hit':'direction-miss'}">${hit?'一致':'不一致'}</td></tr>`}).join('')}</tbody></table>`;document.querySelectorAll('#cycle-list [data-sort]').forEach(th=>th.addEventListener('click',()=>{cycleSort=cycleSort.key===th.dataset.sort?{key:cycleSort.key,dir:-cycleSort.dir}:{key:th.dataset.sort,dir:1};renderCycleTable()}))}
+renderCycleTable();
+function setCycleView(view){
+  document.getElementById('cycle-map').hidden=view!=='map';
+  document.getElementById('cycle-list').hidden=view!=='list';
+  document.querySelectorAll('[data-cycle-view]').forEach(button=>button.classList.toggle('active',button.dataset.cycleView===view));
+  localStorage.setItem('prediction-20260613-cycle-view-v2',view);
+}
+document.querySelectorAll('[data-cycle-view]').forEach(button=>button.addEventListener('click',()=>setCycleView(button.dataset.cycleView)));
+setCycleView(localStorage.getItem('prediction-20260613-cycle-view-v2')==='map'?'map':'list');
 const body=document.querySelector('#candidate-table tbody');
 body.innerHTML=rows.map(r=>`<tr data-machine="${r.m}"><td><b>${r.m}</b></td><td>${r.g}</td><td><span class="badge ${r.rank==='本命'?'primary':r.rank==='次点'?'secondary':'watch'}">${r.rank}</span></td><td class="${r.s>=0?'positive':'negative'}">${r.s>=0?'+':''}${r.s.toFixed(3)}</td><td>${fmt(r.a3)}</td><td>${fmt(r.a5)}</td><td>${r.wr}%</td><td class="${r.f>=0?'positive':'negative'}">${fmt(r.f)}</td><td><input type="number" step="1" value="${r.actual}" aria-label="${r.m}番の実績差玉"></td><td class="answer muted">未入力</td></tr>`).join('');
 const key='prediction-20260613-results';
