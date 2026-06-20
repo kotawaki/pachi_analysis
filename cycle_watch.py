@@ -61,6 +61,10 @@ def log_path(date):
     return DATA_DIR / f"cycle_watch_{date}.json"
 
 
+def cyclewatch_folder(date):
+    return Path(r"C:\kota\BU_Sdrive") / date[:4] / date[4:6] / date[6:8] / "cyclewatch"
+
+
 def load_log(date):
     path = log_path(date)
     if path.exists():
@@ -443,9 +447,11 @@ def write_watch_page(date, rows):
   </table>
 </section>"""
 
-    cards = []
+    screen_dir = cyclewatch_folder(date)
+    list_rows = []
     priority_by_machine = {item["row"]["machine"]: item for item in priority}
-    for row in ordered_rows:
+    screenshot_rows = sorted([row for row in ordered_rows if row["match"]], key=lambda r: int(r["machine"]))
+    for row in screenshot_rows:
         machine = row["machine"]
         events = sorted(data["events"].get(machine, []))
         gaps, hit_periods = event_status(machine, row["periods"], events)
@@ -469,21 +475,18 @@ def write_watch_page(date, rows):
         if not advice and has_hit and zone_match:
             advice = advice_for(row, windows, current_minute)
         advice = advice or "日中hit待ち。初当たり時刻を追加して判定。"
-        cards.append(f"""
-<article class="card {status}">
-  <div class="head"><h2>{int(machine)}番</h2><span>{row['grade']}</span></div>
-  <div class="status">{status_label}</div>
-  <dl>
-    <dt>日足</dt><dd>{row['zone']} / 期待 {row['best_zone']}</dd>
-    <dt>日中周期</dt><dd>{fmt_periods(row['periods'])}分 ±{TOLERANCE}</dd>
-    <dt>期待</dt><dd>{row['hit_rate']:.1f}% / no-hit {row['no_rate']:.1f}%</dd>
-    <dt>中央値</dt><dd>{signed(row['hit_med'])} / {signed(row['no_med'])}</dd>
-    <dt>入力</dt><dd>{event_text}</dd>
-    <dt>差分</dt><dd>{gap_text}</dd>
-    <dt>次見る</dt><dd>{window_text(windows)}</dd>
-    <dt>立ち回り</dt><dd>{advice}</dd>
-  </dl>
-</article>""")
+        list_rows.append(f"""
+<tr class="{status}">
+  <td>{int(machine)}番</td>
+  <td>{row['grade']}</td>
+  <td>{status_label}</td>
+  <td>{fmt_periods(row['periods'])}分</td>
+  <td>{row['hit_rate']:.1f}% / {row['no_rate']:.1f}%<br>{signed(row['hit_med'])} / {signed(row['no_med'])}</td>
+  <td>{event_text}</td>
+  <td>{gap_text}</td>
+  <td>{window_text(windows)}</td>
+  <td>{advice}</td>
+</tr>""")
     html = f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cycle Watch {date}</title>
@@ -491,21 +494,25 @@ def write_watch_page(date, rows):
 *{{box-sizing:border-box}}body{{margin:0;background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif}}
 header,main{{max-width:1180px;margin:auto}}header{{padding:22px 18px 12px}}main{{padding:0 18px 36px}}
 a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:#8b949e;font-size:13px;line-height:1.6}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}}
-.card{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:13px}}
-.card.hit-match{{border-color:#3fb950;box-shadow:0 0 0 1px #23863655}}.card.hit{{border-color:#d29922}}.card.watch{{border-color:#58a6ff}}
-.head{{display:flex;align-items:center;justify-content:space-between;gap:8px}}h2{{font-size:20px;margin:0}}.head span{{color:#8b949e;border:1px solid #30363d;padding:2px 8px;border-radius:999px;font-size:12px}}
-.status{{margin:8px 0 10px;font-weight:700;color:#f0f6fc}}dl{{display:grid;grid-template-columns:78px 1fr;gap:6px 8px;margin:0;font-size:13px}}dt{{color:#8b949e}}dd{{margin:0}}b{{color:#3fb950}}
-.priority{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}.priority h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;color:#3fb950}}
+.priority,.watch-list{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}.priority h2,.watch-list h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;color:#3fb950;white-space:nowrap}}tr.hit-match{{background:#12351f}}tr.hit{{background:#332909}}tr.watch{{background:#10263c}}b{{color:#3fb950}}.path{{color:#8b949e;font-family:Consolas,monospace;font-size:12px;margin:4px 0 10px}}
 .cmd{{background:#010409;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-top:12px;color:#8b949e;font-family:Consolas,monospace;font-size:12px;overflow:auto}}
 </style></head><body>
 <header>
   <a href="index.html">← top</a>
   <h1>Cycle Watch {date}</h1>
   <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated {generated}</div>
+  <div class="meta">スクショ対象フォルダ: <span class="path">{screen_dir}</span></div>
   <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py show --date {date}</div>
 </header>
-<main>{priority_html}<section class="grid">{''.join(cards)}</section></main>
+<main>{priority_html}
+<section class="watch-list">
+  <h2>スクショ対象(日足候補・台番順)</h2>
+  <div class="path">リネーム先: {screen_dir}</div>
+  <table>
+    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
+    <tbody>{''.join(list_rows)}</tbody>
+  </table>
+</section></main>
 </body></html>"""
     dated = DOCS_DIR / f"cycle_watch_{date}.html"
     dated.write_text(html, encoding="utf-8")
@@ -521,6 +528,14 @@ def cmd_page(args):
     rows = watch_rows(date, grades, args.top)
     out = write_watch_page(date, rows)
     print(out)
+
+
+def cmd_folders(args):
+    all_days, _ = load_config_cache(force=args.refresh)
+    date = args.date or default_watch_date(all_days)
+    folder = cyclewatch_folder(date)
+    folder.mkdir(parents=True, exist_ok=True)
+    print(folder)
 
 
 def main():
@@ -554,6 +569,11 @@ def main():
     p_page.add_argument("--top", type=int, default=40, help="表示件数。0で全件")
     p_page.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
     p_page.set_defaults(func=cmd_page)
+
+    p_folders = sub.add_parser("folders", help="Cycle Watchスクショ用フォルダを作成")
+    p_folders.add_argument("--date", help="YYYYMMDD。未指定なら今日または最新日")
+    p_folders.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
+    p_folders.set_defaults(func=cmd_folders)
 
     args = parser.parse_args()
     args.func(args)
