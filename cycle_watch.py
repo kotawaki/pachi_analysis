@@ -110,6 +110,66 @@ def load_ocr_summary(date):
     return out
 
 
+def graph_shape(ocr_item):
+    if not ocr_item:
+        return {
+            "label": "未OCR",
+            "score": 0,
+            "detail": "形状未判定",
+            "advice": "グラフ形状は未反映。",
+        }
+
+    final = ocr_item["final"]
+    high = ocr_item["high"]
+    low = ocr_item["low"]
+    width = max(high - low, 1)
+    pos = (final - low) / width
+    drawdown = high - final
+    rebound = final - low
+
+    if final > 0 and pos >= 0.82:
+        return {
+            "label": "上昇継続",
+            "score": 5,
+            "detail": f"終値が高値圏({pos:.0%})",
+            "advice": "形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。",
+        }
+    if final > 0 and pos >= 0.58:
+        return {
+            "label": "上側維持",
+            "score": 4,
+            "detail": f"終値が上側({pos:.0%})",
+            "advice": "形状は悪くない。直近安値を割らずに次窓へ入るなら確認対象。",
+        }
+    if final < 0 and pos <= 0.25:
+        return {
+            "label": "下側終了",
+            "score": 0,
+            "detail": f"安値寄り({pos:.0%})",
+            "advice": "形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。",
+        }
+    if final < 0 and rebound >= max(2500, width * 0.35):
+        return {
+            "label": "反発途中",
+            "score": 3,
+            "detail": f"安値から{signed(rebound)}戻し",
+            "advice": "一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。",
+        }
+    if drawdown >= max(2500, width * 0.35):
+        return {
+            "label": "失速",
+            "score": 1,
+            "detail": f"高値から{signed(drawdown)}下落",
+            "advice": "高値からの失速が大きい。新規は弱め、再浮上を見てから。",
+        }
+    return {
+        "label": "レンジ",
+        "score": 2,
+        "detail": f"終値位置{pos:.0%}",
+        "advice": "形状は中立。周期窓で上方向に反応するかだけ確認。",
+    }
+
+
 def load_log(date):
     path = log_path(date)
     if path.exists():
@@ -279,6 +339,40 @@ def watch_rows(date, grades, top):
     return rows[:top] if top else rows
 
 
+def row_from_config(machine, machine_config, date, all_days):
+    best = machine_config["best"]
+    zone, score = projected_zone(machine, machine_config, date, all_days)
+    return {
+        "machine": machine,
+        "grade": machine_config["grade"],
+        "periods": tuple(machine_config["periods"]),
+        "zone": zone,
+        "best_zone": best["zone"],
+        "match": zone == best["zone"],
+        "score": score,
+        "hit_rate": best["hit_pos_rate"],
+        "no_rate": best["no_pos_rate"],
+        "hit_med": best["hit_med"],
+        "no_med": best["no_med"],
+    }
+
+
+def include_ocr_rows(date, rows, ocr):
+    if not ocr:
+        return rows
+    existing = {row["machine"] for row in rows}
+    missing = sorted(set(ocr) - existing, key=lambda x: int(x))
+    if not missing:
+        return rows
+    all_days, config = load_config_cache()
+    extra = []
+    for machine in missing:
+        machine_config = config["machines"].get(machine)
+        if machine_config:
+            extra.append(row_from_config(machine, machine_config, date, all_days))
+    return rows + extra
+
+
 def cmd_list(args):
     all_days, _ = load_config_cache(force=args.refresh)
     date = args.date or default_watch_date(all_days)
@@ -428,6 +522,21 @@ def advice_for(row, windows, current_minute):
     return "主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。"
 
 
+def shape_adjusted_advice(base_advice, row, shape, has_hit, zone_match):
+    if shape["label"] == "未OCR":
+        return base_advice
+    prefix = shape["advice"]
+    if has_hit and zone_match and shape["score"] <= 1:
+        return f"{prefix} 周期条件は一致しているが、形状優先では打たない寄り。見るなら {base_advice}"
+    if has_hit and zone_match:
+        return f"{prefix} 周期条件も一致。{base_advice}"
+    if shape["score"] >= 4:
+        return f"{prefix} ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。"
+    if has_hit:
+        return f"{prefix} 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。"
+    return f"{prefix} 日中hit待ち。初当たり時刻を追加して判定。"
+
+
 def priority_rows(rows, data, current_minute):
     out = []
     for row in rows:
@@ -459,14 +568,53 @@ def priority_rows(rows, data, current_minute):
     return out
 
 
+def shape_focus_rows(rows, data, ocr, current_minute):
+    out = []
+    for row in rows:
+        machine = row["machine"]
+        if machine not in ocr:
+            continue
+        events = sorted(data["events"].get(machine, []))
+        gaps, hit_periods = event_status(machine, row["periods"], events)
+        windows = next_windows(events, row["periods"])
+        shape = graph_shape(ocr.get(machine))
+        has_hit = bool(hit_periods)
+        zone_match = row["zone"] == row["best_zone"]
+        if shape["score"] < 3 and not (has_hit and zone_match):
+            continue
+        base = advice_for(row, windows, current_minute) if has_hit and zone_match else "次の初当たりで再判定。"
+        out.append({
+            "row": row,
+            "events": events,
+            "gaps": gaps,
+            "hit_periods": hit_periods,
+            "windows": windows,
+            "shape": shape,
+            "advice": shape_adjusted_advice(base, row, shape, has_hit, zone_match),
+            "strict": has_hit and zone_match,
+        })
+    out.sort(
+        key=lambda item: (
+            item["shape"]["score"],
+            item["strict"],
+            GRADE_SCORE.get(item["row"]["grade"], 0),
+            item["row"]["hit_rate"] - item["row"]["no_rate"],
+        ),
+        reverse=True,
+    )
+    return out
+
+
 def write_watch_page(date, rows):
     data = load_log(date)
     ocr = load_ocr_summary(date)
+    rows = include_ocr_rows(date, rows, ocr)
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
     generated = now.strftime("%Y-%m-%d %H:%M")
     current_minute = now.hour * 60 + now.minute
     priority = priority_rows(rows, data, current_minute)
+    shape_focus = shape_focus_rows(rows, data, ocr, current_minute)
     priority_machines = {item["row"]["machine"] for item in priority}
     ordered_rows = [item["row"] for item in priority] + [row for row in rows if row["machine"] not in priority_machines]
 
@@ -486,9 +634,34 @@ def write_watch_page(date, rows):
 </tr>""")
         priority_html = f"""
 <section class="priority">
-  <h2>今見る優先順位</h2>
+  <h2>厳密一致(日足zone + 日中hit)</h2>
   <table>
     <thead><tr><th>優先</th><th>台</th><th>評価</th><th>周期</th><th>次の見る時間</th><th>立ち回り</th></tr></thead>
+    <tbody>{''.join(items)}</tbody>
+  </table>
+</section>"""
+
+    shape_html = ""
+    if shape_focus:
+        items = []
+        for rank, item in enumerate(shape_focus, 1):
+            row = item["row"]
+            strict = "周期一致" if item["strict"] else "形状注目"
+            items.append(f"""
+<tr>
+  <td>{rank}</td>
+  <td>{int(row['machine'])}番</td>
+  <td>{strict}</td>
+  <td>{item['shape']['label']}<br>{item['shape']['detail']}</td>
+  <td>{fmt_periods(row['periods'])}分</td>
+  <td>{window_text(item['windows'])}</td>
+  <td>{item['advice']}</td>
+</tr>""")
+        shape_html = f"""
+<section class="priority">
+  <h2>形状込み注目</h2>
+  <table>
+    <thead><tr><th>優先</th><th>台</th><th>分類</th><th>形状</th><th>周期</th><th>次の見る時間</th><th>立ち回り</th></tr></thead>
     <tbody>{''.join(items)}</tbody>
   </table>
 </section>"""
@@ -496,7 +669,10 @@ def write_watch_page(date, rows):
     screen_dir = cyclewatch_folder(date)
     list_rows = []
     priority_by_machine = {item["row"]["machine"]: item for item in priority}
-    screenshot_rows = sorted([row for row in ordered_rows if row["match"]], key=lambda r: int(r["machine"]))
+    screenshot_rows = sorted(
+        [row for row in ordered_rows if row["match"] or row["machine"] in ocr],
+        key=lambda r: int(r["machine"]),
+    )
     for row in screenshot_rows:
         machine = row["machine"]
         events = sorted(data["events"].get(machine, []))
@@ -518,6 +694,8 @@ def write_watch_page(date, rows):
             f"H {signed(ocr_item['high'])} / L {signed(ocr_item['low'])}"
             if ocr_item else "未OCR"
         )
+        shape = graph_shape(ocr_item)
+        shape_text = f"{shape['label']}<br>{shape['detail']}"
         gap_text = "<br>".join(
             f"{fmt_time(g['prev'])}→{fmt_time(g['cur'])} = {g['gap']}分"
             + (f" <b>HIT {fmt_periods(g['hits'])}分</b>" if g["hits"] else "")
@@ -526,7 +704,13 @@ def write_watch_page(date, rows):
         advice = priority_by_machine.get(machine, {}).get("advice")
         if not advice and has_hit and zone_match:
             advice = advice_for(row, windows, current_minute)
-        advice = advice or "日中hit待ち。初当たり時刻を追加して判定。"
+        advice = shape_adjusted_advice(
+            advice or "日中hit待ち。初当たり時刻を追加して判定。",
+            row,
+            shape,
+            has_hit,
+            zone_match,
+        )
         list_rows.append(f"""
 <tr class="{status}">
   <td>{int(machine)}番</td>
@@ -535,6 +719,7 @@ def write_watch_page(date, rows):
   <td>{fmt_periods(row['periods'])}分</td>
   <td>{row['hit_rate']:.1f}% / {row['no_rate']:.1f}%<br>{signed(row['hit_med'])} / {signed(row['no_med'])}</td>
   <td>{ocr_text}</td>
+  <td>{shape_text}</td>
   <td>{event_text}</td>
   <td>{gap_text}</td>
   <td>{window_text(windows)}</td>
@@ -557,12 +742,12 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
   <div class="meta">スクショ対象フォルダ: <span class="path">{screen_dir}</span></div>
   <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py show --date {date}</div>
 </header>
-<main>{priority_html}
+<main>{priority_html}{shape_html}
 <section class="watch-list">
   <h2>スクショ対象(日足候補・台番順)</h2>
   <div class="path">リネーム先: {screen_dir}</div>
   <table>
-    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
+    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>形状</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
     <tbody>{''.join(list_rows)}</tbody>
   </table>
 </section></main>
