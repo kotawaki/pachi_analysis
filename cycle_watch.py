@@ -13,6 +13,7 @@
 
 import argparse
 import csv
+import html
 import json
 import math
 from datetime import datetime, timedelta
@@ -173,13 +174,25 @@ def graph_shape(ocr_item):
 def load_log(date):
     path = log_path(date)
     if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return {"date": date, "events": {}}
+        data = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        data = {"date": date}
+    data.setdefault("events", {})
+    data.setdefault("reviews", {})
+    return data
 
 
 def save_log(data):
     path = log_path(data["date"])
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def esc(value):
+    return html.escape(str(value), quote=True)
+
+
+def nl2br(value):
+    return esc(value).replace("\n", "<br>")
 
 
 def latest_data_date(all_days):
@@ -462,6 +475,44 @@ def cmd_show(args):
             hits = [p for p in periods if abs(gap - p) <= TOLERANCE]
             suffix = f" HIT {fmt_periods(hits)}分" if hits else ""
             print(f"  {fmt_time(prev)} -> {fmt_time(cur)} = {gap}分{suffix}")
+    reviews = data.get("reviews", {})
+    if reviews:
+        print("レビュー:")
+        for machine in sorted(reviews, key=lambda x: int(x)):
+            item = reviews[machine]
+            print(f"  {int(machine)}番 結果: {item.get('result', '')}")
+            review = item.get("review", "")
+            if review:
+                print(f"    {review}")
+
+
+def cmd_review(args):
+    all_days, _ = load_config_cache(force=args.refresh)
+    date = args.date or default_watch_date(all_days)
+    machine = str(args.machine).zfill(3)
+    data = load_log(date)
+    reviews = data.setdefault("reviews", {})
+    if args.clear:
+        reviews.pop(machine, None)
+        save_log(data)
+        print(f"{date} {int(machine)}番 レビュー削除")
+    else:
+        current = reviews.get(machine, {})
+        result = args.result if args.result is not None else current.get("result", "")
+        review = args.review if args.review is not None else current.get("review", "")
+        outcome = args.outcome if args.outcome is not None else current.get("outcome", "")
+        reviews[machine] = {
+            "outcome": outcome,
+            "result": result,
+            "review": review,
+            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+        save_log(data)
+        print(f"{date} {int(machine)}番 レビュー保存")
+
+    rows = watch_rows(date, {"A", "B"}, 40)
+    out = write_watch_page(date, rows)
+    print(f"page: {out}")
 
 
 def event_status(machine, periods, events):
@@ -666,6 +717,33 @@ def write_watch_page(date, rows):
   </table>
 </section>"""
 
+    reviews = data.get("reviews", {})
+    review_html = ""
+    if reviews:
+        items = []
+        for machine in sorted(reviews, key=lambda x: int(x)):
+            item = reviews[machine]
+            outcome = item.get("outcome") or "-"
+            result = item.get("result") or "-"
+            review = item.get("review") or "-"
+            updated = item.get("updated_at") or "-"
+            items.append(f"""
+<tr data-title="{int(machine)}番">
+  <td data-label="台">{int(machine)}番</td>
+  <td data-label="判定">{esc(outcome)}</td>
+  <td data-label="結果">{nl2br(result)}</td>
+  <td data-label="レビュー">{nl2br(review)}</td>
+  <td data-label="更新">{esc(updated)}</td>
+</tr>""")
+        review_html = f"""
+<section class="priority">
+  <h2>結果レビュー</h2>
+  <table>
+    <thead><tr><th>台</th><th>判定</th><th>結果</th><th>レビュー</th><th>更新</th></tr></thead>
+    <tbody>{''.join(items)}</tbody>
+  </table>
+</section>"""
+
     screen_dir = cyclewatch_folder(date)
     list_rows = []
     priority_by_machine = {item["row"]["machine"]: item for item in priority}
@@ -711,6 +789,14 @@ def write_watch_page(date, rows):
             has_hit,
             zone_match,
         )
+        review_item = reviews.get(machine, {})
+        review_text = "-"
+        if review_item:
+            review_text = (
+                f"{esc(review_item.get('outcome') or '-')}<br>"
+                f"{nl2br(review_item.get('result') or '-')}<br>"
+                f"{nl2br(review_item.get('review') or '-')}"
+            )
         list_rows.append(f"""
 <tr class="{status}" data-title="{int(machine)}番">
   <td data-label="台">{int(machine)}番</td>
@@ -724,6 +810,7 @@ def write_watch_page(date, rows):
   <td data-label="差分">{gap_text}</td>
   <td data-label="次見る時間">{window_text(windows)}</td>
   <td data-label="立ち回り">{advice}</td>
+  <td data-label="結果/レビュー">{review_text}</td>
 </tr>""")
     html = f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -752,14 +839,14 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
   <h1>Cycle Watch {date}</h1>
   <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated {generated}</div>
   <div class="meta">スクショ対象フォルダ: <span class="path">{screen_dir}</span></div>
-  <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py show --date {date}</div>
+  <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py review 39 --outcome ○ --result "終日+3000" --review "形状通りに伸びた"<br>python cycle_watch.py show --date {date}</div>
 </header>
-<main>{priority_html}{shape_html}
+<main>{priority_html}{shape_html}{review_html}
 <section class="watch-list">
   <h2>スクショ対象(日足候補・台番順)</h2>
   <div class="path">リネーム先: {screen_dir}</div>
   <table>
-    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>形状</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
+    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>形状</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th><th>結果/レビュー</th></tr></thead>
     <tbody>{''.join(list_rows)}</tbody>
   </table>
 </section></main>
@@ -812,6 +899,16 @@ def main():
     p_show.add_argument("--date", help="YYYYMMDD。未指定なら今日または最新日")
     p_show.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
     p_show.set_defaults(func=cmd_show)
+
+    p_review = sub.add_parser("review", help="翌日の答え合わせ結果とレビューを記録")
+    p_review.add_argument("machine", help="台番")
+    p_review.add_argument("--date", help="YYYYMMDD。監視した日付")
+    p_review.add_argument("--outcome", default=None, help="判定。例: ○/△/×/保留")
+    p_review.add_argument("--result", default=None, help="結果メモ。例: 終日+3000、初当たり3回")
+    p_review.add_argument("--review", default=None, help="振り返り。周期/形状/立ち回りの評価")
+    p_review.add_argument("--clear", action="store_true", help="この台のレビューを削除")
+    p_review.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
+    p_review.set_defaults(func=cmd_review)
 
     p_page = sub.add_parser("page", help="候補ページを生成")
     p_page.add_argument("--date", help="YYYYMMDD。未指定なら今日または最新日")
