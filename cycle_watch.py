@@ -16,6 +16,7 @@ import csv
 import html
 import json
 import math
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -69,6 +70,10 @@ def cyclewatch_folder(date):
 
 def analyze_csv_path(date):
     return ROOT / "csv" / "analyze" / date / f"{date}_analyze.csv"
+
+
+def cycle_watch_page_path(date):
+    return DOCS_DIR / f"cycle_watch_{date}.html"
 
 
 def load_ocr_summary(date):
@@ -855,7 +860,179 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
     dated.write_text(html, encoding="utf-8")
     current = DOCS_DIR / "cycle_watch.html"
     current.write_text(html, encoding="utf-8")
+    write_cycle_watch_top()
     return current
+
+
+def cycle_watch_dates():
+    dates = set()
+    for path in DOCS_DIR.glob("cycle_watch_*.html"):
+        stem = path.stem.replace("cycle_watch_", "")
+        if stem.isdigit() and len(stem) == 8:
+            dates.add(stem)
+    for path in DATA_DIR.glob("cycle_watch_*.json"):
+        stem = path.stem.replace("cycle_watch_", "")
+        if stem.isdigit() and len(stem) == 8:
+            dates.add(stem)
+    return sorted(dates)
+
+
+def strict_performance_rows(date):
+    if not analyze_csv_path(date).exists():
+        return []
+    historical = historical_strict_machines(date)
+    try:
+        rows = watch_rows(date, {"A", "B"}, 40)
+    except Exception:
+        return []
+    data = load_log(date)
+    ocr = load_ocr_summary(date)
+    rows = include_ocr_rows(date, rows, ocr)
+    out = []
+    for row in rows:
+        machine = row["machine"]
+        events = sorted(data["events"].get(machine, []))
+        _, hit_periods = event_status(machine, row["periods"], events)
+        if historical:
+            if machine not in historical:
+                continue
+        elif not (hit_periods and row["zone"] == row["best_zone"]):
+            continue
+        ocr_item = ocr.get(machine)
+        if not ocr_item:
+            continue
+        shape = graph_shape(ocr_item)
+        review = data.get("reviews", {}).get(machine, {})
+        out.append({
+            "date": date,
+            "machine": machine,
+            "grade": row["grade"],
+            "periods": row["periods"],
+            "hit_periods": sorted(set(hit_periods)),
+            "final": ocr_item["final"],
+            "atari": ocr_item["atari"],
+            "shape": shape["label"],
+            "outcome": review.get("outcome", ""),
+            "review": review.get("review", ""),
+        })
+    out.sort(key=lambda item: (item["final"], item["atari"]), reverse=True)
+    return out
+
+
+def historical_strict_machines(date):
+    path = cycle_watch_page_path(date)
+    if not path.exists():
+        return set()
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    machines = set()
+    for match in re.finditer(r'<tr class="hit-match" data-title="(\d+)番"', text):
+        machines.add(match.group(1).zfill(3))
+    return machines
+
+
+def write_cycle_watch_top():
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    today = datetime.now().strftime("%Y%m%d")
+    dates = cycle_watch_dates()
+    if not dates:
+        return None
+
+    latest = dates[-1]
+    performance = []
+    for date in dates:
+        performance.extend(strict_performance_rows(date))
+    performance.sort(key=lambda item: (item["final"], item["atari"]), reverse=True)
+
+    perf_rows = []
+    for item in performance[:10]:
+        result = f"{signed(item['final'])} / 初当たり{item['atari']}回"
+        hit = fmt_periods(item["hit_periods"])
+        review = item["review"] or "-"
+        perf_rows.append(f"""
+<tr data-title="{item['date']} {int(item['machine'])}番">
+  <td data-label="日付"><a href="cycle_watch_{item['date']}.html">{item['date']}</a></td>
+  <td data-label="台">{int(item['machine'])}番</td>
+  <td data-label="評価">{esc(item['grade'])}</td>
+  <td data-label="周期hit">{esc(hit)}分</td>
+  <td data-label="結果">{esc(result)}</td>
+  <td data-label="形状">{esc(item['shape'])}</td>
+  <td data-label="レビュー">{nl2br(review)}</td>
+</tr>""")
+    if not perf_rows:
+        perf_rows.append("""
+<tr data-title="未集計">
+  <td data-label="日付">-</td>
+  <td data-label="台">-</td>
+  <td data-label="評価">-</td>
+  <td data-label="周期hit">-</td>
+  <td data-label="結果">日足一致 + 日中hit の結果CSV待ち</td>
+  <td data-label="形状">-</td>
+  <td data-label="レビュー">-</td>
+</tr>""")
+
+    prediction_rows = []
+    result_rows = []
+    for date in sorted(dates, reverse=True):
+        page = cycle_watch_page_path(date).name
+        has_result = analyze_csv_path(date).exists()
+        data = load_log(date)
+        review_count = len(data.get("reviews", {}))
+        strict_count = len(strict_performance_rows(date)) if has_result else 0
+        label = "結果あり" if has_result and date < today else ("監視中" if date >= today else "結果待ち")
+        row_html = f"""
+<tr data-title="{date}">
+  <td data-label="日付"><a href="{page}">{date}</a></td>
+  <td data-label="状態">{label}</td>
+  <td data-label="厳密hit結果">{strict_count}台</td>
+  <td data-label="レビュー">{review_count}件</td>
+</tr>"""
+        if date >= today:
+            prediction_rows.append(row_html)
+        else:
+            result_rows.append(row_html)
+
+    html = f"""<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cycle Watch Top</title>
+<style>
+*{{box-sizing:border-box}}body{{margin:0;background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif}}
+header,main{{max-width:1120px;margin:auto}}header{{padding:22px 18px 8px}}main{{padding:0 18px 36px}}
+a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:#8b949e;font-size:13px;line-height:1.6}}
+section{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}
+table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;white-space:nowrap}}b{{color:#3fb950}}
+@media (max-width:720px){{header{{padding:14px 12px 6px}}main{{padding:0 10px 24px}}h1{{font-size:21px}}section{{padding:10px;overflow:visible}}table,tbody,tr,td{{display:block;width:100%}}thead{{display:none}}tr{{border:1px solid #30363d;border-radius:8px;margin:0 0 10px;padding:8px 10px;background:#0d1117}}tr::before{{content:attr(data-title);display:block;color:#3fb950;font-weight:700;font-size:18px;padding-bottom:6px;border-bottom:1px solid #30363d;margin-bottom:4px}}td{{border-bottom:0;padding:5px 0;display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}}td::before{{content:attr(data-label);color:#8b949e;font-weight:600;white-space:nowrap}}}}
+</style></head><body>
+<header>
+  <a href="index.html">← dashboard</a>
+  <h1>Cycle Watch Top</h1>
+  <div class="meta">予測日と過去結果を日別に確認します。最新: <a href="cycle_watch_{latest}.html">{latest}</a></div>
+</header>
+<main>
+<section>
+  <h2>日足周期 + 日中周期 成績上位</h2>
+  <table>
+    <thead><tr><th>日付</th><th>台</th><th>評価</th><th>周期hit</th><th>結果</th><th>形状</th><th>レビュー</th></tr></thead>
+    <tbody>{''.join(perf_rows)}</tbody>
+  </table>
+</section>
+<section>
+  <h2>予測日</h2>
+  <table>
+    <thead><tr><th>日付</th><th>状態</th><th>厳密hit結果</th><th>レビュー</th></tr></thead>
+    <tbody>{''.join(prediction_rows) if prediction_rows else '<tr data-title="なし"><td data-label="日付">-</td><td data-label="状態">予測日なし</td><td data-label="厳密hit結果">-</td><td data-label="レビュー">-</td></tr>'}</tbody>
+  </table>
+</section>
+<section>
+  <h2>過去の結果</h2>
+  <table>
+    <thead><tr><th>日付</th><th>状態</th><th>厳密hit結果</th><th>レビュー</th></tr></thead>
+    <tbody>{''.join(result_rows) if result_rows else '<tr data-title="なし"><td data-label="日付">-</td><td data-label="状態">過去結果なし</td><td data-label="厳密hit結果">-</td><td data-label="レビュー">-</td></tr>'}</tbody>
+  </table>
+</section>
+</main></body></html>"""
+    out = DOCS_DIR / "cycle_watch_top.html"
+    out.write_text(html, encoding="utf-8")
+    return out
 
 
 def cmd_page(args):
@@ -864,6 +1041,12 @@ def cmd_page(args):
     grades = set(args.grades.split(",")) if args.grades else {"A", "B"}
     rows = watch_rows(date, grades, args.top)
     out = write_watch_page(date, rows)
+    print(out)
+
+
+def cmd_top(args):
+    load_config_cache(force=args.refresh)
+    out = write_cycle_watch_top()
     print(out)
 
 
@@ -916,6 +1099,10 @@ def main():
     p_page.add_argument("--top", type=int, default=40, help="表示件数。0で全件")
     p_page.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
     p_page.set_defaults(func=cmd_page)
+
+    p_top = sub.add_parser("top", help="Cycle Watchの実績一覧トップを生成")
+    p_top.add_argument("--refresh", action="store_true", help="監視設定キャッシュを再生成")
+    p_top.set_defaults(func=cmd_top)
 
     p_folders = sub.add_parser("folders", help="Cycle Watchスクショ用フォルダを作成")
     p_folders.add_argument("--date", help="YYYYMMDD。未指定なら今日または最新日")
