@@ -12,6 +12,7 @@
 """
 
 import argparse
+import csv
 import json
 import math
 from datetime import datetime, timedelta
@@ -63,6 +64,50 @@ def log_path(date):
 
 def cyclewatch_folder(date):
     return Path(r"C:\kota\BU_Sdrive") / date[:4] / date[4:6] / date[6:8] / "cyclewatch"
+
+
+def analyze_csv_path(date):
+    return ROOT / "csv" / "analyze" / date / f"{date}_analyze.csv"
+
+
+def load_ocr_summary(date):
+    path = analyze_csv_path(date)
+    if not path.exists():
+        return {}
+    by_machine = {}
+    atari = {"当り", "大当り"}
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            if len(row) < 11:
+                continue
+            machine = str(row[1]).zfill(3)
+            by_machine.setdefault(machine, []).append(row)
+
+    out = {}
+    for machine, rows in by_machine.items():
+        vals = [0]
+        for row in rows:
+            try:
+                vals.append(int(float(row[6] or 0)))
+                vals.append(int(float(row[8] or 0)))
+            except ValueError:
+                pass
+        latest = max(rows, key=lambda row: row[7])
+        try:
+            final = int(float(latest[8] or 0))
+        except ValueError:
+            final = 0
+        hits = [row for row in rows if row[4] in atari]
+        out[machine] = {
+            "atari": len(hits),
+            "final": final,
+            "high": max(vals) if vals else 0,
+            "low": min(vals) if vals else 0,
+            "latest": f"{latest[4]} {latest[5]}-{latest[7]}",
+        }
+    return out
 
 
 def load_log(date):
@@ -416,6 +461,7 @@ def priority_rows(rows, data, current_minute):
 
 def write_watch_page(date, rows):
     data = load_log(date)
+    ocr = load_ocr_summary(date)
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
     generated = now.strftime("%Y-%m-%d %H:%M")
@@ -466,6 +512,12 @@ def write_watch_page(date, rows):
             "standby": "監視",
         }[status]
         event_text = " / ".join(fmt_time(t) for t in events) if events else "未入力"
+        ocr_item = ocr.get(machine)
+        ocr_text = (
+            f"{ocr_item['atari']}回 / {signed(ocr_item['final'])}<br>"
+            f"H {signed(ocr_item['high'])} / L {signed(ocr_item['low'])}"
+            if ocr_item else "未OCR"
+        )
         gap_text = "<br>".join(
             f"{fmt_time(g['prev'])}→{fmt_time(g['cur'])} = {g['gap']}分"
             + (f" <b>HIT {fmt_periods(g['hits'])}分</b>" if g["hits"] else "")
@@ -482,6 +534,7 @@ def write_watch_page(date, rows):
   <td>{status_label}</td>
   <td>{fmt_periods(row['periods'])}分</td>
   <td>{row['hit_rate']:.1f}% / {row['no_rate']:.1f}%<br>{signed(row['hit_med'])} / {signed(row['no_med'])}</td>
+  <td>{ocr_text}</td>
   <td>{event_text}</td>
   <td>{gap_text}</td>
   <td>{window_text(windows)}</td>
@@ -509,7 +562,7 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
   <h2>スクショ対象(日足候補・台番順)</h2>
   <div class="path">リネーム先: {screen_dir}</div>
   <table>
-    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
+    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th></tr></thead>
     <tbody>{''.join(list_rows)}</tbody>
   </table>
 </section></main>
