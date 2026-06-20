@@ -624,13 +624,13 @@ def write_watch_page(date, rows):
         for rank, item in enumerate(priority, 1):
             row = item["row"]
             items.append(f"""
-<tr>
-  <td>{rank}</td>
-  <td>{int(row['machine'])}番</td>
-  <td>{row['grade']}</td>
-  <td>{fmt_periods(row['periods'])}分</td>
-  <td>{window_text(item['windows'])}</td>
-  <td>{item['advice']}</td>
+<tr data-title="{rank}. {int(row['machine'])}番">
+  <td data-label="優先">{rank}</td>
+  <td data-label="台">{int(row['machine'])}番</td>
+  <td data-label="評価">{row['grade']}</td>
+  <td data-label="周期">{fmt_periods(row['periods'])}分</td>
+  <td data-label="次の見る時間">{window_text(item['windows'])}</td>
+  <td data-label="立ち回り">{item['advice']}</td>
 </tr>""")
         priority_html = f"""
 <section class="priority">
@@ -648,14 +648,14 @@ def write_watch_page(date, rows):
             row = item["row"]
             strict = "周期一致" if item["strict"] else "形状注目"
             items.append(f"""
-<tr>
-  <td>{rank}</td>
-  <td>{int(row['machine'])}番</td>
-  <td>{strict}</td>
-  <td>{item['shape']['label']}<br>{item['shape']['detail']}</td>
-  <td>{fmt_periods(row['periods'])}分</td>
-  <td>{window_text(item['windows'])}</td>
-  <td>{item['advice']}</td>
+<tr data-title="{rank}. {int(row['machine'])}番">
+  <td data-label="優先">{rank}</td>
+  <td data-label="台">{int(row['machine'])}番</td>
+  <td data-label="分類">{strict}</td>
+  <td data-label="形状">{item['shape']['label']}<br>{item['shape']['detail']}</td>
+  <td data-label="周期">{fmt_periods(row['periods'])}分</td>
+  <td data-label="次の見る時間">{window_text(item['windows'])}</td>
+  <td data-label="立ち回り">{item['advice']}</td>
 </tr>""")
         shape_html = f"""
 <section class="priority">
@@ -712,18 +712,18 @@ def write_watch_page(date, rows):
             zone_match,
         )
         list_rows.append(f"""
-<tr class="{status}">
-  <td>{int(machine)}番</td>
-  <td>{row['grade']}</td>
-  <td>{status_label}</td>
-  <td>{fmt_periods(row['periods'])}分</td>
-  <td>{row['hit_rate']:.1f}% / {row['no_rate']:.1f}%<br>{signed(row['hit_med'])} / {signed(row['no_med'])}</td>
-  <td>{ocr_text}</td>
-  <td>{shape_text}</td>
-  <td>{event_text}</td>
-  <td>{gap_text}</td>
-  <td>{window_text(windows)}</td>
-  <td>{advice}</td>
+<tr class="{status}" data-title="{int(machine)}番">
+  <td data-label="台">{int(machine)}番</td>
+  <td data-label="評価">{row['grade']}</td>
+  <td data-label="状態">{status_label}</td>
+  <td data-label="日中周期">{fmt_periods(row['periods'])}分</td>
+  <td data-label="期待/中央値">{row['hit_rate']:.1f}% / {row['no_rate']:.1f}%<br>{signed(row['hit_med'])} / {signed(row['no_med'])}</td>
+  <td data-label="OCR現在">{ocr_text}</td>
+  <td data-label="形状">{shape_text}</td>
+  <td data-label="入力">{event_text}</td>
+  <td data-label="差分">{gap_text}</td>
+  <td data-label="次見る時間">{window_text(windows)}</td>
+  <td data-label="立ち回り">{advice}</td>
 </tr>""")
     html = f"""<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -731,9 +731,21 @@ def write_watch_page(date, rows):
 <style>
 *{{box-sizing:border-box}}body{{margin:0;background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif}}
 header,main{{max-width:1180px;margin:auto}}header{{padding:22px 18px 12px}}main{{padding:0 18px 36px}}
-a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:#8b949e;font-size:13px;line-height:1.6}}
-.priority,.watch-list{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}.priority h2,.watch-list h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;color:#3fb950;white-space:nowrap}}tr.hit-match{{background:#12351f}}tr.hit{{background:#332909}}tr.watch{{background:#10263c}}b{{color:#3fb950}}.path{{color:#8b949e;font-family:Consolas,monospace;font-size:12px;margin:4px 0 10px}}
+a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:#8b949e;font-size:13px;line-height:1.6;overflow-wrap:anywhere}}
+.priority,.watch-list{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}.priority h2,.watch-list h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;color:#3fb950;white-space:nowrap}}tr.hit-match{{background:#12351f}}tr.hit{{background:#332909}}tr.watch{{background:#10263c}}b{{color:#3fb950}}.path{{color:#8b949e;font-family:Consolas,monospace;font-size:12px;margin:4px 0 10px;overflow-wrap:anywhere}}
 .cmd{{background:#010409;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-top:12px;color:#8b949e;font-family:Consolas,monospace;font-size:12px;overflow:auto}}
+@media (max-width: 720px){{
+  header{{padding:14px 12px 6px}}main{{padding:0 10px 24px}}h1{{font-size:21px}}.meta{{font-size:12px}}.cmd{{font-size:11px;padding:8px 10px}}
+  .priority,.watch-list{{padding:10px;margin-top:10px;overflow:visible}}.priority h2,.watch-list h2{{font-size:16px}}
+  table,tbody,tr,td{{display:block;width:100%}}thead{{display:none}}table{{font-size:12px;border-collapse:separate;border-spacing:0}}
+  tr{{border:1px solid #30363d;border-radius:8px;margin:0 0 10px;padding:8px 10px;background:#0d1117}}
+  tr.hit-match{{background:#12351f}}tr.hit{{background:#332909}}tr.watch{{background:#10263c}}
+  tr::before{{content:attr(data-title);display:block;color:#3fb950;font-weight:700;font-size:18px;padding-bottom:6px;border-bottom:1px solid #30363d;margin-bottom:4px}}
+  td{{border-bottom:0;padding:5px 0;display:grid;grid-template-columns:86px minmax(0,1fr);column-gap:8px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}}
+  td::before{{content:attr(data-label);color:#8b949e;font-weight:600;white-space:nowrap}}
+  td:first-child{{color:#c9d1d9;font-size:12px;white-space:normal;font-weight:400}}
+  td:first-child::before{{content:attr(data-label)}}
+}}
 </style></head><body>
 <header>
   <a href="index.html">← top</a>
