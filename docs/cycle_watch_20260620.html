@@ -10,15 +10,71 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
 .card.hit-match{border-color:#3fb950;box-shadow:0 0 0 1px #23863655}.card.hit{border-color:#d29922}.card.watch{border-color:#58a6ff}
 .head{display:flex;align-items:center;justify-content:space-between;gap:8px}h2{font-size:20px;margin:0}.head span{color:#8b949e;border:1px solid #30363d;padding:2px 8px;border-radius:999px;font-size:12px}
 .status{margin:8px 0 10px;font-weight:700;color:#f0f6fc}dl{display:grid;grid-template-columns:78px 1fr;gap:6px 8px;margin:0;font-size:13px}dt{color:#8b949e}dd{margin:0}b{color:#3fb950}
+.priority{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}.priority h2{font-size:18px;margin:0 0 10px;color:#f0f6fc}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}th{color:#8b949e;white-space:nowrap}td:first-child{font-weight:700;color:#3fb950}
 .cmd{background:#010409;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-top:12px;color:#8b949e;font-family:Consolas,monospace;font-size:12px;overflow:auto}
 </style></head><body>
 <header>
   <a href="index.html">← top</a>
   <h1>Cycle Watch 20260620</h1>
-  <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated 2026-06-20 16:08</div>
+  <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated 2026-06-20 16:30</div>
   <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py show --date 20260620</div>
 </header>
-<main><section class="grid">
+<main>
+<section class="priority">
+  <h2>今見る優先順位</h2>
+  <table>
+    <thead><tr><th>優先</th><th>台</th><th>評価</th><th>周期</th><th>次の見る時間</th><th>立ち回り</th></tr></thead>
+    <tbody>
+<tr>
+  <td>1</td>
+  <td>44番</td>
+  <td>A</td>
+  <td>130/70/180分</td>
+  <td>15:36〜15:46 (70分)<br>16:36〜16:46 (130分)<br>17:26〜17:36 (180分)</td>
+  <td>A評価。まず 16:36〜16:46 (130分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>73番</td>
+  <td>A</td>
+  <td>80/70/160分</td>
+  <td>15:26〜15:36 (70分)<br>15:36〜15:46 (80分)<br>16:56〜17:06 (160分)</td>
+  <td>A評価。まず 16:56〜17:06 (160分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>50番</td>
+  <td>B</td>
+  <td>170/100/140分</td>
+  <td>15:45〜15:55 (100分)<br>16:25〜16:35 (140分)<br>16:55〜17:05 (170分)</td>
+  <td>B評価。16:25〜16:35 (140分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>76番</td>
+  <td>B</td>
+  <td>30/100/20分</td>
+  <td>15:28〜15:38 (20分)<br>15:38〜15:48 (30分)<br>16:48〜16:58 (100分)</td>
+  <td>短周期の勢い確認型。16:48〜16:58 (100分) で再hitなら継続感あり。外したら勢い切れ寄り。</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>56番</td>
+  <td>B</td>
+  <td>80/90/160分</td>
+  <td>13:36〜13:46 (80分)<br>13:46〜13:56 (90分)<br>14:56〜15:06 (160分)</td>
+  <td>主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>49番</td>
+  <td>B</td>
+  <td>60/50/80分</td>
+  <td>13:18〜13:28 (50分)<br>13:28〜13:38 (60分)<br>13:48〜13:58 (80分)</td>
+  <td>主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</td>
+</tr></tbody>
+  </table>
+</section><section class="grid">
 <article class="card hit-match">
   <div class="head"><h2>44番</h2><span>A</span></div>
   <div class="status">日足一致 + 日中hit</div>
@@ -29,18 +85,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+4,753 / -4,504</dd>
     <dt>入力</dt><dd>13:16 / 14:31</dd>
     <dt>差分</dt><dd>13:16→14:31 = 75分 <b>HIT 70分</b></dd>
-  </dl>
-</article>
-<article class="card watch">
-  <div class="head"><h2>39番</h2><span>A</span></div>
-  <div class="status">日足一致</div>
-  <dl>
-    <dt>日足</dt><dd>lower-mid / 期待 lower-mid</dd>
-    <dt>日中周期</dt><dd>50/70/60分 ±5</dd>
-    <dt>期待</dt><dd>69.0% / no-hit 22.8%</dd>
-    <dt>中央値</dt><dd>+5,376 / -5,710</dd>
-    <dt>入力</dt><dd>14:05</dd>
-    <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>15:36〜15:46 (70分)<br>16:36〜16:46 (130分)<br>17:26〜17:36 (180分)</dd>
+    <dt>立ち回り</dt><dd>A評価。まず 16:36〜16:46 (130分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</dd>
   </dl>
 </article>
 <article class="card hit-match">
@@ -53,54 +99,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,092 / -7,804</dd>
     <dt>入力</dt><dd>11:16 / 12:04 / 12:18 / 13:36 / 14:02 / 14:21</dd>
     <dt>差分</dt><dd>11:16→12:04 = 48分<br>12:04→12:18 = 14分<br>12:18→13:36 = 78分 <b>HIT 80分</b><br>13:36→14:02 = 26分<br>14:02→14:21 = 19分</dd>
-  </dl>
-</article>
-<article class="card watch">
-  <div class="head"><h2>46番</h2><span>A</span></div>
-  <div class="status">日足一致</div>
-  <dl>
-    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
-    <dt>日中周期</dt><dd>100/110/40分 ±5</dd>
-    <dt>期待</dt><dd>74.2% / no-hit 38.9%</dd>
-    <dt>中央値</dt><dd>+4,965 / -2,182</dd>
-    <dt>入力</dt><dd>未入力</dd>
-    <dt>差分</dt><dd>当たり2回目から判定</dd>
-  </dl>
-</article>
-<article class="card watch">
-  <div class="head"><h2>77番</h2><span>B</span></div>
-  <div class="status">日足一致</div>
-  <dl>
-    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
-    <dt>日中周期</dt><dd>180/60/110分 ±5</dd>
-    <dt>期待</dt><dd>70.8% / no-hit 37.0%</dd>
-    <dt>中央値</dt><dd>+4,090 / -3,742</dd>
-    <dt>入力</dt><dd>11:27 / 13:46 / 14:27</dd>
-    <dt>差分</dt><dd>11:27→13:46 = 139分<br>13:46→14:27 = 41分</dd>
-  </dl>
-</article>
-<article class="card hit-match">
-  <div class="head"><h2>56番</h2><span>B</span></div>
-  <div class="status">日足一致 + 日中hit</div>
-  <dl>
-    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
-    <dt>日中周期</dt><dd>80/90/160分 ±5</dd>
-    <dt>期待</dt><dd>69.6% / no-hit 36.5%</dd>
-    <dt>中央値</dt><dd>+7,782 / -3,121</dd>
-    <dt>入力</dt><dd>10:55 / 12:21</dd>
-    <dt>差分</dt><dd>10:55→12:21 = 86分 <b>HIT 90分</b></dd>
-  </dl>
-</article>
-<article class="card watch">
-  <div class="head"><h2>60番</h2><span>B</span></div>
-  <div class="status">日足一致</div>
-  <dl>
-    <dt>日足</dt><dd>lower-mid / 期待 lower-mid</dd>
-    <dt>日中周期</dt><dd>60/170/70分 ±5</dd>
-    <dt>期待</dt><dd>57.9% / no-hit 27.8%</dd>
-    <dt>中央値</dt><dd>+2,711 / -5,709</dd>
-    <dt>入力</dt><dd>10:36 / 12:19 / 12:54 / 15:16</dd>
-    <dt>差分</dt><dd>10:36→12:19 = 103分<br>12:19→12:54 = 35分<br>12:54→15:16 = 142分</dd>
+    <dt>次見る</dt><dd>15:26〜15:36 (70分)<br>15:36〜15:46 (80分)<br>16:56〜17:06 (160分)</dd>
+    <dt>立ち回り</dt><dd>A評価。まず 16:56〜17:06 (160分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</dd>
   </dl>
 </article>
 <article class="card hit-match">
@@ -113,18 +113,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,444 / -6,383</dd>
     <dt>入力</dt><dd>12:35 / 14:10</dd>
     <dt>差分</dt><dd>12:35→14:10 = 95分 <b>HIT 100分</b></dd>
-  </dl>
-</article>
-<article class="card hit-match">
-  <div class="head"><h2>49番</h2><span>B</span></div>
-  <div class="status">日足一致 + 日中hit</div>
-  <dl>
-    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
-    <dt>日中周期</dt><dd>60/50/80分 ±5</dd>
-    <dt>期待</dt><dd>61.5% / no-hit 33.3%</dd>
-    <dt>中央値</dt><dd>+5,686 / -3,085</dd>
-    <dt>入力</dt><dd>11:21 / 12:19 / 12:33</dd>
-    <dt>差分</dt><dd>11:21→12:19 = 58分 <b>HIT 60分</b><br>12:19→12:33 = 14分</dd>
+    <dt>次見る</dt><dd>15:45〜15:55 (100分)<br>16:25〜16:35 (140分)<br>16:55〜17:05 (170分)</dd>
+    <dt>立ち回り</dt><dd>B評価。16:25〜16:35 (140分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</dd>
   </dl>
 </article>
 <article class="card hit-match">
@@ -137,6 +127,92 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,444 / -3,866</dd>
     <dt>入力</dt><dd>12:44 / 12:56 / 13:30 / 14:07 / 15:13</dd>
     <dt>差分</dt><dd>12:44→12:56 = 12分<br>12:56→13:30 = 34分 <b>HIT 30分</b><br>13:30→14:07 = 37分<br>14:07→15:13 = 66分</dd>
+    <dt>次見る</dt><dd>15:28〜15:38 (20分)<br>15:38〜15:48 (30分)<br>16:48〜16:58 (100分)</dd>
+    <dt>立ち回り</dt><dd>短周期の勢い確認型。16:48〜16:58 (100分) で再hitなら継続感あり。外したら勢い切れ寄り。</dd>
+  </dl>
+</article>
+<article class="card hit-match">
+  <div class="head"><h2>56番</h2><span>B</span></div>
+  <div class="status">日足一致 + 日中hit</div>
+  <dl>
+    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
+    <dt>日中周期</dt><dd>80/90/160分 ±5</dd>
+    <dt>期待</dt><dd>69.6% / no-hit 36.5%</dd>
+    <dt>中央値</dt><dd>+7,782 / -3,121</dd>
+    <dt>入力</dt><dd>10:55 / 12:21</dd>
+    <dt>差分</dt><dd>10:55→12:21 = 86分 <b>HIT 90分</b></dd>
+    <dt>次見る</dt><dd>13:36〜13:46 (80分)<br>13:46〜13:56 (90分)<br>14:56〜15:06 (160分)</dd>
+    <dt>立ち回り</dt><dd>主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</dd>
+  </dl>
+</article>
+<article class="card hit-match">
+  <div class="head"><h2>49番</h2><span>B</span></div>
+  <div class="status">日足一致 + 日中hit</div>
+  <dl>
+    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
+    <dt>日中周期</dt><dd>60/50/80分 ±5</dd>
+    <dt>期待</dt><dd>61.5% / no-hit 33.3%</dd>
+    <dt>中央値</dt><dd>+5,686 / -3,085</dd>
+    <dt>入力</dt><dd>11:21 / 12:19 / 12:33</dd>
+    <dt>差分</dt><dd>11:21→12:19 = 58分 <b>HIT 60分</b><br>12:19→12:33 = 14分</dd>
+    <dt>次見る</dt><dd>13:18〜13:28 (50分)<br>13:28〜13:38 (60分)<br>13:48〜13:58 (80分)</dd>
+    <dt>立ち回り</dt><dd>主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</dd>
+  </dl>
+</article>
+<article class="card watch">
+  <div class="head"><h2>39番</h2><span>A</span></div>
+  <div class="status">日足一致</div>
+  <dl>
+    <dt>日足</dt><dd>lower-mid / 期待 lower-mid</dd>
+    <dt>日中周期</dt><dd>50/70/60分 ±5</dd>
+    <dt>期待</dt><dd>69.0% / no-hit 22.8%</dd>
+    <dt>中央値</dt><dd>+5,376 / -5,710</dd>
+    <dt>入力</dt><dd>14:05</dd>
+    <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>14:50〜15:00 (50分)<br>15:00〜15:10 (60分)<br>15:10〜15:20 (70分)</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
+  </dl>
+</article>
+<article class="card watch">
+  <div class="head"><h2>46番</h2><span>A</span></div>
+  <div class="status">日足一致</div>
+  <dl>
+    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
+    <dt>日中周期</dt><dd>100/110/40分 ±5</dd>
+    <dt>期待</dt><dd>74.2% / no-hit 38.9%</dd>
+    <dt>中央値</dt><dd>+4,965 / -2,182</dd>
+    <dt>入力</dt><dd>未入力</dd>
+    <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
+  </dl>
+</article>
+<article class="card watch">
+  <div class="head"><h2>77番</h2><span>B</span></div>
+  <div class="status">日足一致</div>
+  <dl>
+    <dt>日足</dt><dd>upper-mid / 期待 upper-mid</dd>
+    <dt>日中周期</dt><dd>180/60/110分 ±5</dd>
+    <dt>期待</dt><dd>70.8% / no-hit 37.0%</dd>
+    <dt>中央値</dt><dd>+4,090 / -3,742</dd>
+    <dt>入力</dt><dd>11:27 / 13:46 / 14:27</dd>
+    <dt>差分</dt><dd>11:27→13:46 = 139分<br>13:46→14:27 = 41分</dd>
+    <dt>次見る</dt><dd>15:22〜15:32 (60分)<br>16:12〜16:22 (110分)<br>17:22〜17:32 (180分)</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
+  </dl>
+</article>
+<article class="card watch">
+  <div class="head"><h2>60番</h2><span>B</span></div>
+  <div class="status">日足一致</div>
+  <dl>
+    <dt>日足</dt><dd>lower-mid / 期待 lower-mid</dd>
+    <dt>日中周期</dt><dd>60/170/70分 ±5</dd>
+    <dt>期待</dt><dd>57.9% / no-hit 27.8%</dd>
+    <dt>中央値</dt><dd>+2,711 / -5,709</dd>
+    <dt>入力</dt><dd>10:36 / 12:19 / 12:54 / 15:16</dd>
+    <dt>差分</dt><dd>10:36→12:19 = 103分<br>12:19→12:54 = 35分<br>12:54→15:16 = 142分</dd>
+    <dt>次見る</dt><dd>16:11〜16:21 (60分)<br>16:21〜16:31 (70分)<br>18:01〜18:11 (170分)</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card watch">
@@ -149,6 +225,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+9,718 / -1,666</dd>
     <dt>入力</dt><dd>12:45 / 14:45</dd>
     <dt>差分</dt><dd>12:45→14:45 = 120分</dd>
+    <dt>次見る</dt><dd>15:20〜15:30 (40分)<br>16:00〜16:10 (80分)<br>16:20〜16:30 (100分)</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -161,6 +239,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+10,070 / -1,524</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -173,6 +253,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+9,578 / -1,496</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -185,6 +267,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+10,775 / +5,009</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -197,6 +281,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,198 / -4,468</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -209,6 +295,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+12,113 / +1,126</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -221,6 +309,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+2,172 / -7,057</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -233,6 +323,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+2,464 / -4,291</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -245,6 +337,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+5,728 / -614</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -257,6 +351,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,021 / -4,350</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -269,6 +365,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+2,465 / -5,573</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -281,6 +379,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+3,527 / -602</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -293,6 +393,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+1,808 / -1,524</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -305,6 +407,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+3,486 / -6,100</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -317,6 +421,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+246 / -5,638</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -329,6 +435,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+2,482 / -5,508</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article>
 <article class="card standby">
@@ -341,6 +449,8 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
     <dt>中央値</dt><dd>+5,950 / -1,028</dd>
     <dt>入力</dt><dd>未入力</dd>
     <dt>差分</dt><dd>当たり2回目から判定</dd>
+    <dt>次見る</dt><dd>次回当たり待ち</dd>
+    <dt>立ち回り</dt><dd>日中hit待ち。初当たり時刻を追加して判定。</dd>
   </dl>
 </article></section></main>
 </body></html>

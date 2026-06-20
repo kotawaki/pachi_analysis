@@ -338,15 +338,118 @@ def event_status(machine, periods, events):
     return rows, hit_periods
 
 
-def write_watch_page(date, rows):
-    data = load_log(date)
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    generated = datetime.now().strftime("%Y-%m-%d %H:%M")
-    cards = []
+def next_windows(events, periods):
+    if not events:
+        return []
+    base = max(events)
+    windows = []
+    for period in periods:
+        center = base + period
+        windows.append({
+            "period": period,
+            "start": center - TOLERANCE,
+            "center": center,
+            "end": center + TOLERANCE,
+        })
+    return sorted(windows, key=lambda item: item["center"])
+
+
+def fmt_window(window):
+    return f"{fmt_time(window['start'])}〜{fmt_time(window['end'])} ({window['period']}分)"
+
+
+def window_text(windows):
+    return "<br>".join(fmt_window(window) for window in windows) if windows else "次回当たり待ち"
+
+
+def advice_for(row, windows, current_minute):
+    future = [window for window in windows if window["end"] >= current_minute]
+    near = future[0] if future else None
+    min_period = min(row["periods"]) if row["periods"] else 999
+    if row["grade"] == "A":
+        if near:
+            return f"A評価。まず {fmt_window(near)} を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。"
+        return "A評価だが直近窓は通過気味。次の初当たりが出たら再判定。打ちっぱなしより待ち。"
+    if min_period <= 30:
+        if near:
+            return f"短周期の勢い確認型。{fmt_window(near)} で再hitなら継続感あり。外したら勢い切れ寄り。"
+        return "短周期の主要窓は通過気味。今からは後追い弱め、次の初当たりで再判定。"
+    if near:
+        return f"B評価。{fmt_window(near)} で再hitなら追跡、来なければ深追いせず次窓だけ確認。"
+    return "主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。"
+
+
+def priority_rows(rows, data, current_minute):
+    out = []
     for row in rows:
         machine = row["machine"]
         events = sorted(data["events"].get(machine, []))
         gaps, hit_periods = event_status(machine, row["periods"], events)
+        if not (hit_periods and row["zone"] == row["best_zone"]):
+            continue
+        windows = next_windows(events, row["periods"])
+        active = any(window["end"] >= current_minute for window in windows)
+        out.append({
+            "row": row,
+            "events": events,
+            "gaps": gaps,
+            "hit_periods": hit_periods,
+            "windows": windows,
+            "active": active,
+            "advice": advice_for(row, windows, current_minute),
+        })
+    out.sort(
+        key=lambda item: (
+            GRADE_SCORE.get(item["row"]["grade"], 0),
+            item["active"],
+            item["row"]["hit_rate"] - item["row"]["no_rate"],
+            item["row"]["hit_med"] - item["row"]["no_med"],
+        ),
+        reverse=True,
+    )
+    return out
+
+
+def write_watch_page(date, rows):
+    data = load_log(date)
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now()
+    generated = now.strftime("%Y-%m-%d %H:%M")
+    current_minute = now.hour * 60 + now.minute
+    priority = priority_rows(rows, data, current_minute)
+    priority_machines = {item["row"]["machine"] for item in priority}
+    ordered_rows = [item["row"] for item in priority] + [row for row in rows if row["machine"] not in priority_machines]
+
+    priority_html = ""
+    if priority:
+        items = []
+        for rank, item in enumerate(priority, 1):
+            row = item["row"]
+            items.append(f"""
+<tr>
+  <td>{rank}</td>
+  <td>{int(row['machine'])}番</td>
+  <td>{row['grade']}</td>
+  <td>{fmt_periods(row['periods'])}分</td>
+  <td>{window_text(item['windows'])}</td>
+  <td>{item['advice']}</td>
+</tr>""")
+        priority_html = f"""
+<section class="priority">
+  <h2>今見る優先順位</h2>
+  <table>
+    <thead><tr><th>優先</th><th>台</th><th>評価</th><th>周期</th><th>次の見る時間</th><th>立ち回り</th></tr></thead>
+    <tbody>{''.join(items)}</tbody>
+  </table>
+</section>"""
+
+    cards = []
+    priority_by_machine = {item["row"]["machine"]: item for item in priority}
+    for row in ordered_rows:
+        machine = row["machine"]
+        events = sorted(data["events"].get(machine, []))
+        gaps, hit_periods = event_status(machine, row["periods"], events)
+        windows = next_windows(events, row["periods"])
         zone_match = row["zone"] == row["best_zone"]
         has_hit = bool(hit_periods)
         status = "hit-match" if has_hit and zone_match else ("hit" if has_hit else ("watch" if zone_match else "standby"))
@@ -362,6 +465,10 @@ def write_watch_page(date, rows):
             + (f" <b>HIT {fmt_periods(g['hits'])}分</b>" if g["hits"] else "")
             for g in gaps
         ) or "当たり2回目から判定"
+        advice = priority_by_machine.get(machine, {}).get("advice")
+        if not advice and has_hit and zone_match:
+            advice = advice_for(row, windows, current_minute)
+        advice = advice or "日中hit待ち。初当たり時刻を追加して判定。"
         cards.append(f"""
 <article class="card {status}">
   <div class="head"><h2>{int(machine)}番</h2><span>{row['grade']}</span></div>
@@ -373,6 +480,8 @@ def write_watch_page(date, rows):
     <dt>中央値</dt><dd>{signed(row['hit_med'])} / {signed(row['no_med'])}</dd>
     <dt>入力</dt><dd>{event_text}</dd>
     <dt>差分</dt><dd>{gap_text}</dd>
+    <dt>次見る</dt><dd>{window_text(windows)}</dd>
+    <dt>立ち回り</dt><dd>{advice}</dd>
   </dl>
 </article>""")
     html = f"""<!doctype html>
@@ -387,6 +496,7 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
 .card.hit-match{{border-color:#3fb950;box-shadow:0 0 0 1px #23863655}}.card.hit{{border-color:#d29922}}.card.watch{{border-color:#58a6ff}}
 .head{{display:flex;align-items:center;justify-content:space-between;gap:8px}}h2{{font-size:20px;margin:0}}.head span{{color:#8b949e;border:1px solid #30363d;padding:2px 8px;border-radius:999px;font-size:12px}}
 .status{{margin:8px 0 10px;font-weight:700;color:#f0f6fc}}dl{{display:grid;grid-template-columns:78px 1fr;gap:6px 8px;margin:0;font-size:13px}}dt{{color:#8b949e}}dd{{margin:0}}b{{color:#3fb950}}
+.priority{{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}}.priority h2{{font-size:18px;margin:0 0 10px;color:#f0f6fc}}table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}}th{{color:#8b949e;white-space:nowrap}}td:first-child{{font-weight:700;color:#3fb950}}
 .cmd{{background:#010409;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-top:12px;color:#8b949e;font-family:Consolas,monospace;font-size:12px;overflow:auto}}
 </style></head><body>
 <header>
@@ -395,7 +505,7 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
   <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated {generated}</div>
   <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py show --date {date}</div>
 </header>
-<main><section class="grid">{''.join(cards)}</section></main>
+<main>{priority_html}<section class="grid">{''.join(cards)}</section></main>
 </body></html>"""
     dated = DOCS_DIR / f"cycle_watch_{date}.html"
     dated.write_text(html, encoding="utf-8")
