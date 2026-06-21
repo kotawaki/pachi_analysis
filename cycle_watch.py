@@ -200,6 +200,20 @@ def nl2br(value):
     return esc(value).replace("\n", "<br>")
 
 
+def outcome_label(final):
+    if final > 0:
+        return "陽線"
+    if final < 0:
+        return "陰線"
+    return "±0"
+
+
+def auto_result_text(ocr_item):
+    if not ocr_item:
+        return "-"
+    return f"{outcome_label(ocr_item['final'])}<br>{signed(ocr_item['final'])} / 初当たり{ocr_item['atari']}回"
+
+
 def latest_data_date(all_days):
     return max(date for date, _ in all_days.keys())
 
@@ -378,8 +392,10 @@ def row_from_config(machine, machine_config, date, all_days):
 def include_ocr_rows(date, rows, ocr):
     if not ocr:
         return rows
+    data = load_log(date)
+    logged_machines = set(data.get("events", {})) | set(data.get("reviews", {}))
     existing = {row["machine"] for row in rows}
-    missing = sorted(set(ocr) - existing, key=lambda x: int(x))
+    missing = sorted((set(ocr) & logged_machines) - existing, key=lambda x: int(x))
     if not missing:
         return rows
     all_days, config = load_config_cache()
@@ -665,11 +681,14 @@ def write_watch_page(date, rows):
     data = load_log(date)
     ocr = load_ocr_summary(date)
     rows = include_ocr_rows(date, rows, ocr)
+    historical_strict = historical_strict_machines(date)
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
     generated = now.strftime("%Y-%m-%d %H:%M")
     current_minute = now.hour * 60 + now.minute
     priority = priority_rows(rows, data, current_minute)
+    if historical_strict:
+        priority = [item for item in priority if item["row"]["machine"] in historical_strict]
     shape_focus = shape_focus_rows(rows, data, ocr, current_minute)
     priority_machines = {item["row"]["machine"] for item in priority}
     ordered_rows = [item["row"] for item in priority] + [row for row in rows if row["machine"] not in priority_machines]
@@ -763,7 +782,8 @@ def write_watch_page(date, rows):
         windows = next_windows(events, row["periods"])
         zone_match = row["zone"] == row["best_zone"]
         has_hit = bool(hit_periods)
-        status = "hit-match" if has_hit and zone_match else ("hit" if has_hit else ("watch" if zone_match else "standby"))
+        strict_match = machine in historical_strict if historical_strict else has_hit and zone_match
+        status = "hit-match" if strict_match else ("hit" if has_hit else ("watch" if zone_match else "standby"))
         status_label = {
             "hit-match": "日足一致 + 日中hit",
             "hit": "日中hit",
@@ -795,11 +815,11 @@ def write_watch_page(date, rows):
             zone_match,
         )
         review_item = reviews.get(machine, {})
-        review_text = "-"
+        review_text = auto_result_text(ocr_item)
         if review_item:
             review_text = (
                 f"{esc(review_item.get('outcome') or '-')}<br>"
-                f"{nl2br(review_item.get('result') or '-')}<br>"
+                f"{nl2br(review_item.get('result') or auto_result_text(ocr_item))}<br>"
                 f"{nl2br(review_item.get('review') or '-')}"
             )
         list_rows.append(f"""
@@ -840,7 +860,7 @@ a{{color:#58a6ff}}h1{{margin:0 0 6px;color:#58a6ff;font-size:24px}}.meta{{color:
 }}
 </style></head><body>
 <header>
-  <a href="index.html">← top</a>
+  <a href="cycle_watch_top.html">← Cycle Watch Top</a>
   <h1>Cycle Watch {date}</h1>
   <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated {generated}</div>
   <div class="meta">スクショ対象フォルダ: <span class="path">{screen_dir}</span></div>
@@ -910,6 +930,7 @@ def strict_performance_rows(date):
             "periods": row["periods"],
             "hit_periods": sorted(set(hit_periods)),
             "final": ocr_item["final"],
+            "positive": ocr_item["final"] > 0,
             "atari": ocr_item["atari"],
             "shape": shape["label"],
             "outcome": review.get("outcome", ""),
@@ -930,6 +951,47 @@ def historical_strict_machines(date):
     return machines
 
 
+def aggregate_performance(performance):
+    by_machine = {}
+    for item in performance:
+        machine = item["machine"]
+        bucket = by_machine.setdefault(machine, {
+            "machine": machine,
+            "grade": item["grade"],
+            "count": 0,
+            "positive": 0,
+            "total_final": 0,
+            "dates": [],
+            "best_final": None,
+            "latest_review": "",
+        })
+        bucket["count"] += 1
+        bucket["positive"] += 1 if item["positive"] else 0
+        bucket["total_final"] += item["final"]
+        bucket["dates"].append(item["date"])
+        if bucket["best_final"] is None or item["final"] > bucket["best_final"]:
+            bucket["best_final"] = item["final"]
+        if item.get("review"):
+            bucket["latest_review"] = item["review"]
+
+    out = []
+    for item in by_machine.values():
+        item["positive_rate"] = item["positive"] / item["count"] if item["count"] else 0
+        item["avg_final"] = item["total_final"] / item["count"] if item["count"] else 0
+        item["dates"] = sorted(set(item["dates"]))
+        out.append(item)
+    out.sort(
+        key=lambda item: (
+            item["positive_rate"],
+            item["count"],
+            item["avg_final"],
+            item["total_final"],
+        ),
+        reverse=True,
+    )
+    return out
+
+
 def write_cycle_watch_top():
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     today = datetime.now().strftime("%Y%m%d")
@@ -941,21 +1003,27 @@ def write_cycle_watch_top():
     performance = []
     for date in dates:
         performance.extend(strict_performance_rows(date))
-    performance.sort(key=lambda item: (item["final"], item["atari"]), reverse=True)
+    aggregate = aggregate_performance(performance)
 
     perf_rows = []
-    for item in performance[:10]:
-        result = f"{signed(item['final'])} / 初当たり{item['atari']}回"
-        hit = fmt_periods(item["hit_periods"])
-        review = item["review"] or "-"
+    for item in aggregate[:10]:
+        result = (
+            f"{item['positive']}/{item['count']} 陽線 "
+            f"({item['positive_rate']:.0%})<br>"
+            f"平均{signed(item['avg_final'])} / 合計{signed(item['total_final'])}"
+        )
+        dates_text = " / ".join(
+            f'<a href="cycle_watch_{date}.html">{date}</a>' for date in item["dates"]
+        )
+        review = item["latest_review"] or "-"
         perf_rows.append(f"""
-<tr data-title="{item['date']} {int(item['machine'])}番">
-  <td data-label="日付"><a href="cycle_watch_{item['date']}.html">{item['date']}</a></td>
+<tr data-title="{int(item['machine'])}番">
   <td data-label="台">{int(item['machine'])}番</td>
   <td data-label="評価">{esc(item['grade'])}</td>
-  <td data-label="周期hit">{esc(hit)}分</td>
-  <td data-label="結果">{esc(result)}</td>
-  <td data-label="形状">{esc(item['shape'])}</td>
+  <td data-label="対象日">{dates_text}</td>
+  <td data-label="件数">{item['count']}件</td>
+  <td data-label="陽線率/差玉">{result}</td>
+  <td data-label="最高差玉">{signed(item['best_final'])}</td>
   <td data-label="レビュー">{nl2br(review)}</td>
 </tr>""")
     if not perf_rows:
@@ -964,9 +1032,10 @@ def write_cycle_watch_top():
   <td data-label="日付">-</td>
   <td data-label="台">-</td>
   <td data-label="評価">-</td>
-  <td data-label="周期hit">-</td>
-  <td data-label="結果">日足一致 + 日中hit の結果CSV待ち</td>
-  <td data-label="形状">-</td>
+  <td data-label="対象日">-</td>
+  <td data-label="件数">0件</td>
+  <td data-label="陽線率/差玉">日足一致 + 日中hit の結果CSV待ち</td>
+  <td data-label="最高差玉">-</td>
   <td data-label="レビュー">-</td>
 </tr>""")
 
@@ -1005,13 +1074,13 @@ table{{width:100%;border-collapse:collapse;font-size:13px}}th,td{{border-bottom:
 <header>
   <a href="index.html">← dashboard</a>
   <h1>Cycle Watch Top</h1>
-  <div class="meta">予測日と過去結果を日別に確認します。最新: <a href="cycle_watch_{latest}.html">{latest}</a></div>
+  <div class="meta">予測日と過去結果を日別に確認します。成績上位は結果CSVが揃っている期間全体で集計します。最新: <a href="cycle_watch_{latest}.html">{latest}</a></div>
 </header>
 <main>
 <section>
-  <h2>日足周期 + 日中周期 成績上位</h2>
+  <h2>日足周期 + 日中周期 成績上位(期間集計)</h2>
   <table>
-    <thead><tr><th>日付</th><th>台</th><th>評価</th><th>周期hit</th><th>結果</th><th>形状</th><th>レビュー</th></tr></thead>
+    <thead><tr><th>台</th><th>評価</th><th>対象日</th><th>件数</th><th>陽線率/差玉</th><th>最高差玉</th><th>レビュー</th></tr></thead>
     <tbody>{''.join(perf_rows)}</tbody>
   </table>
 </section>

@@ -21,9 +21,9 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
 }
 </style></head><body>
 <header>
-  <a href="index.html">← top</a>
+  <a href="cycle_watch_top.html">← Cycle Watch Top</a>
   <h1>Cycle Watch 20260620</h1>
-  <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated 2026-06-20 21:31</div>
+  <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated 2026-06-21 09:04</div>
   <div class="meta">スクショ対象フォルダ: <span class="path">C:\kota\BU_Sdrive\2026\06\20\cyclewatch</span></div>
   <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py review 39 --outcome ○ --result "終日+3000" --review "形状通りに伸びた"<br>python cycle_watch.py show --date 20260620</div>
 </header>
@@ -39,7 +39,7 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="評価">A</td>
   <td data-label="周期">130/70/180分</td>
   <td data-label="次の見る時間">17:42〜17:52 (70分)<br>18:42〜18:52 (130分)<br>19:32〜19:42 (180分)</td>
-  <td data-label="立ち回り">A評価だが直近窓は通過気味。次の初当たりが出たら再判定。打ちっぱなしより待ち。</td>
+  <td data-label="立ち回り">A評価。まず 17:42〜17:52 (70分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
 </tr>
 <tr data-title="2. 50番">
   <td data-label="優先">2</td>
@@ -47,7 +47,7 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="評価">B</td>
   <td data-label="周期">170/100/140分</td>
   <td data-label="次の見る時間">17:07〜17:17 (100分)<br>17:47〜17:57 (140分)<br>18:17〜18:27 (170分)</td>
-  <td data-label="立ち回り">主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</td>
+  <td data-label="立ち回り">B評価。17:07〜17:17 (100分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
 </tr></tbody>
   </table>
 </section>
@@ -56,86 +56,113 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <table>
     <thead><tr><th>優先</th><th>台</th><th>分類</th><th>形状</th><th>周期</th><th>次の見る時間</th><th>立ち回り</th></tr></thead>
     <tbody>
-<tr data-title="1. 56番">
+<tr data-title="1. 49番">
   <td data-label="優先">1</td>
-  <td data-label="台">56番</td>
-  <td data-label="分類">形状注目</td>
+  <td data-label="台">49番</td>
+  <td data-label="分類">周期一致</td>
   <td data-label="形状">上昇継続<br>終値が高値圏(100%)</td>
-  <td data-label="周期">80/90/160分</td>
-  <td data-label="次の見る時間">13:36〜13:46 (80分)<br>13:46〜13:56 (90分)<br>14:56〜15:06 (160分)</td>
+  <td data-label="周期">60/50/80分</td>
+  <td data-label="次の見る時間">16:52〜17:02 (50分)<br>17:02〜17:12 (60分)<br>17:22〜17:32 (80分)</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 周期条件も一致。A評価。まず 16:52〜17:02 (50分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
+</tr>
+<tr data-title="2. 149番">
+  <td data-label="優先">2</td>
+  <td data-label="台">149番</td>
+  <td data-label="分類">形状注目</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(93%)</td>
+  <td data-label="周期">90/60/30分</td>
+  <td data-label="次の見る時間">次回当たり待ち</td>
   <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
 </tr>
-<tr data-title="2. 77番">
-  <td data-label="優先">2</td>
+<tr data-title="3. 45番">
+  <td data-label="優先">3</td>
+  <td data-label="台">45番</td>
+  <td data-label="分類">形状注目</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(84%)</td>
+  <td data-label="周期">160/50/150分</td>
+  <td data-label="次の見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+</tr>
+<tr data-title="4. 77番">
+  <td data-label="優先">4</td>
   <td data-label="台">77番</td>
   <td data-label="分類">形状注目</td>
-  <td data-label="形状">上昇継続<br>終値が高値圏(95%)</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(91%)</td>
   <td data-label="周期">180/60/110分</td>
   <td data-label="次の見る時間">17:25〜17:35 (60分)<br>18:15〜18:25 (110分)<br>19:25〜19:35 (180分)</td>
   <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
 </tr>
-<tr data-title="3. 60番">
-  <td data-label="優先">3</td>
+<tr data-title="5. 68番">
+  <td data-label="優先">5</td>
+  <td data-label="台">68番</td>
+  <td data-label="分類">形状注目</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(93%)</td>
+  <td data-label="周期">130/100/110分</td>
+  <td data-label="次の見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+</tr>
+<tr data-title="6. 41番">
+  <td data-label="優先">6</td>
+  <td data-label="台">41番</td>
+  <td data-label="分類">形状注目</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(100%)</td>
+  <td data-label="周期">110/140/180分</td>
+  <td data-label="次の見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+</tr>
+<tr data-title="7. 60番">
+  <td data-label="優先">7</td>
   <td data-label="台">60番</td>
   <td data-label="分類">形状注目</td>
-  <td data-label="形状">上昇継続<br>終値が高値圏(99%)</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(86%)</td>
   <td data-label="周期">60/70/110分</td>
   <td data-label="次の見る時間">16:11〜16:21 (60分)<br>16:21〜16:31 (70分)<br>17:01〜17:11 (110分)</td>
   <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
 </tr>
-<tr data-title="4. 59番">
-  <td data-label="優先">4</td>
+<tr data-title="8. 59番">
+  <td data-label="優先">8</td>
   <td data-label="台">59番</td>
   <td data-label="分類">形状注目</td>
-  <td data-label="形状">上側維持<br>終値が上側(65%)</td>
+  <td data-label="形状">上側維持<br>終値が上側(58%)</td>
   <td data-label="周期">80/100/40分</td>
   <td data-label="次の見る時間">16:24〜16:34 (40分)<br>17:04〜17:14 (80分)<br>17:24〜17:34 (100分)</td>
   <td data-label="立ち回り">形状は悪くない。直近安値を割らずに次窓へ入るなら確認対象。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
 </tr>
-<tr data-title="5. 76番">
-  <td data-label="優先">5</td>
-  <td data-label="台">76番</td>
+<tr data-title="9. 69番">
+  <td data-label="優先">9</td>
+  <td data-label="台">69番</td>
   <td data-label="分類">形状注目</td>
-  <td data-label="形状">上側維持<br>終値が上側(59%)</td>
-  <td data-label="周期">30/100/20分</td>
-  <td data-label="次の見る時間">15:28〜15:38 (20分)<br>15:38〜15:48 (30分)<br>16:48〜16:58 (100分)</td>
-  <td data-label="立ち回り">形状は悪くない。直近安値を割らずに次窓へ入るなら確認対象。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-</tr>
-<tr data-title="6. 73番">
-  <td data-label="優先">6</td>
-  <td data-label="台">73番</td>
-  <td data-label="分類">形状注目</td>
-  <td data-label="形状">反発途中<br>安値から+3,132戻し</td>
-  <td data-label="周期">80/70/160分</td>
-  <td data-label="次の見る時間">17:02〜17:12 (70分)<br>17:12〜17:22 (80分)<br>18:32〜18:42 (160分)</td>
-  <td data-label="立ち回り">一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。</td>
-</tr>
-<tr data-title="7. 39番">
-  <td data-label="優先">7</td>
-  <td data-label="台">39番</td>
-  <td data-label="分類">形状注目</td>
-  <td data-label="形状">反発途中<br>安値から+3,830戻し</td>
-  <td data-label="周期">50/70/60分</td>
-  <td data-label="次の見る時間">14:50〜15:00 (50分)<br>15:00〜15:10 (60分)<br>15:10〜15:20 (70分)</td>
+  <td data-label="形状">反発途中<br>安値から+5,402戻し</td>
+  <td data-label="周期">80/130/140分</td>
+  <td data-label="次の見る時間">次回当たり待ち</td>
   <td data-label="立ち回り">一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。 日中hit待ち。初当たり時刻を追加して判定。</td>
 </tr>
-<tr data-title="8. 44番">
-  <td data-label="優先">8</td>
+<tr data-title="10. 44番">
+  <td data-label="優先">10</td>
   <td data-label="台">44番</td>
   <td data-label="分類">周期一致</td>
-  <td data-label="形状">下側終了<br>安値寄り(1%)</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
   <td data-label="周期">130/70/180分</td>
   <td data-label="次の見る時間">17:42〜17:52 (70分)<br>18:42〜18:52 (130分)<br>19:32〜19:42 (180分)</td>
-  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら A評価だが直近窓は通過気味。次の初当たりが出たら再判定。打ちっぱなしより待ち。</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら A評価。まず 17:42〜17:52 (70分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
 </tr>
-<tr data-title="9. 50番">
-  <td data-label="優先">9</td>
+<tr data-title="11. 56番">
+  <td data-label="優先">11</td>
+  <td data-label="台">56番</td>
+  <td data-label="分類">周期一致</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="周期">80/90/160分</td>
+  <td data-label="次の見る時間">13:36〜13:46 (80分)<br>13:46〜13:56 (90分)<br>14:56〜15:06 (160分)</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら B評価。13:36〜13:46 (80分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
+</tr>
+<tr data-title="12. 50番">
+  <td data-label="優先">12</td>
   <td data-label="台">50番</td>
   <td data-label="分類">周期一致</td>
   <td data-label="形状">下側終了<br>安値寄り(0%)</td>
   <td data-label="周期">170/100/140分</td>
   <td data-label="次の見る時間">17:07〜17:17 (100分)<br>17:47〜17:57 (140分)<br>18:17〜18:27 (170分)</td>
-  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら 主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら B評価。17:07〜17:17 (100分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
 </tr></tbody>
   </table>
 </section>
@@ -145,19 +172,75 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <table>
     <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>形状</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th><th>結果/レビュー</th></tr></thead>
     <tbody>
+<tr class="standby" data-title="38番">
+  <td data-label="台">38番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">70/180/130分</td>
+  <td data-label="期待/中央値">56.5% / 25.5%<br>+1,655 / -4,008</td>
+  <td data-label="OCR現在">2回 / -5,710<br>H +0 / L -5,710</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-5,710 / 初当たり2回</td>
+</tr>
 <tr class="standby" data-title="39番">
   <td data-label="台">39番</td>
   <td data-label="評価">A</td>
   <td data-label="状態">監視</td>
   <td data-label="日中周期">50/70/60分</td>
   <td data-label="期待/中央値">78.6% / 43.3%<br>+7,782 / -2,518</td>
-  <td data-label="OCR現在">1回 / -2,884<br>H +3,779 / L -6,714</td>
-  <td data-label="形状">反発途中<br>安値から+3,830戻し</td>
+  <td data-label="OCR現在">1回 / -3,086<br>H +3,779 / L -6,714</td>
+  <td data-label="形状">失速<br>高値から+6,865下落</td>
   <td data-label="入力">14:05</td>
   <td data-label="差分">当たり2回目から判定</td>
   <td data-label="次見る時間">14:50〜15:00 (50分)<br>15:00〜15:10 (60分)<br>15:10〜15:20 (70分)</td>
-  <td data-label="立ち回り">一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。 日中hit待ち。初当たり時刻を追加して判定。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">高値からの失速が大きい。新規は弱め、再浮上を見てから。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-3,086 / 初当たり1回</td>
+</tr>
+<tr class="standby" data-title="40番">
+  <td data-label="台">40番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">110/80/70分</td>
+  <td data-label="期待/中央値">68.4% / 31.2%<br>+2,289 / -2,950</td>
+  <td data-label="OCR現在">3回 / -9,114<br>H +0 / L -9,114</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-9,114 / 初当たり3回</td>
+</tr>
+<tr class="standby" data-title="41番">
+  <td data-label="台">41番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">110/140/180分</td>
+  <td data-label="期待/中央値">61.5% / 36.5%<br>+128 / -4,184</td>
+  <td data-label="OCR現在">5回 / +25,034<br>H +25,135 / L -2,905</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(100%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+  <td data-label="結果/レビュー">陽線<br>+25,034 / 初当たり5回</td>
+</tr>
+<tr class="watch" data-title="42番">
+  <td data-label="台">42番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">80/60/100分</td>
+  <td data-label="期待/中央値">52.2% / 25.9%<br>+246 / -5,196</td>
+  <td data-label="OCR現在">3回 / -8,334<br>H +2,160 / L -8,334</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-8,334 / 初当たり3回</td>
 </tr>
 <tr class="hit-match" data-title="44番">
   <td data-label="台">44番</td>
@@ -165,13 +248,27 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">日足一致 + 日中hit</td>
   <td data-label="日中周期">130/70/180分</td>
   <td data-label="期待/中央値">66.7% / 23.8%<br>+7,112 / -5,284</td>
-  <td data-label="OCR現在">3回 / -12,837<br>H +0 / L -12,955</td>
-  <td data-label="形状">下側終了<br>安値寄り(1%)</td>
+  <td data-label="OCR現在">3回 / -13,120<br>H +0 / L -13,120</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
   <td data-label="入力">13:16 / 14:31 / 15:49 / 16:05 / 16:37</td>
   <td data-label="差分">13:16→14:31 = 75分 <b>HIT 70分</b><br>14:31→15:49 = 78分<br>15:49→16:05 = 16分<br>16:05→16:37 = 32分</td>
   <td data-label="次見る時間">17:42〜17:52 (70分)<br>18:42〜18:52 (130分)<br>19:32〜19:42 (180分)</td>
-  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら A評価だが直近窓は通過気味。次の初当たりが出たら再判定。打ちっぱなしより待ち。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら A評価。まず 17:42〜17:52 (70分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
+  <td data-label="結果/レビュー">陰線<br>-13,120 / 初当たり3回</td>
+</tr>
+<tr class="standby" data-title="45番">
+  <td data-label="台">45番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">160/50/150分</td>
+  <td data-label="期待/中央値">69.2% / 25.9%<br>+7,676 / -6,950</td>
+  <td data-label="OCR現在">3回 / +7,536<br>H +10,141 / L -6,052</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(84%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+  <td data-label="結果/レビュー">陽線<br>+7,536 / 初当たり3回</td>
 </tr>
 <tr class="standby" data-title="46番">
   <td data-label="台">46番</td>
@@ -179,27 +276,41 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">監視</td>
   <td data-label="日中周期">100/110/40分</td>
   <td data-label="期待/中央値">60.0% / 30.5%<br>+4,155 / -5,461</td>
-  <td data-label="OCR現在">1回 / -12,435<br>H +0 / L -13,806</td>
-  <td data-label="形状">下側終了<br>安値寄り(10%)</td>
+  <td data-label="OCR現在">1回 / -13,830<br>H +0 / L -13,830</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
   <td data-label="入力">17:08</td>
   <td data-label="差分">当たり2回目から判定</td>
   <td data-label="次見る時間">17:43〜17:53 (40分)<br>18:43〜18:53 (100分)<br>18:53〜19:03 (110分)</td>
   <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="結果/レビュー">陰線<br>-13,830 / 初当たり1回</td>
+</tr>
+<tr class="standby" data-title="48番">
+  <td data-label="台">48番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">90/50/110分</td>
+  <td data-label="期待/中央値">70.4% / 44.1%<br>+7,078 / -1,496</td>
+  <td data-label="OCR現在">1回 / -13,688<br>H +0 / L -13,688</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-13,688 / 初当たり1回</td>
 </tr>
 <tr class="hit" data-title="49番">
   <td data-label="台">49番</td>
   <td data-label="評価">A</td>
   <td data-label="状態">日中hit</td>
   <td data-label="日中周期">60/50/80分</td>
-  <td data-label="期待/中央値">100.0% / 33.3%<br>+15,564 / -2,163</td>
-  <td data-label="OCR現在">3回 / -10,000<br>H +1,315 / L -10,000</td>
-  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="期待/中央値">70.0% / 34.6%<br>+10,986 / -2,447</td>
+  <td data-label="OCR現在">4回 / +19,392<br>H +19,459 / L -10,000</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(100%)</td>
   <td data-label="入力">11:21 / 12:19 / 12:33 / 16:07</td>
   <td data-label="差分">11:21→12:19 = 58分 <b>HIT 60分</b><br>12:19→12:33 = 14分<br>12:33→16:07 = 214分</td>
   <td data-label="次見る時間">16:52〜17:02 (50分)<br>17:02〜17:12 (60分)<br>17:22〜17:32 (80分)</td>
-  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 周期条件も一致。A評価。まず 16:52〜17:02 (50分) を本命窓として監視。再hitなら監視強化、外したら次の長め周期だけ見る。</td>
+  <td data-label="結果/レビュー">陽線<br>+19,392 / 初当たり4回</td>
 </tr>
 <tr class="hit-match" data-title="50番">
   <td data-label="台">50番</td>
@@ -212,22 +323,92 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="入力">12:35 / 14:10 / 15:32</td>
   <td data-label="差分">12:35→14:10 = 95分 <b>HIT 100分</b><br>14:10→15:32 = 82分</td>
   <td data-label="次見る時間">17:07〜17:17 (100分)<br>17:47〜17:57 (140分)<br>18:17〜18:27 (170分)</td>
-  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら 主要窓は通過気味。今から新規で追うより、次の初当たりを待って再判定。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら B評価。17:07〜17:17 (100分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
+  <td data-label="結果/レビュー">陰線<br>-9,870 / 初当たり2回</td>
+</tr>
+<tr class="watch" data-title="52番">
+  <td data-label="台">52番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">70/130/120分</td>
+  <td data-label="期待/中央値">59.1% / 27.7%<br>+3,011 / -7,482</td>
+  <td data-label="OCR現在">4回 / -10,567<br>H +3,239 / L -10,591</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-10,567 / 初当たり4回</td>
+</tr>
+<tr class="watch" data-title="53番">
+  <td data-label="台">53番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">130/150/100分</td>
+  <td data-label="期待/中央値">76.9% / 40.0%<br>+10,584 / +0</td>
+  <td data-label="OCR現在">3回 / -13,546<br>H +0 / L -13,546</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-13,546 / 初当たり3回</td>
+</tr>
+<tr class="standby" data-title="54番">
+  <td data-label="台">54番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">70/80/130分</td>
+  <td data-label="期待/中央値">77.8% / 41.2%<br>+3,686 / -2,944</td>
+  <td data-label="OCR現在">3回 / -17,660<br>H +0 / L -19,811</td>
+  <td data-label="形状">下側終了<br>安値寄り(11%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-17,660 / 初当たり3回</td>
 </tr>
 <tr class="hit" data-title="56番">
   <td data-label="台">56番</td>
   <td data-label="評価">B</td>
   <td data-label="状態">日中hit</td>
   <td data-label="日中周期">80/90/160分</td>
-  <td data-label="期待/中央値">71.4% / 37.3%<br>+8,274 / -2,872</td>
-  <td data-label="OCR現在">2回 / +6,667<br>H +6,667 / L -2,884</td>
-  <td data-label="形状">上昇継続<br>終値が高値圏(100%)</td>
+  <td data-label="期待/中央値">66.7% / 36.8%<br>+7,958 / -2,872</td>
+  <td data-label="OCR現在">2回 / -6,418<br>H +6,667 / L -6,418</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
   <td data-label="入力">10:55 / 12:21</td>
   <td data-label="差分">10:55→12:21 = 86分 <b>HIT 90分</b></td>
   <td data-label="次見る時間">13:36〜13:46 (80分)<br>13:46〜13:56 (90分)<br>14:56〜15:06 (160分)</td>
-  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 周期条件は一致しているが、形状優先では打たない寄り。見るなら B評価。13:36〜13:46 (80分) で再hitなら追跡、来なければ深追いせず次窓だけ確認。</td>
+  <td data-label="結果/レビュー">陰線<br>-6,418 / 初当たり2回</td>
+</tr>
+<tr class="standby" data-title="57番">
+  <td data-label="台">57番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">110/30/100分</td>
+  <td data-label="期待/中央値">59.1% / 32.1%<br>+774 / -5,148</td>
+  <td data-label="OCR現在">5回 / +5,282<br>H +10,235 / L -993</td>
+  <td data-label="形状">失速<br>高値から+4,953下落</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">高値からの失速が大きい。新規は弱め、再浮上を見てから。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陽線<br>+5,282 / 初当たり5回</td>
+</tr>
+<tr class="standby" data-title="58番">
+  <td data-label="台">58番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">80/40/30分</td>
+  <td data-label="期待/中央値">79.3% / 34.8%<br>+7,254 / -4,628</td>
+  <td data-label="OCR現在">2回 / +5,845<br>H +16,432 / L -1,939</td>
+  <td data-label="形状">失速<br>高値から+10,587下落</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">高値からの失速が大きい。新規は弱め、再浮上を見てから。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陽線<br>+5,845 / 初当たり2回</td>
 </tr>
 <tr class="watch" data-title="59番">
   <td data-label="台">59番</td>
@@ -235,13 +416,13 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">日足一致</td>
   <td data-label="日中周期">80/100/40分</td>
   <td data-label="期待/中央値">50.0% / 28.6%<br>-260 / -4,290</td>
-  <td data-label="OCR現在">3回 / +2,218<br>H +6,784 / L -6,194</td>
-  <td data-label="形状">上側維持<br>終値が上側(65%)</td>
+  <td data-label="OCR現在">3回 / +1,373<br>H +6,784 / L -6,194</td>
+  <td data-label="形状">上側維持<br>終値が上側(58%)</td>
   <td data-label="入力">12:45 / 14:45 / 15:49</td>
   <td data-label="差分">12:45→14:45 = 120分<br>14:45→15:49 = 64分</td>
   <td data-label="次見る時間">16:24〜16:34 (40分)<br>17:04〜17:14 (80分)<br>17:24〜17:34 (100分)</td>
   <td data-label="立ち回り">形状は悪くない。直近安値を割らずに次窓へ入るなら確認対象。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="結果/レビュー">陽線<br>+1,373 / 初当たり3回</td>
 </tr>
 <tr class="standby" data-title="60番">
   <td data-label="台">60番</td>
@@ -249,27 +430,97 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">監視</td>
   <td data-label="日中周期">60/70/110分</td>
   <td data-label="期待/中央値">65.2% / 43.5%<br>+6,126 / -2,606</td>
-  <td data-label="OCR現在">5回 / +9,930<br>H +10,000 / L -2,175</td>
-  <td data-label="形状">上昇継続<br>終値が高値圏(99%)</td>
+  <td data-label="OCR現在">6回 / +8,380<br>H +10,094 / L -2,175</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(86%)</td>
   <td data-label="入力">10:36 / 12:19 / 12:54 / 15:16</td>
   <td data-label="差分">10:36→12:19 = 103分<br>12:19→12:54 = 35分<br>12:54→15:16 = 142分</td>
   <td data-label="次見る時間">16:11〜16:21 (60分)<br>16:21〜16:31 (70分)<br>17:01〜17:11 (110分)</td>
   <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="結果/レビュー">陽線<br>+8,380 / 初当たり6回</td>
+</tr>
+<tr class="standby" data-title="66番">
+  <td data-label="台">66番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">50/70/150分</td>
+  <td data-label="期待/中央値">63.6% / 31.1%<br>+1,021 / -3,582</td>
+  <td data-label="OCR現在">6回 / +8,098<br>H +17,606 / L -4,066</td>
+  <td data-label="形状">失速<br>高値から+9,508下落</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">高値からの失速が大きい。新規は弱め、再浮上を見てから。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陽線<br>+8,098 / 初当たり6回</td>
+</tr>
+<tr class="watch" data-title="68番">
+  <td data-label="台">68番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">130/100/110分</td>
+  <td data-label="期待/中央値">76.5% / 46.6%<br>+4,296 / -916</td>
+  <td data-label="OCR現在">3回 / +15,282<br>H +16,854 / L -4,917</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(93%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+  <td data-label="結果/レビュー">陽線<br>+15,282 / 初当たり3回</td>
+</tr>
+<tr class="standby" data-title="69番">
+  <td data-label="台">69番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">80/130/140分</td>
+  <td data-label="期待/中央値">87.5% / 47.9%<br>+12,042 / -585</td>
+  <td data-label="OCR現在">2回 / -886<br>H +2,958 / L -6,288</td>
+  <td data-label="形状">反発途中<br>安値から+5,402戻し</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-886 / 初当たり2回</td>
+</tr>
+<tr class="standby" data-title="70番">
+  <td data-label="台">70番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">150/60/140分</td>
+  <td data-label="期待/中央値">85.7% / 41.2%<br>+7,277 / -816</td>
+  <td data-label="OCR現在">1回 / -19,740<br>H +0 / L -19,740</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-19,740 / 初当たり1回</td>
+</tr>
+<tr class="standby" data-title="72番">
+  <td data-label="台">72番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">80/30/150分</td>
+  <td data-label="期待/中央値">72.7% / 42.6%<br>+8,891 / -1,424</td>
+  <td data-label="OCR現在">1回 / -21,994<br>H +1,892 / L -21,994</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-21,994 / 初当たり1回</td>
 </tr>
 <tr class="hit" data-title="73番">
   <td data-label="台">73番</td>
   <td data-label="評価">A</td>
   <td data-label="状態">日中hit</td>
   <td data-label="日中周期">80/70/160分</td>
-  <td data-label="期待/中央値">57.1% / 16.1%<br>+3,639 / -8,014</td>
-  <td data-label="OCR現在">5回 / -1,880<br>H +986 / L -5,012</td>
-  <td data-label="形状">反発途中<br>安値から+3,132戻し</td>
+  <td data-label="期待/中央値">57.1% / 16.4%<br>+3,639 / -7,908</td>
+  <td data-label="OCR現在">5回 / -4,586<br>H +986 / L -5,012</td>
+  <td data-label="形状">下側終了<br>安値寄り(7%)</td>
   <td data-label="入力">11:16 / 12:04 / 12:18 / 13:36 / 14:02 / 14:21 / 15:57</td>
   <td data-label="差分">11:16→12:04 = 48分<br>12:04→12:18 = 14分<br>12:18→13:36 = 78分 <b>HIT 80分</b><br>13:36→14:02 = 26分<br>14:02→14:21 = 19分<br>14:21→15:57 = 96分</td>
   <td data-label="次見る時間">17:02〜17:12 (70分)<br>17:12〜17:22 (80分)<br>18:32〜18:42 (160分)</td>
-  <td data-label="立ち回り">一発反発はあるがまだ水面下。戻りが続くか、次窓の反応だけ確認。 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。</td>
+  <td data-label="結果/レビュー">陰線<br>-4,586 / 初当たり5回</td>
 </tr>
 <tr class="hit" data-title="76番">
   <td data-label="台">76番</td>
@@ -277,13 +528,13 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">日中hit</td>
   <td data-label="日中周期">30/100/20分</td>
   <td data-label="期待/中央値">63.2% / 47.5%<br>+4,461 / -390</td>
-  <td data-label="OCR現在">5回 / +740<br>H +2,653 / L -2,033</td>
-  <td data-label="形状">上側維持<br>終値が上側(59%)</td>
+  <td data-label="OCR現在">5回 / -674<br>H +2,653 / L -2,033</td>
+  <td data-label="形状">失速<br>高値から+3,327下落</td>
   <td data-label="入力">12:44 / 12:56 / 13:30 / 14:07 / 15:13</td>
   <td data-label="差分">12:44→12:56 = 12分<br>12:56→13:30 = 34分 <b>HIT 30分</b><br>13:30→14:07 = 37分<br>14:07→15:13 = 66分</td>
   <td data-label="次見る時間">15:28〜15:38 (20分)<br>15:38〜15:48 (30分)<br>16:48〜16:58 (100分)</td>
-  <td data-label="立ち回り">形状は悪くない。直近安値を割らずに次窓へ入るなら確認対象。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="立ち回り">高値からの失速が大きい。新規は弱め、再浮上を見てから。 日中hitはあるが日足zoneが期待zone外。候補ではなく補助監視。</td>
+  <td data-label="結果/レビュー">陰線<br>-674 / 初当たり5回</td>
 </tr>
 <tr class="hit" data-title="77番">
   <td data-label="台">77番</td>
@@ -291,13 +542,41 @@ a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b94
   <td data-label="状態">日中hit</td>
   <td data-label="日中周期">180/60/110分</td>
   <td data-label="期待/中央値">57.1% / 24.6%<br>+1,244 / -8,688</td>
-  <td data-label="OCR現在">3回 / +23,412<br>H +24,797 / L -473</td>
-  <td data-label="形状">上昇継続<br>終値が高値圏(95%)</td>
+  <td data-label="OCR現在">3回 / +22,398<br>H +24,797 / L -473</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(91%)</td>
   <td data-label="入力">11:27 / 13:46 / 14:27 / 15:27 / 16:17 / 16:30</td>
   <td data-label="差分">11:27→13:46 = 139分<br>13:46→14:27 = 41分<br>14:27→15:27 = 60分 <b>HIT 60分</b><br>15:27→16:17 = 50分<br>16:17→16:30 = 13分</td>
   <td data-label="次見る時間">17:25〜17:35 (60分)<br>18:15〜18:25 (110分)<br>19:25〜19:35 (180分)</td>
   <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
-  <td data-label="結果/レビュー">-</td>
+  <td data-label="結果/レビュー">陽線<br>+22,398 / 初当たり3回</td>
+</tr>
+<tr class="watch" data-title="119番">
+  <td data-label="台">119番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">50/60/20分</td>
+  <td data-label="期待/中央値">80.0% / 26.1%<br>+9,697 / -4,184</td>
+  <td data-label="OCR現在">1回 / -9,184<br>H +0 / L -9,184</td>
+  <td data-label="形状">下側終了<br>安値寄り(0%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は弱い。周期hitだけで打たず、下降チャネル上抜けか強い反発を待つ。 日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">陰線<br>-9,184 / 初当たり1回</td>
+</tr>
+<tr class="standby" data-title="149番">
+  <td data-label="台">149番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">監視</td>
+  <td data-label="日中周期">90/60/30分</td>
+  <td data-label="期待/中央値">90.0% / 29.5%<br>+22,472 / -7,589</td>
+  <td data-label="OCR現在">3回 / +37,500<br>H +40,496 / L -968</td>
+  <td data-label="形状">上昇継続<br>終値が高値圏(93%)</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">形状は強い。高値圏の押し目維持なら監視継続、崩れたら後追いは控えめ。 ただし日足zone/日中hitの厳密条件は未成立なので、打つ根拠は形状寄り。</td>
+  <td data-label="結果/レビュー">陽線<br>+37,500 / 初当たり3回</td>
 </tr></tbody>
   </table>
 </section></main>
