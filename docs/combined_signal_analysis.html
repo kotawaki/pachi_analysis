@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>複合シグナル検証</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font-family:"Segoe UI",Meiryo,sans-serif;line-height:1.55}
+header,main{max-width:1180px;margin:auto}header{padding:26px 16px 12px}main{padding:0 16px 48px;display:grid;gap:16px}
+a{color:#58a6ff;text-decoration:none}h1{margin:6px 0 4px;color:#58a6ff;font-size:24px}h2{font-size:18px;margin:0 0 12px;color:#58a6ff}h3{margin:0;font-size:18px}h4{margin:12px 0 8px;color:#8b949e;font-size:13px}
+.meta,.note,small{color:#8b949e}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric,.panel,.day-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px}
+.metric span{display:block;color:#8b949e;font-size:12px}.metric b{display:block;font-size:28px;margin:3px 0}.metric p{margin:0;color:#c9d1d9;font-size:13px}.metric small{display:block;margin-top:5px}
+.metric.plus{border-color:#238636}.metric.minus{border-color:#6e7681}.metric.hit{border-color:#d29922}.metric.weak{border-color:#da3633}.pos{color:#3fb950}.neg{color:#f85149}
+table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1px solid #30363d;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:#8b949e;font-size:12px}
+.day-list{display:grid;gap:12px}.day-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.badge{font-size:12px;border:1px solid #30363d;border-radius:999px;padding:3px 10px;color:#8b949e}.badge.special{color:#d29922;border-color:#9e6a03;background:#2d2608}
+.day-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.day-grid div{background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:9px}.day-grid span{display:block;color:#8b949e;font-size:11px}.day-grid b{font-size:18px}.day-grid small{display:block;font-size:11px}
+.mini-split{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:#8b949e}.mini-split p{margin:0}.reverse-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}.reverse-list li{display:grid;grid-template-columns:52px 90px 1fr;gap:8px;align-items:center;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:7px 9px}.reverse-list span{color:#3fb950;font-weight:700}.reverse-list em{color:#8b949e;font-style:normal;font-size:12px}
+@media(max-width:860px){.summary{grid-template-columns:1fr 1fr}.day-grid{grid-template-columns:1fr 1fr}.panel{overflow:auto}table{min-width:760px}}
+@media(max-width:560px){.summary{grid-template-columns:1fr}.reverse-list li{grid-template-columns:44px 82px 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">← ダッシュボード</a>
+  <h1>複合シグナル検証</h1>
+  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。</div>
+</header>
+<main>
+  <section class="panel">
+    <h2>全期間 20260613〜20260621</h2>
+    <div class="summary"><article class="metric base"><span>全体陽線率</span><b>36.4%</b><p>223/612 / 中央値 -2,698</p><small>612件 / 方向一致 336/612 (54.9%)</small></article>
+<article class="metric plus"><span>周期プラス</span><b>41.0%</b><p>121/295 / 中央値 -2,022</p><small>朝時点の上向き候補</small></article>
+<article class="metric minus"><span>周期マイナス</span><b>32.2%</b><p>102/317 / 中央値 -3,156</p><small>朝時点の下向き候補</small></article>
+<article class="metric hit"><span>周期+ × 日中hit</span><b>58.3%</b><p>42/72 / 中央値 +1,743</p><small>上向き候補の当日確認</small></article>
+<article class="metric hit"><span>周期- × 日中hit</span><b>55.6%</b><p>35/63 / 中央値 +2,148</p><small>下向きからの反転候補</small></article>
+<article class="metric weak"><span>周期- × hitなし</span><b>26.4%</b><p>67/254 / 中央値 -3,722</p><small>反転材料なし</small></article></div>
+  </section>
+  <section class="panel">
+    <h2>条件別リスト</h2>
+    <table><thead><tr><th>日区分</th><th>周期</th><th>日中周期</th><th>陽線</th><th>陽線率</th><th>中央値</th><th>平均</th></tr></thead><tbody>
+      <tr><td>通常日</td><td>周期-</td><td>日中hitなし</td><td>56/198</td><td>28.3%</td><td>-3,461</td><td>-1,937</td></tr><tr><td>通常日</td><td>周期-</td><td>日中hitあり</td><td>23/44</td><td>52.3%</td><td>+1,966</td><td>+4,036</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitなし</td><td>62/182</td><td>34.1%</td><td>-3,510</td><td>-1,735</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitあり</td><td>31/52</td><td>59.6%</td><td>+3,116</td><td>+3,770</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitなし</td><td>11/56</td><td>19.6%</td><td>-4,051</td><td>-3,816</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitあり</td><td>12/19</td><td>63.2%</td><td>+3,732</td><td>+4,218</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitなし</td><td>17/41</td><td>41.5%</td><td>-1,808</td><td>-973</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitあり</td><td>11/20</td><td>55.0%</td><td>+1,091</td><td>+1,823</td></tr>
+    </tbody></table>
+  </section>
+  <section>
+    <h2>日別リスト</h2>
+    <div class="day-list">
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260613</h3><span class="badge special">特日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>58.1%</b><small>18/31</small></div>
+    <div><span>周期-</span><b>40.5%</b><small>15/37</small></div>
+    <div><span>差</span><b class="pos">+17.5pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>48.5%</b><small>33/68</small></div>
+    <div><span>日中hit全体</span><b>73.9%</b><small>17/23</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 9台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>8/12 (66.7%)</b></p>
+    <p>周期-×hit: <b>9/11 (81.8%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>61</b><span>+36,616</span><em>80分 / neutral</em></li><li><b>50</b><span>+34,154</span><em>140分 / weak</em></li><li><b>64</b><span>+23,615</span><em>140分 / neutral</em></li><li><b>43</b><span>+14,155</span><em>130分,80分 / weak</em></li><li><b>44</b><span>+13,333</span><em>180分 / good</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260614</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>60.6%</b><small>20/33</small></div>
+    <div><span>周期-</span><b>34.3%</b><small>12/35</small></div>
+    <div><span>差</span><b class="pos">+26.3pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>47.1%</b><small>32/68</small></div>
+    <div><span>日中hit全体</span><b>57.1%</b><small>8/14</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 2台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>6/7 (85.7%)</b></p>
+    <p>周期-×hit: <b>2/7 (28.6%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>120</b><span>+50,950</span><em>hitなし / weak</em></li><li><b>58</b><span>+36,054</span><em>hitなし / weak</em></li><li><b>50</b><span>+31,488</span><em>hitなし / weak</em></li><li><b>41</b><span>+27,264</span><em>110分 / good</em></li><li><b>63</b><span>+18,545</span><em>60分,110分 / good</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260615</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>44.4%</b><small>16/36</small></div>
+    <div><span>周期-</span><b>40.6%</b><small>13/32</small></div>
+    <div><span>差</span><b class="pos">+3.8pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>42.6%</b><small>29/68</small></div>
+    <div><span>日中hit全体</span><b>61.1%</b><small>11/18</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 5台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>6/10 (60.0%)</b></p>
+    <p>周期-×hit: <b>5/8 (62.5%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>55</b><span>+36,206</span><em>hitなし / weak</em></li><li><b>43</b><span>+22,398</span><em>hitなし / weak</em></li><li><b>69</b><span>+22,196</span><em>140分 / neutral</em></li><li><b>51</b><span>+8,802</span><em>hitなし / weak</em></li><li><b>44</b><span>+8,662</span><em>180分 / good</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260616</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>28.6%</b><small>10/35</small></div>
+    <div><span>周期-</span><b>45.5%</b><small>15/33</small></div>
+    <div><span>差</span><b class="neg">-16.9pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
+    <div><span>日中hit全体</span><b>75.0%</b><small>9/12</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 5台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期-×hit: <b>5/5 (100.0%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>63</b><span>+26,452</span><em>hitなし / good</em></li><li><b>119</b><span>+26,250</span><em>hitなし / weak</em></li><li><b>39</b><span>+26,191</span><em>hitなし / good</em></li><li><b>77</b><span>+21,385</span><em>180分 / neutral</em></li><li><b>148</b><span>+21,182</span><em>hitなし / weak</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260617</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>33.3%</b><small>11/33</small></div>
+    <div><span>周期-</span><b>17.1%</b><small>6/35</small></div>
+    <div><span>差</span><b class="pos">+16.2pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>25.0%</b><small>17/68</small></div>
+    <div><span>日中hit全体</span><b>44.4%</b><small>4/9</small></div>
+    <div><span>周期-陽線</span><b>6台</b><small>うちhit 2台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
+    <p>周期-×hit: <b>2/5 (40.0%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>60</b><span>+24,020</span><em>60分 / neutral</em></li><li><b>48</b><span>+8,522</span><em>50分,110分 / good</em></li><li><b>1173</b><span>+7,388</span><em>hitなし / weak</em></li><li><b>1179</b><span>+4,942</span><em>hitなし / weak</em></li><li><b>1177</b><span>+3,583</span><em>hitなし / weak</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260618</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>43.8%</b><small>14/32</small></div>
+    <div><span>周期-</span><b>41.7%</b><small>15/36</small></div>
+    <div><span>差</span><b class="pos">+2.1pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>42.6%</b><small>29/68</small></div>
+    <div><span>日中hit全体</span><b>62.5%</b><small>10/16</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 4台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>6/9 (66.7%)</b></p>
+    <p>周期-×hit: <b>4/7 (57.1%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>76</b><span>+32,512</span><em>hitなし / weak</em></li><li><b>149</b><span>+30,052</span><em>hitなし / weak</em></li><li><b>50</b><span>+27,180</span><em>140分 / weak</em></li><li><b>41</b><span>+20,169</span><em>140分 / good</em></li><li><b>153</b><span>+17,128</span><em>hitなし / good</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260619</h3><span class="badge special">特日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>33.3%</b><small>10/30</small></div>
+    <div><span>周期-</span><b>21.1%</b><small>8/38</small></div>
+    <div><span>差</span><b class="pos">+12.3pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>26.5%</b><small>18/68</small></div>
+    <div><span>日中hit全体</span><b>37.5%</b><small>6/16</small></div>
+    <div><span>周期-陽線</span><b>8台</b><small>うちhit 3台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>3/8 (37.5%)</b></p>
+    <p>周期-×hit: <b>3/8 (37.5%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>154</b><span>+36,444</span><em>hitなし / weak</em></li><li><b>48</b><span>+7,254</span><em>hitなし / good</em></li><li><b>53</b><span>+6,232</span><em>hitなし / weak</em></li><li><b>60</b><span>+6,126</span><em>60分 / neutral</em></li><li><b>58</b><span>+5,000</span><em>30分 / neutral</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260620</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>38.7%</b><small>12/31</small></div>
+    <div><span>周期-</span><b>21.6%</b><small>8/37</small></div>
+    <div><span>差</span><b class="pos">+17.1pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>29.4%</b><small>20/68</small></div>
+    <div><span>日中hit全体</span><b>37.5%</b><small>6/16</small></div>
+    <div><span>周期-陽線</span><b>8台</b><small>うちhit 2台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期-×hit: <b>2/9 (22.2%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>62</b><span>+40,806</span><em>80分 / good</em></li><li><b>157</b><span>+21,790</span><em>hitなし / neutral</em></li><li><b>60</b><span>+8,380</span><em>170分 / good</em></li><li><b>45</b><span>+7,536</span><em>hitなし / good</em></li><li><b>58</b><span>+5,845</span><em>hitなし / neutral</em></li></ul>
+</section>
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260621</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>29.4%</b><small>10/34</small></div>
+    <div><span>周期-</span><b>29.4%</b><small>10/34</small></div>
+    <div><span>差</span><b class="pos">+0.0pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>29.4%</b><small>20/68</small></div>
+    <div><span>日中hit全体</span><b>54.5%</b><small>6/11</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 3台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>3/8 (37.5%)</b></p>
+    <p>周期-×hit: <b>3/3 (100.0%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>44</b><span>+18,344</span><em>hitなし / good</em></li><li><b>57</b><span>+16,926</span><em>hitなし / neutral</em></li><li><b>66</b><span>+10,939</span><em>50分 / weak</em></li><li><b>157</b><span>+8,345</span><em>hitなし / neutral</em></li><li><b>68</b><span>+7,559</span><em>hitなし / neutral</em></li></ul>
+</section></div>
+  </section>
+  <section class="panel note">
+    更新時は <code>python combined_signal_analysis.py --start 20260613 --end 最新日</code> を実行します。predictionページに実績が入った日だけ日別カードに追加されます。
+  </section>
+</main>
+</body>
+</html>
