@@ -89,7 +89,7 @@ def html_escape_json(data):
 
 
 def load_latest_intraday_hits():
-    paths = sorted((ROOT / "data").glob("cycle_watch_20*.json"))
+    paths = sorted((ROOT / "data").glob("daytime_hits_20*.json"))
     if not paths:
         return {"date": "", "hits": [], "events": {}}
     path = paths[-1]
@@ -99,9 +99,10 @@ def load_latest_intraday_hits():
         for machine, values in data.get("events", {}).items()
         if str(machine).strip().isdigit()
     }
+    hits = data.get("hits") or events.keys()
     return {
-        "date": data.get("date", path.stem.removeprefix("cycle_watch_")),
-        "hits": sorted((int(machine) for machine in events), key=int),
+        "date": data.get("date", path.stem.removeprefix("daytime_hits_")),
+        "hits": sorted((int(machine) for machine in hits), key=int),
         "events": events,
     }
 
