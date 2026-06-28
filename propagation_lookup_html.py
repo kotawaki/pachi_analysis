@@ -9,7 +9,6 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from prediction_daily import parse_locked_forecasts
 from propagation import extract_starts, load_snaps
 
 
@@ -89,25 +88,21 @@ def html_escape_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
-def load_daily_prediction():
-    paths = sorted(
-        path for path in (ROOT / "docs").glob("prediction_20*.html")
-        if path.stem.removeprefix("prediction_").isdigit()
-    )
+def load_latest_intraday_hits():
+    paths = sorted((ROOT / "data").glob("cycle_watch_20*.json"))
     if not paths:
-        return {"date": "", "picks": {"main": [], "next": [], "watch": []}, "cycles": {}}
+        return {"date": "", "hits": [], "events": {}}
     path = paths[-1]
-    rows, cycles = parse_locked_forecasts(path)
-    rank_keys = {"本命": "main", "次点": "next", "監視": "watch"}
-    picks = {"main": [], "next": [], "watch": []}
-    for row in rows:
-        key = rank_keys.get(row.get("rank"))
-        if key:
-            picks[key].append(row["machine"])
+    data = json.loads(path.read_text(encoding="utf-8"))
+    events = {
+        str(int(machine)): values
+        for machine, values in data.get("events", {}).items()
+        if str(machine).strip().isdigit()
+    }
     return {
-        "date": path.stem.removeprefix("prediction_"),
-        "picks": picks,
-        "cycles": {machine: cycles[machine] for machine in range(39, 78)},
+        "date": data.get("date", path.stem.removeprefix("cycle_watch_")),
+        "hits": sorted((int(machine) for machine in events), key=int),
+        "events": events,
     }
 
 
@@ -117,7 +112,7 @@ def main():
         raise SystemExit("snapshotがありません。daily_ingest.py を先に実行してください。")
 
     dates = sorted(snaps.keys())
-    prediction = load_daily_prediction()
+    intraday = load_latest_intraday_hits()
     payload = {
         "meta": {
             "from": dates[0],
@@ -187,7 +182,7 @@ button{{font:inherit}}
 .warning{{margin-top:12px;color:#829bb0;font-size:11px;line-height:1.6}}
 .daily-badge{{display:grid;place-items:center;min-height:29px;border-radius:6px;font-size:11px;font-weight:900}}
 .daily-empty{{background:transparent}}
-.daily-main{{background:#238636;color:#fff}}.daily-next{{background:#9e6a03;color:#fff}}.daily-watch{{background:#57606a;color:#fff}}
+.daily-hit{{background:#d29922;color:#fff}}
 @media(max-width:760px){{main{{padding:12px}}.map-panel{{padding:12px}}.aisle{{min-height:620px}}.guide{{align-items:flex-start}}.candidate-list{{grid-template-columns:1fr}}}}
 </style>
 </head>
@@ -199,7 +194,7 @@ button{{font:inherit}}
     <span>{payload["meta"]["days"]}日分</span>
     <span>伝播窓 {payload["meta"]["windowMin"]}分</span>
     <span>生成 {payload["meta"]["generated"]}</span>
-    <span>日次候補 {prediction["date"]}</span>
+    <span>日中周期hit {intraday["date"]}</span>
   </div>
 </header>
 <main>
@@ -232,24 +227,16 @@ button{{font:inherit}}
 <script>
 const DATA = {html_escape_json(payload)};
 const selected = new Set();
-const DAILY_PICKS = {html_escape_json(prediction["picks"])};
-const CYCLE_ESTIMATE = {html_escape_json(prediction["cycles"])};
-const CYCLE_MAX = Math.max(...Object.values(CYCLE_ESTIMATE));
-const CYCLE_MIN = Math.min(...Object.values(CYCLE_ESTIMATE));
+const DAILY_HITS = new Set({html_escape_json(intraday["hits"])});
+const HIT_EVENTS = {html_escape_json(intraday["events"])};
 const machines = [
   ...Array.from({{length: 19}}, (_, i) => 77 - i),
   ...Array.from({{length: 19}}, (_, i) => 39 + i)
 ];
 function z3(value) {{ return String(value).padStart(3, '0'); }}
-function dailyKind(machine) {{
-  return Object.entries(DAILY_PICKS).find(([, values]) => values.includes(machine))?.[0] || '';
-}}
-function cycleColor(machine) {{
-  const value=CYCLE_ESTIMATE[machine] || 0;
-  const ratio=value>=0 ? value/CYCLE_MAX : value/CYCLE_MIN;
-  const target=value>=0 ? [46,220,92] : [255,82,82];
-  const rgb=target.map(channel=>Math.round(255+(channel-255)*ratio));
-  return {{color:`rgb(${{rgb.join(',')}})`,value}};
+function hitText(machine) {{
+  const values = HIT_EVENTS[String(machine)] || [];
+  return values.map(v => `${{String(Math.floor(v/60)).padStart(2,'0')}}:${{String(v%60).padStart(2,'0')}}`).join(' / ');
 }}
 function level(row) {{
   if (row.count >= 30 && row.lift >= 1.5 && row.pct >= 10) return 'strong';
@@ -263,7 +250,7 @@ function rankClass(rank) {{
 }}
 function buildIsland(id, values) {{
   document.getElementById(id).innerHTML = values.map(machine =>
-    `<div class="machine-row"><span class="daily-badge ${{dailyKind(machine) ? `daily-${{dailyKind(machine)}}` : 'daily-empty'}}">${{{{main:'本',next:'次',watch:'監'}}[dailyKind(machine)] || ''}}</span><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false" title="周期推定 ${{cycleColor(machine).value>=0?'+':''}}${{cycleColor(machine).value.toLocaleString()}}"><span class="machine-no" style="color:${{cycleColor(machine).color}}">${{machine}}</span><small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
+    `<div class="machine-row"><span class="daily-badge ${{DAILY_HITS.has(machine) ? 'daily-hit' : 'daily-empty'}}">${{DAILY_HITS.has(machine) ? 'H' : ''}}</span><a class="chart-link" href="ohlc.html?machine=${{machine}}" aria-label="${{machine}}番台のチャートを表示" title="チャートを表示">↗</a><button class="machine" data-machine="${{machine}}" aria-pressed="false" title="${{DAILY_HITS.has(machine) ? '日中hit '+hitText(machine) : '日中hitなし'}}"><span class="machine-no">${{machine}}</span><small>G${{((machine - 1) % 9) + 1}}</small></button></div>`
   ).join('');
 }}
 function candidateRows() {{

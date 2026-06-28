@@ -71,6 +71,11 @@ def main():
             print(f"  収集範囲の縮小を検出: {iso[i]} ({mcount[i-1]}台 → {mcount[i]}台)")
             break
 
+    # ヒートマップは左を最新、右を過去にする。
+    iso = list(reversed(iso))
+    for g in ra.GROUPS:
+        zser[g] = list(reversed(zser[g]))
+
     payload = json.dumps({"dates": iso, "z": zser}, ensure_ascii=False, separators=(',', ':'))
 
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -93,13 +98,8 @@ HTML = r"""<!DOCTYPE html>
 body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;font-size:13px;padding:14px}
 h1{font-size:15px;color:#58a6ff;margin-bottom:4px}
 .sub{color:#8b949e;font-size:11px;margin-bottom:12px;line-height:1.5}
-.controls{display:flex;gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.controls label{color:#8b949e}
-select,button{background:#161b22;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer}
-button.active{background:#1f6feb;border-color:#1f6feb;color:#fff}
 .card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin-bottom:16px}
 .card h2{font-size:12px;color:#58a6ff;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-#bumpWrap{position:relative;height:360px}
 #heat{overflow-x:auto}
 table{border-collapse:collapse;font-size:10px}
 th,td{text-align:center;padding:0;border:1px solid #0d1117}
@@ -124,23 +124,8 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
   <span style="color:#e3b341">⚠ 黄色の境界線より右は収集範囲が34-77番のみ（各グループ約5台）に縮小。それ以前の全ホール（各約42台）とは母集団が異なり連続比較できません。</span>
 </div>
 
-<div class="controls">
-  <label>平滑化(①の折れ線のみ):</label>
-  <button data-roll="1" class="active">なし</button>
-  <button data-roll="3">3日</button>
-  <button data-roll="7">7日</button>
-  <span style="margin-left:14px;color:#8b949e">表示:</span>
-  <button data-view="rank" class="active">ランク</button>
-  <button data-view="z">z値</button>
-</div>
-
 <div class="card">
-  <h2>① ランク推移（バンプチャート）</h2>
-  <div id="bumpWrap"><canvas id="bump"></canvas></div>
-</div>
-
-<div class="card">
-  <h2>② ヒートマップ（日次ランク・生データ）</h2>
+  <h2>ヒートマップ（日次ランク・生データ）</h2>
   <div id="heat"></div>
   <div class="legend">
     <span class="lg"><span class="sw" style="background:#f85149"></span>1位(強)</span>
@@ -150,7 +135,7 @@ td.cell{width:15px;height:20px;color:#0d1117;font-weight:700}
   </div>
   <div class="note">
     セル内数字 = その日の順位。横スクロールで全期間。<br>
-    ⚠ <b>このヒートマップは常に生データ（平滑化なし）で表示</b>します（上の平滑化ボタンは①の折れ線だけに効きます）。
+    ⚠ <b>このヒートマップは常に生データ（平滑化なし）で表示</b>します。
     7日移動平均をかけると強グループが「数日維持」して見えますが、それは<b>移動平均が隣接日のデータを共有することで生じる見せかけ</b>です
     （持続性ゼロのデータでも同じ縞模様が出ることを検証済み）。実際の日次トップはほぼ毎日入れ替わり、翌日の予測には使えません。
   </div>
@@ -206,38 +191,8 @@ function ranksByDay(zsm){
   return rank;
 }
 
-let chart=null;
 function render(){
-  const zsm = {}; GROUPS.forEach(g=>zsm[g]=smooth(DATA.z[g], roll));
-  const rank = ranksByDay(zsm);          // バンプチャート用(平滑化を反映)
   const rankRaw = ranksByDay(DATA.z);    // ヒートマップ用(常に生データ=事実)
-
-  // バンプチャート
-  const datasets = GROUPS.map(g=>({
-    label: "G"+g,
-    data: (view==="rank"? rank[g] : zsm[g]),
-    borderColor: GCOLOR[g], backgroundColor: GCOLOR[g],
-    borderWidth: 2, pointRadius: 2, pointHoverRadius: 5,
-    tension: 0.3, spanGaps: true
-  }));
-  if (chart) chart.destroy();
-  chart = new Chart(document.getElementById('bump'), {
-    type:'line',
-    data:{ labels: DATA.dates.map(d=>d.slice(5)), datasets },
-    plugins:[vlinePlugin],
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'nearest',intersect:false},
-      plugins:{ legend:{labels:{color:'#c9d1d9',boxWidth:14,font:{size:11}}},
-        tooltip:{callbacks:{label:c=>` G${c.dataset.label.slice(1)}: ${view==='rank'?(c.parsed.y+'位'):c.parsed.y.toFixed(1)}`}}},
-      scales:{
-        x:{ ticks:{color:'#8b949e',maxTicksLimit:16,font:{size:10}}, grid:{color:'#1c2128'}},
-        y: view==='rank'
-            ? { reverse:true, min:1, max:9, ticks:{color:'#8b949e',stepSize:1,callback:v=>v+'位'}, grid:{color:'#1c2128'}}
-            : { ticks:{color:'#8b949e'}, grid:{color:'#1c2128'}, title:{display:true,text:'z値',color:'#8b949e'}}
-      }
-    }
-  });
 
   // ヒートマップ
   const heatColor = r => {
@@ -260,15 +215,6 @@ function render(){
   html+='</tbody></table>';
   document.getElementById('heat').innerHTML=html;
 }
-
-document.querySelectorAll('[data-roll]').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('[data-roll]').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); roll=+b.dataset.roll; render();
-}));
-document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); view=b.dataset.view; render();
-}));
 render();
 </script>
 </body>

@@ -1,83 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>パチンコ伝播分析</title>
+<title>pachi_analyze</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;
-     min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-h1{font-size:22px;color:#58a6ff;margin-bottom:6px;text-align:center}
-.sub{color:#8b949e;font-size:13px;margin-bottom:28px;text-align:center;line-height:1.6}
-.cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;max-width:760px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:24px;width:340px;
-      text-decoration:none;color:inherit;transition:.18s;display:block}
-.card:hover{border-color:#58a6ff;transform:translateY(-3px);box-shadow:0 8px 24px #0008}
-.ico{font-size:38px;margin-bottom:10px}
-.card h2{font-size:17px;color:#c9d1d9;margin-bottom:8px}
-.card p{font-size:12px;color:#8b949e;line-height:1.6}
-.tag{display:inline-block;margin-top:12px;font-size:11px;color:#58a6ff;border:1px solid #30363d;
-     border-radius:20px;padding:3px 12px}
-.foot{margin-top:30px;font-size:11px;color:#6e7681;text-align:center;line-height:1.7}
-.foot a{color:#8b949e}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0d1117;color:#c9d1d9;font-family:"Segoe UI",Meiryo,sans-serif;padding:28px 18px}
+main{max-width:1040px;margin:auto}header{margin-bottom:20px}h1{margin:0;color:#58a6ff;font-size:28px}p{margin:6px 0 0;color:#8b949e;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{display:block;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:18px;color:inherit;text-decoration:none;min-height:168px}
+.card:hover{border-color:#58a6ff;background:#19212b}.num{color:#58a6ff;font-weight:800;font-size:13px}.card h2{font-size:19px;margin:8px 0;color:#f0f6fc}.card p{font-size:13px}.tag{display:inline-block;margin-top:14px;border:1px solid #30363d;border-radius:999px;padding:4px 10px;color:#8b949e;font-size:12px}
+.note{margin-top:18px;border-top:1px solid #30363d;padding-top:14px;font-size:12px;color:#8b949e}
+@media(max-width:720px){.cards{grid-template-columns:1fr}body{padding:18px 12px}h1{font-size:24px}}
 </style>
 </head>
 <body>
-<h1>🎰 パチンコ伝播分析</h1>
-<div class="sub">スランプグラフ由来データから当たり伝播の構造を可視化・検証するダッシュボード</div>
+<main>
+  <header>
+    <h1>pachi_analyze</h1>
+    <p>自動スクショ + HTML取得からCSV化し、日足・伝播・日中周期hit・グループ強さを更新していく分析トップです。</p>
+  </header>
 
-<div class="cards">
-  <a class="card" href="ohlc.html">
-    <div class="ico">📈</div>
-    <h2>差玉チャート（日足OHLC）</h2>
-    <p>台別・レンジ別の差玉を累積ローソク足で表示。MA5/20/75、フィボナッチ、
-       ゴールデンクロス(75→20)、スイングH/L、リスクリワードを自動描画。</p>
-    <span class="tag">ローソク足 / テクニカル →</span>
-  </a>
+  <section class="cards">
+    <a class="card" href="ohlc.html">
+      <div class="num">01</div>
+      <h2>差玉チャート(日足OHLC)</h2>
+      <p>20260626までは既存蓄積データ、今後はmorning取得のスクショ + HTMLから作るCSVで日足を形成します。</p>
+      <span class="tag">OHLC / MA / Fibo / SL / GC</span>
+    </a>
 
-  <a class="card" href="groups.html">
-    <div class="ico">🏆</div>
-    <h2>グループ強さランキング推移</h2>
-    <p>各グループの「引っ張り合いの強さ(z値)」を日次でランク付け。
-       バンプチャートとヒートマップで、主役グループがどう推移するかを可視化。</p>
-    <span class="tag">ランキング / 推移 →</span>
-  </a>
+    <a class="card" href="propagation_lookup.html">
+      <div class="num">02</div>
+      <h2>Propagation Lookup</h2>
+      <p>日中周期hitした台を起点として、同グループ内で過去に引っ張られやすかった候補台を確認します。</p>
+      <span class="tag">日中hit起点 / lift / count</span>
+    </a>
 
-  <a class="card" href="propagation_lookup.html">
-    <div class="ico">%</div>
-    <h2>Propagation Lookup</h2>
-    <p>Enter the currently firing machine number and show historical propagation candidates with percent, base rate, lift, count, and sample size. The percent is P(B fires within 30 min | A fired), not a prediction.</p>
-    <span class="tag">candidate percent / lift / count</span>
-  </a>
+    <a class="card" href="combined_signal_analysis.html">
+      <div class="num">03</div>
+      <h2>日中周期hit複合シグナル</h2>
+      <p>daytime取得でhit候補を確認し、morning実績で日中周期hitから陽線化した割合を日々記録します。</p>
+      <span class="tag">候補リスト / 実績一覧</span>
+    </a>
 
-  <a class="card" href="prediction_top.html">
-    <div class="ico">P</div>
-    <h2>日次陽線候補・実績</h2>
-    <p>同一基準で採点した日次予測と翌日の答え合わせを一覧表示。日付を選ぶと、候補台、採点根拠、各台の実績を確認できます。</p>
-    <span class="tag">日次一覧 / 予測 / 検証</span>
-  </a>
+    <a class="card" href="groups.html">
+      <div class="num">04</div>
+      <h2>グループ強さランキング推移</h2>
+      <p>参考用。日次ランクの生データをヒートマップで確認します。左が現在、右に行くほど過去です。</p>
+      <span class="tag">ヒートマップのみ</span>
+    </a>
+  </section>
 
-  <a class="card" href="cycle_watch_top.html">
-    <div class="ico">C</div>
-    <h2>Cycle Watch</h2>
-    <p>日足周期で当日の監視台を絞り、初当たり時刻から日中周期hitを判定。予測日と過去結果、成績上位を日別に確認できます。</p>
-    <span class="tag">日別一覧 / 実績 / レビュー</span>
-  </a>
-
-  <a class="card" href="combined_signal_analysis.html">
-    <div class="ico">H</div>
-    <h2>日中周期hit 複合シグナル</h2>
-    <p>周期推定±、特日/通常日、日中周期hit、MA/Fibo/SL/GCを組み合わせて陽線率を一覧化。
-       全期間サマリーと日別リストで、マイナス周期からの陽線化も確認できます。</p>
-    <span class="tag">日中周期 / チャート / 反転型 →</span>
-  </a>
-
-</div>
-
-<div class="foot">
-  ※伝播の「予測可能性」は検証の結果ネガティブ（強グループ・伝播ペアとも翌期再現せず）。<br>
-  本ダッシュボードは予測ではなく<b>構造の記述・可視化</b>を目的としています。
-</div>
+  <div class="note">
+    morningは毎日取得、daytimeは必要な時だけ取得する前提です。CSVとオーバーレイ画像は分析入力として扱い、通常はコミット対象にしません。
+  </div>
+</main>
 </body>
 </html>
