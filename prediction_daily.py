@@ -38,14 +38,24 @@ ISLANDS = {
 WEIGHTS = (0.30, 0.20, 0.15, 0.10, 0.10, 0.05, 0.10)
 
 
+def machine_id(value: object) -> int | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+
 def load_daily_net(machine: int) -> list[tuple[str, int]]:
-    target = str(machine).zfill(3)
+    target = int(machine)
     daily = []
     for path in sorted(CSV_DIR.glob("*/*_analyze.csv")):
         rows = []
         with path.open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
-                if str(row.get("Machine", "")).strip().zfill(3) != target:
+                if machine_id(row.get("Machine", "")) != target:
                     continue
                 end_time = str(row.get("終了時刻", "")).strip()
                 if not end_time:
@@ -186,10 +196,10 @@ def parse_locked_forecasts(path: Path) -> tuple[list[dict], dict[int, int]]:
     return rows, cycles
 
 
-def actuals(date: str) -> dict[int, int]:
+def actuals(date: str) -> dict[int, int | None]:
     out = {}
     for machine in MACHINES:
-        out[machine] = dict(load_daily_net(machine)).get(date, 0)
+        out[machine] = dict(load_daily_net(machine)).get(date)
     return out
 
 
@@ -202,10 +212,13 @@ def render_detail(date: str, cutoff: str, rows: list[dict], cycles: dict[int, in
     candidates = [row for row in rows if row.get("rank")]
     settled = actual is not None
     counts = {rank: sum(row["rank"] == rank for row in candidates) for rank in ("本命", "次点", "監視")}
-    candidate_hits = sum(actual[row["machine"]] > 0 for row in candidates) if settled else 0
+    candidate_known = [row for row in candidates if settled and actual.get(row["machine"]) is not None]
+    candidate_hits = sum(actual[row["machine"]] > 0 for row in candidate_known) if settled else 0
     cycle_positive = [machine for machine, value in cycles.items() if value > 0]
-    cycle_hits = sum(actual[machine] > 0 for machine in cycle_positive) if settled else 0
-    direction_hits = sum((cycles[machine] > 0) == (actual[machine] > 0) for machine in MACHINES) if settled else 0
+    cycle_positive_known = [machine for machine in cycle_positive if settled and actual.get(machine) is not None]
+    cycle_hits = sum(actual[machine] > 0 for machine in cycle_positive_known) if settled else 0
+    direction_known = [machine for machine in MACHINES if settled and actual.get(machine) is not None]
+    direction_hits = sum((cycles[machine] > 0) == (actual[machine] > 0) for machine in direction_known) if settled else 0
     conclusion = "".join(
         f'<p><strong class="{css}">{rank}:</strong> ' + "、".join(
             str(row["machine"]) for row in candidates if row["rank"] == rank
@@ -243,12 +256,13 @@ def render_detail(date: str, cutoff: str, rows: list[dict], cycles: dict[int, in
     }
     date_label = f"{date[:4]}年{int(date[4:6])}月{int(date[6:])}日"
     short_date = f"{int(date[4:6])}/{int(date[6:])}"
-    answer = f"{candidate_hits}/{len(candidates)}" if settled else "実績待ち"
+    missing_candidates = len(candidates) - len(candidate_known)
+    answer = f"{candidate_hits}/{len(candidate_known)}" + (f" / 未取得{missing_candidates}" if missing_candidates else "") if settled else "実績待ち"
     answer_css = "warning" if settled else "muted"
     legend = (
         f'<span class="positive">緑枠: 方向一致 {direction_hits}台</span>'
-        f'<span class="negative">赤枠: 方向不一致 {len(MACHINES) - direction_hits}台</span>'
-        f'<span>周期プラス群の陽線: {cycle_hits}/{len(cycle_positive)}台（{cycle_hits / len(cycle_positive) * 100:.1f}%）</span>'
+        f'<span class="negative">赤枠: 方向不一致 {len(direction_known) - direction_hits}台</span>'
+        f'<span>周期プラス群の陽線: {cycle_hits}/{len(cycle_positive_known)}台（{cycle_hits / len(cycle_positive_known) * 100:.1f}%）</span>'
         if settled else f'<span>周期推定プラス: {len(cycle_positive)}/{len(MACHINES)}台（{len(cycle_positive) / len(MACHINES) * 100:.1f}%） / 実績待ち</span>'
     )
     template = """<!doctype html>
@@ -266,12 +280,13 @@ def render_detail(date: str, cutoff: str, rows: list[dict], cycles: dict[int, in
 const rows=__ROWS__;
 const cycleIslands=__CYCLES__;
 const settled=__SETTLED__,fmt=n=>(n>=0?'+':'')+Math.round(n).toLocaleString();
-const cycleCard=([m,f,a])=>{const hit=settled&&(f>0)===(a>0);return `<a class="cycle-card ${settled?(hit?'hit':'miss'):'wait'}" href="ohlc.html?machine=${m}"><div class="cycle-machine">${m}番</div><div class="cycle-values"><span class="${f>=0?'cycle-up':'cycle-down'}">周期 ${fmt(f)}</span><span class="${settled?(a>=0?'cycle-up':'cycle-down'):'muted'}">${settled?'実績 '+fmt(a):'実績待ち'}</span></div></a>`};
+const hasActual=a=>a!==null&&a!==undefined;
+const cycleCard=([m,f,a])=>{const known=hasActual(a),hit=settled&&known&&(f>0)===(a>0);return `<a class="cycle-card ${settled?(known?(hit?'hit':'miss'):'wait'):'wait'}" href="ohlc.html?machine=${m}"><div class="cycle-machine">${m}番</div><div class="cycle-values"><span class="${f>=0?'cycle-up':'cycle-down'}">周期 ${fmt(f)}</span><span class="${settled&&known?(a>=0?'cycle-up':'cycle-down'):'muted'}">${settled?(known?'実績 '+fmt(a):'未取得'):'実績待ち'}</span></div></a>`};
 const island=name=>`<div class="island-column"><div class="island-title">${name.toUpperCase()}</div><div class="island-stack">${cycleIslands[name].map(cycleCard).join('')}</div></div>`;
 document.getElementById('cycle-floor').innerHTML=`<div class="floor-top"><div class="island-pair">${island('s9')}${island('s8')}</div><div class="island-single">${island('s7')}</div><div class="island-single sl1-offset">${island('sl1')}</div><div class="island-single">${island('s4')}</div><div class="island-pair">${island('s3')}${island('s2')}</div></div>`;
 const listGroups=[['35〜38番',['s2']],['39〜77番',['s3','s4']],['118〜123番',['s7']],['148〜153番',['s8']],['154〜158番',['s9']],['1173〜1180番',['sl1']]];
 const cycleRows=listGroups.flatMap(([range,names])=>names.flatMap(name=>cycleIslands[name]).map(row=>[range,...row]));let cycleSort={key:'machine',dir:1};
-function renderCycleTable(){const labels={machine:'台',range:'範囲',forecast:'周期推定',forecastDir:'周期方向',actual:'__SHORT_DATE__実績差玉',actualDir:'実績',hit:'方向判定'},keys=Object.keys(labels),sorted=cycleRows.slice().sort((x,y)=>{const value=r=>({machine:r[1],range:r[0],forecast:r[2],forecastDir:r[2]>0?1:0,actual:r[3]??0,actualDir:(r[3]??0)>0?1:0,hit:settled&&((r[2]>0)===((r[3]??0)>0))?1:0}[cycleSort.key]);const a=value(x),b=value(y);return(typeof a==='string'?a.localeCompare(b,'ja'):a-b)*cycleSort.dir});document.getElementById('cycle-list').innerHTML=`<table><thead><tr>${keys.map(key=>`<th class="sortable" data-sort="${key}">${labels[key]}${cycleSort.key===key?(cycleSort.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${sorted.map(([range,m,f,a])=>{const hit=settled&&(f>0)===(a>0);return `<tr><td><a class="cycle-table-link" href="ohlc.html?machine=${m}">${m}</a></td><td>${range}</td><td class="${f>=0?'positive':'negative'}">${fmt(f)}</td><td>${f>0?'陽線方向':'陰線方向'}</td><td class="${settled?(a>=0?'positive':'negative'):'muted'}">${settled?fmt(a):'実績待ち'}</td><td>${settled?(a>0?'陽線':'陰線'):'実績待ち'}</td><td class="${settled?(hit?'direction-hit':'direction-miss'):'muted'}">${settled?(hit?'一致':'不一致'):'実績待ち'}</td></tr>`}).join('')}</tbody></table>`;document.querySelectorAll('#cycle-list [data-sort]').forEach(th=>th.onclick=()=>{cycleSort=cycleSort.key===th.dataset.sort?{key:cycleSort.key,dir:-cycleSort.dir}:{key:th.dataset.sort,dir:1};renderCycleTable()})}renderCycleTable();
+function renderCycleTable(){const labels={machine:'台',range:'範囲',forecast:'周期推定',forecastDir:'周期方向',actual:'__SHORT_DATE__実績差玉',actualDir:'実績',hit:'方向判定'},keys=Object.keys(labels),sorted=cycleRows.slice().sort((x,y)=>{const value=r=>({machine:r[1],range:r[0],forecast:r[2],forecastDir:r[2]>0?1:0,actual:r[3]??0,actualDir:hasActual(r[3])?(r[3]>0?1:0):-1,hit:settled&&hasActual(r[3])&&((r[2]>0)===(r[3]>0))?1:0}[cycleSort.key]);const a=value(x),b=value(y);return(typeof a==='string'?a.localeCompare(b,'ja'):a-b)*cycleSort.dir});document.getElementById('cycle-list').innerHTML=`<table><thead><tr>${keys.map(key=>`<th class="sortable" data-sort="${key}">${labels[key]}${cycleSort.key===key?(cycleSort.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${sorted.map(([range,m,f,a])=>{const known=hasActual(a),hit=settled&&known&&(f>0)===(a>0);return `<tr><td><a class="cycle-table-link" href="ohlc.html?machine=${m}">${m}</a></td><td>${range}</td><td class="${f>=0?'positive':'negative'}">${fmt(f)}</td><td>${f>0?'陽線方向':'陰線方向'}</td><td class="${settled&&known?(a>=0?'positive':'negative'):'muted'}">${settled?(known?fmt(a):'未取得'):'実績待ち'}</td><td>${settled?(known?(a>0?'陽線':'陰線'):'未取得'):'実績待ち'}</td><td class="${settled&&known?(hit?'direction-hit':'direction-miss'):'muted'}">${settled?(known?(hit?'一致':'不一致'):'未取得'):'実績待ち'}</td></tr>`}).join('')}</tbody></table>`;document.querySelectorAll('#cycle-list [data-sort]').forEach(th=>th.onclick=()=>{cycleSort=cycleSort.key===th.dataset.sort?{key:cycleSort.key,dir:-cycleSort.dir}:{key:th.dataset.sort,dir:1};renderCycleTable()})}renderCycleTable();
 function setCycleView(view){document.getElementById('cycle-map').hidden=view!=='map';document.getElementById('cycle-list').hidden=view!=='list';document.querySelectorAll('[data-cycle-view]').forEach(button=>button.classList.toggle('active',button.dataset.cycleView===view));localStorage.setItem('prediction-__DATE__-cycle-view-v2',view)}document.querySelectorAll('[data-cycle-view]').forEach(button=>button.onclick=()=>setCycleView(button.dataset.cycleView));setCycleView(localStorage.getItem('prediction-__DATE__-cycle-view-v2')==='map'?'map':'list');
 const body=document.querySelector('#candidate-table tbody');body.innerHTML=rows.map(r=>`<tr data-machine="${r.m}"><td><a class="machine-link" href="ohlc.html?machine=${r.m}">${r.m}</a></td><td>${r.g}</td><td><span class="badge ${r.rank==='本命'?'primary':r.rank==='次点'?'secondary':'watch'}">${r.rank}</span></td><td class="${r.s>=0?'positive':'negative'}">${r.s>=0?'+':''}${r.s.toFixed(3)}</td><td>${fmt(r.a3)}</td><td>${fmt(r.a5)}</td><td>${r.wr}%</td><td class="${r.f>=0?'positive':'negative'}">${fmt(r.f)}</td><td><input type="number" step="1" value="${r.actual??''}" aria-label="${r.m}番の実績差玉"></td><td class="answer muted">未入力</td></tr>`).join('');
 const key='prediction-__DATE__-results';function evaluate(){let entered=0,hits=0;document.querySelectorAll('#candidate-table tbody tr').forEach(tr=>{const input=tr.querySelector('input'),ans=tr.querySelector('.answer');if(input.value===''){ans.className='answer muted';ans.textContent='未入力';return}entered++;const value=Number(input.value),hit=value>0;if(hit)hits++;ans.className='answer '+(hit?'judge-hit':'judge-miss');ans.textContent=hit?'陽線・一致':value<0?'陰線・不一致':'同値・不一致'});document.getElementById('overall').textContent=entered?`入力 ${entered}台 / 陽線 ${hits}台 / 方向一致率 ${(hits/entered*100).toFixed(1)}%`:'実績待ち'}
@@ -294,21 +309,25 @@ document.getElementById('save').onclick=()=>{const values={};document.querySelec
 
 
 def render_top(actual_date: str, prediction_date: str, settled_rows: list[dict],
-               settled_cycles: dict[int, int], actual: dict[int, int], next_positive: int) -> str:
+               settled_cycles: dict[int, int], actual: dict[int, int | None], next_positive: int) -> str:
     candidates = [row for row in settled_rows if row.get("rank")]
-    hits = sum(actual[row["machine"]] > 0 for row in candidates)
+    candidate_known = [row for row in candidates if actual.get(row["machine"]) is not None]
+    hits = sum(actual[row["machine"]] > 0 for row in candidate_known)
     positives = [machine for machine, value in settled_cycles.items() if value > 0]
-    cycle_hits = sum(actual[machine] > 0 for machine in positives)
-    all_hits = sum(value > 0 for value in actual.values())
-    rank_hits = {rank: sum(actual[row["machine"]] > 0 for row in candidates if row["rank"] == rank) for rank in ("本命", "次点", "監視")}
-    rank_counts = {rank: sum(row["rank"] == rank for row in candidates) for rank in rank_hits}
+    positives_known = [machine for machine in positives if actual.get(machine) is not None]
+    cycle_hits = sum(actual[machine] > 0 for machine in positives_known)
+    actual_known = [value for value in actual.values() if value is not None]
+    all_hits = sum(value > 0 for value in actual_known)
+    rank_hits = {rank: sum(actual[row["machine"]] > 0 for row in candidate_known if row["rank"] == rank) for rank in ("本命", "次点", "監視")}
+    rank_counts = {rank: sum(row["rank"] == rank for row in candidate_known) for rank in rank_hits}
+    prior_hits, prior_count = 6, 13
     return f"""<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>日次陽線候補 実績一覧</title><style>
 *{{box-sizing:border-box}}body{{margin:0;background:#0d1117;color:#c9d1d9;font-family:"Segoe UI",Meiryo,sans-serif;line-height:1.6}}header,main{{max-width:1040px;margin:auto}}header{{padding:26px 18px 15px}}main{{padding:0 18px 44px;display:grid;gap:14px}}h1{{margin:0;color:#58a6ff;font-size:24px}}.meta,.note,.muted{{color:#8b949e;font-size:13px}}.summary{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}}.stat,.panel{{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:15px}}.stat span{{display:block;color:#8b949e;font-size:12px}}.stat b{{font-size:22px}}.warning{{color:#d29922}}table{{width:100%;border-collapse:collapse}}th,td{{padding:12px 10px;border-bottom:1px solid #30363d;text-align:right;white-space:nowrap}}th:first-child,td:first-child{{text-align:left}}th{{color:#8b949e;font-size:12px}}.cycle{{color:#79c0ff}}tbody tr{{cursor:pointer}}tbody tr:hover{{background:#1f2937}}.date-link{{color:#58a6ff;font-weight:700;text-decoration:none}}.rate{{font-weight:700}}.arrow,.back{{color:#8b949e}}.back{{text-decoration:none}}@media(max-width:720px){{.summary{{grid-template-columns:1fr}}.panel{{overflow-x:auto}}table{{min-width:720px}}}}
 </style></head><body><header><a class="back" href="index.html">← ダッシュボード</a><h1>日次陽線候補 実績一覧</h1><div class="meta">同じ採点ルールによる予測と翌日の答え合わせを日付別に蓄積します。</div></header><main>
-<section class="summary"><div class="stat"><span>予測記録</span><b>3日</b></div><div class="stat"><span>累計方向一致</span><b class="warning">{hits + 6}/26</b></div><div class="stat"><span>累計一致率</span><b class="warning">{(hits + 6) / 26 * 100:.1f}%</b></div></section>
+<section class="summary"><div class="stat"><span>予測記録</span><b>3日</b></div><div class="stat"><span>累計方向一致</span><b class="warning">{hits + prior_hits}/{len(candidate_known) + prior_count}</b></div><div class="stat"><span>累計一致率</span><b class="warning">{(hits + prior_hits) / (len(candidate_known) + prior_count) * 100:.1f}%</b></div></section>
 <section class="panel"><table><thead><tr><th>予測日</th><th>本命</th><th>次点</th><th>監視</th><th>全体</th><th>周期＋候補</th><th>周期＋陽線</th><th>全台実陽線</th><th></th></tr></thead><tbody>
 <tr data-href="prediction_{prediction_date}.html"><td><a class="date-link" href="prediction_{prediction_date}.html">{prediction_date[:4]}年{int(prediction_date[4:6])}月{int(prediction_date[6:])}日</a></td><td class="muted" colspan="4">実績待ち</td><td class="cycle"><span class="rate">{next_positive}/68</span>（{next_positive / 68 * 100:.1f}%）</td><td class="muted">実績待ち</td><td class="muted">実績待ち</td><td class="arrow">›</td></tr>
-<tr data-href="prediction_{actual_date}.html"><td><a class="date-link" href="prediction_{actual_date}.html">{actual_date[:4]}年{int(actual_date[4:6])}月{int(actual_date[6:])}日</a></td><td>{rank_hits['本命']}/{rank_counts['本命']}</td><td>{rank_hits['次点']}/{rank_counts['次点']}</td><td>{rank_hits['監視']}/{rank_counts['監視']}</td><td class="warning">{hits}/{len(candidates)}（{hits / len(candidates) * 100:.1f}%）</td><td class="cycle">{len(positives)}/68</td><td class="cycle">{cycle_hits}/{len(positives)}（{cycle_hits / len(positives) * 100:.1f}%）</td><td>{all_hits}/68（{all_hits / 68 * 100:.1f}%）</td><td class="arrow">›</td></tr>
+<tr data-href="prediction_{actual_date}.html"><td><a class="date-link" href="prediction_{actual_date}.html">{actual_date[:4]}年{int(actual_date[4:6])}月{int(actual_date[6:])}日</a></td><td>{rank_hits['本命']}/{rank_counts['本命']}</td><td>{rank_hits['次点']}/{rank_counts['次点']}</td><td>{rank_hits['監視']}/{rank_counts['監視']}</td><td class="warning">{hits}/{len(candidate_known)}（{hits / len(candidate_known) * 100:.1f}%）</td><td class="cycle">{len(positives)}/68</td><td class="cycle">{cycle_hits}/{len(positives_known)}（{cycle_hits / len(positives_known) * 100:.1f}%）</td><td>{all_hits}/{len(actual_known)}（{all_hits / len(actual_known) * 100:.1f}%）</td><td class="arrow">›</td></tr>
 <tr data-href="prediction_20260613.html"><td><a class="date-link" href="prediction_20260613.html">2026年6月13日</a></td><td>4/8</td><td>1/2</td><td>1/3</td><td class="warning">6/13（46.2%）</td><td class="cycle">31/68</td><td class="cycle">18/31（58.1%）</td><td>33/68（48.5%）</td><td class="arrow">›</td></tr>
 </tbody></table></section><section class="panel note">「周期＋候補」は主要5周期の翌日合成値がプラスだった台数です。標本数が少ない間は結論を急がず、同じ条件で記録を継続します。</section></main><script>document.querySelectorAll('tr[data-href]').forEach(row=>row.onclick=event=>{{if(!event.target.closest('a'))location.href=row.dataset.href}});</script></body></html>"""
 
@@ -342,10 +361,13 @@ def main() -> None:
         encoding="utf-8",
     )
     candidates = [row for row in locked_rows if row.get("rank")]
-    hits = sum(day_actuals[row["machine"]] > 0 for row in candidates)
+    candidate_known = [row for row in candidates if day_actuals.get(row["machine"]) is not None]
+    hits = sum(day_actuals[row["machine"]] > 0 for row in candidate_known)
     positives = [machine for machine, value in locked_cycles.items() if value > 0]
-    cycle_hits = sum(day_actuals[machine] > 0 for machine in positives)
-    print(f"actual={args.actual_date} candidates={hits}/{len(candidates)} cycle={cycle_hits}/{len(positives)} all={sum(v > 0 for v in day_actuals.values())}/{len(day_actuals)}")
+    positive_known = [machine for machine in positives if day_actuals.get(machine) is not None]
+    cycle_hits = sum(day_actuals[machine] > 0 for machine in positive_known)
+    actual_known = [value for value in day_actuals.values() if value is not None]
+    print(f"actual={args.actual_date} candidates={hits}/{len(candidate_known)} cycle={cycle_hits}/{len(positive_known)} all={sum(v > 0 for v in actual_known)}/{len(actual_known)}")
     print(f"prediction={args.prediction_date} candidates=13")
 
 

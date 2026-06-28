@@ -76,6 +76,17 @@ def cycle_watch_page_path(date):
     return DOCS_DIR / f"cycle_watch_{date}.html"
 
 
+def normalize_machine_key(value):
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        number = int(text)
+    except ValueError:
+        return text
+    return str(number).zfill(3)
+
+
 def load_ocr_summary(date):
     path = analyze_csv_path(date)
     if not path.exists():
@@ -88,7 +99,7 @@ def load_ocr_summary(date):
         for row in reader:
             if len(row) < 11:
                 continue
-            machine = str(row[1]).zfill(3)
+            machine = normalize_machine_key(row[1])
             by_machine.setdefault(machine, []).append(row)
 
     out = {}

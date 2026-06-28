@@ -14,14 +14,15 @@ from __future__ import annotations
 
 import argparse
 import ast
-import csv
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
 import chart_signal_positive as chart
+import daily_intraday_cycle_sync as cycle_sync
 import machine_cycle_positive as intraday
+import prediction_daily as prediction
 
 
 ROOT = Path(__file__).parent
@@ -60,32 +61,128 @@ def parse_js_object(source):
         return ast.literal_eval(quoted)
 
 
-def load_prediction_rows(start_date, end_date):
+def csv_dates():
+    return sorted(path.name for path in prediction.CSV_DIR.iterdir() if path.is_dir() and re.fullmatch(r"\d{8}", path.name))
+
+
+def previous_date(date, dates):
+    prev = [item for item in dates if item < date]
+    return prev[-1] if prev else None
+
+
+def prediction_html_rows(date):
     rows = []
-    for path in sorted(DOCS_DIR.glob("prediction_*.html")):
-        date = path.stem.split("_")[-1]
+    path = DOCS_DIR / f"prediction_{date}.html"
+    if not path.exists():
+        return rows
+    text = path.read_text(encoding="utf-8")
+    match = re.search(r"const cycleIslands=(\{.*?\});", text, re.S)
+    if not match:
+        return rows
+    data = parse_js_object(match.group(1))
+    for island, values in data.items():
+        for item in values:
+            if len(item) < 3 or item[2] is None:
+                continue
+            machine, forecast, actual = item[:3]
+            rows.append({
+                "date": date,
+                "machine": f"{int(machine):03d}",
+                "forecast": int(forecast),
+                "actual": int(actual),
+                "positive": int(actual) > 0,
+                "cycle_plus": int(forecast) > 0,
+                "island": island,
+                "special": int(date[6:8]) in SPECIAL_DAYS,
+                "source": "html",
+            })
+    return rows
+
+
+def load_daily_cache():
+    return {machine: prediction.load_daily_net(machine) for machine in prediction.MACHINES}
+
+
+def backfill_prediction_rows(date, cutoff, daily_cache):
+    rows = []
+    for machine in prediction.MACHINES:
+        daily = daily_cache[machine]
+        history = [value for day, value in daily if day <= cutoff]
+        actual_by_date = dict(daily)
+        if len(history) < 21 or date not in actual_by_date:
+            continue
+        forecast = prediction.cycle_forecast(history)
+        actual = actual_by_date[date]
+        rows.append({
+            "date": date,
+            "machine": f"{machine:03d}",
+            "forecast": int(forecast),
+            "actual": int(actual),
+            "positive": int(actual) > 0,
+            "cycle_plus": int(forecast) > 0,
+            "island": "",
+            "special": int(date[6:8]) in SPECIAL_DAYS,
+            "source": "backfill",
+        })
+    return rows
+
+
+def load_structural_cycle_cache():
+    cache = {}
+    for machine in prediction.MACHINES:
+        key = f"{machine:03d}"
+        try:
+            wave_rows, _ = cycle_sync.build_daily_wave(key, 5)
+        except Exception:
+            continue
+        cache[key] = {row["date"]: row["composite"] for row in wave_rows}
+    return cache
+
+
+def structural_backfill_rows(date, daily_cache, structural_cache):
+    rows = []
+    for machine in prediction.MACHINES:
+        key = f"{machine:03d}"
+        actual_by_date = dict(daily_cache[machine])
+        if date not in actual_by_date or date not in structural_cache.get(key, {}):
+            continue
+        forecast = round(structural_cache[key][date])
+        actual = actual_by_date[date]
+        rows.append({
+            "date": date,
+            "machine": key,
+            "forecast": int(forecast),
+            "actual": int(actual),
+            "positive": int(actual) > 0,
+            "cycle_plus": int(forecast) > 0,
+            "island": "",
+            "special": int(date[6:8]) in SPECIAL_DAYS,
+            "source": "structural",
+        })
+    return rows
+
+
+def load_prediction_rows(start_date, end_date, backfill=False, backfill_mode="asof"):
+    rows = []
+    dates = csv_dates()
+    daily_cache = load_daily_cache() if backfill else None
+    structural_cache = load_structural_cycle_cache() if backfill and backfill_mode == "structural" else None
+    for date in dates:
         if not (start_date <= date <= end_date):
             continue
-        text = path.read_text(encoding="utf-8")
-        match = re.search(r"const cycleIslands=(\{.*?\});", text, re.S)
-        if not match:
+        html_rows = prediction_html_rows(date)
+        if html_rows:
+            rows.extend(html_rows)
             continue
-        data = parse_js_object(match.group(1))
-        for island, values in data.items():
-            for item in values:
-                if len(item) < 3 or item[2] is None:
-                    continue
-                machine, forecast, actual = item[:3]
-                rows.append({
-                    "date": date,
-                    "machine": f"{int(machine):03d}",
-                    "forecast": int(forecast),
-                    "actual": int(actual),
-                    "positive": int(actual) > 0,
-                    "cycle_plus": int(forecast) > 0,
-                    "island": island,
-                    "special": int(date[6:8]) in SPECIAL_DAYS,
-                })
+        if not backfill:
+            continue
+        if backfill_mode == "structural":
+            rows.extend(structural_backfill_rows(date, daily_cache, structural_cache))
+        else:
+            cutoff = previous_date(date, dates)
+            if not cutoff:
+                continue
+            rows.extend(backfill_prediction_rows(date, cutoff, daily_cache))
     return rows
 
 
@@ -291,12 +388,14 @@ def make_report(rows, args):
     pp = summarize(plus)
     mm = summarize(minus)
     direction = sum((row["cycle_plus"] and row["positive"]) or ((not row["cycle_plus"]) and (not row["positive"])) for row in rows)
+    source_counts = Counter(row.get("source", "unknown") for row in rows)
     lines = [
         f"# 複合シグナル検証 {args.start}〜{args.end}",
         "",
         "## 要約",
         "",
         f"- 対象件数: {len(rows)} machine-days",
+        f"- データ元: " + ", ".join(f"{key} {value}件" for key, value in sorted(source_counts.items())),
         f"- 全体陽線率: {all_s['positive']}/{all_s['total']} ({pct(all_s['positive'], all_s['total']):.1f}%)",
         f"- 周期プラス陽線率: {pp['positive']}/{pp['total']} ({pct(pp['positive'], pp['total']):.1f}%)",
         f"- 周期マイナス陽線率: {mm['positive']}/{mm['total']} ({pct(mm['positive'], mm['total']):.1f}%)",
@@ -324,6 +423,8 @@ def make_report(rows, args):
         "## 注意",
         "",
         "- 周期推定はpredictionページに固定された値を使う。",
+        "- predictionページがない過去日は、--backfill指定時のみ前日までのCSVから周期推定を再計算する。",
+        "- --backfill-mode structural は全履歴の日足周期構造を使うため、予測ではなく構造分析として読む。",
         "- 日中周期hitは当日中に初めて確認できる条件なので、朝時点の予測ではなく当日途中の確認シグナル。",
         "- チャート状態は前日終了時点から翌日を判定する特徴量。",
         "- 日数が少ないため、細分条件は件数不足になりやすい。",
@@ -342,6 +443,8 @@ def make_html(rows, args):
     minus_no = [row for row in minus if not row["intraday_hit"]]
     reverse = [row for row in minus if row["positive"]]
     direction = sum((row["cycle_plus"] and row["positive"]) or ((not row["cycle_plus"]) and (not row["positive"])) for row in rows)
+    source_counts = Counter(row.get("source", "unknown") for row in rows)
+    source_text = " / ".join(f"{key}: {value}件" for key, value in sorted(source_counts.items()))
 
     def metric_card(title, sub, group, tone=""):
         rate, count, _ = compact_rate(group)
@@ -446,7 +549,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:9px 10px;border-botto
 <header>
   <a href="index.html">← ダッシュボード</a>
   <h1>複合シグナル検証</h1>
-  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。</div>
+  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: {source_text}</div>
 </header>
 <main>
   <section class="panel">
@@ -464,7 +567,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:9px 10px;border-botto
     <div class="day-list">{''.join(daily_cards)}</div>
   </section>
   <section class="panel note">
-    更新時は <code>python combined_signal_analysis.py --start 20260613 --end 最新日</code> を実行します。predictionページに実績が入った日だけ日別カードに追加されます。
+    更新時は <code>python combined_signal_analysis.py --start 20260613 --end 最新日</code> を実行します。過去分を補完する場合は <code>--backfill</code> を付けます。全期間を高速に見る場合は <code>--backfill-mode structural</code> を使います。
   </section>
 </main>
 </body>
@@ -479,6 +582,8 @@ def parse_args():
     parser.add_argument("--period-report", default=str(REPORT_DIR / "cycle_sync_68_summary.md"), help="日中周期一覧レポート")
     parser.add_argument("--tolerance", type=int, default=5, help="日中周期hit許容幅")
     parser.add_argument("--min-count", type=int, default=5, help="細分表に出す最小件数")
+    parser.add_argument("--backfill", action="store_true", help="prediction HTMLがない過去日を前日までのCSVから再計算する")
+    parser.add_argument("--backfill-mode", choices=("asof", "structural"), default="asof", help="asof=前日までで再計算、structural=全履歴周期構造で高速補完")
     parser.add_argument("--out", default=None, help="出力先")
     parser.add_argument("--html-out", default=str(ROOT / "docs" / "combined_signal_analysis.html"), help="HTML出力先")
     return parser.parse_args()
@@ -486,7 +591,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    rows = load_prediction_rows(args.start, args.end)
+    rows = load_prediction_rows(args.start, args.end, args.backfill, args.backfill_mode)
     if not rows:
         raise SystemExit("対象のprediction実績がありません。")
     periods = load_intraday_periods(Path(args.period_report))
