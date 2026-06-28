@@ -323,7 +323,7 @@ def daily_table(rows):
         "|日付|区分|周期+ 陽線率|周期- 陽線率|差|全体陽線率|方向一致|",
         "|---:|---|---:|---:|---:|---:|---:|",
     ]
-    for date in sorted({row["date"] for row in rows}):
+    for date in sorted({row["date"] for row in rows}, reverse=True):
         sub = [row for row in rows if row["date"] == date]
         plus = [row for row in sub if row["cycle_plus"]]
         minus = [row for row in sub if not row["cycle_plus"]]
@@ -484,7 +484,7 @@ def make_html(rows, args):
                 )
 
     daily_cards = []
-    for date in sorted({row["date"] for row in rows}):
+    for date in sorted({row["date"] for row in rows}, reverse=True):
         sub = [row for row in rows if row["date"] == date]
         day_plus = [row for row in sub if row["cycle_plus"]]
         day_minus = [row for row in sub if not row["cycle_plus"]]
