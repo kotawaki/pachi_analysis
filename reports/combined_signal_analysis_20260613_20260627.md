@@ -43,43 +43,43 @@
 
 |special|cycle_plus|intraday_hit|件数|陽線率|中央値|平均|
 |---|---|---|---:|---:|---:|---:|
-|False|False|False|352|120/352 (34.1%)|-2,867|-1,168|
-|False|False|True|56|32/56 (57.1%)|+3,063|+4,463|
-|False|True|False|325|117/325 (36.0%)|-3,050|-1,173|
-|False|True|True|71|44/71 (62.0%)|+4,014|+4,435|
-|True|False|False|86|22/86 (25.6%)|-3,504|-2,282|
-|True|False|True|30|18/30 (60.0%)|+2,658|+3,601|
-|True|True|False|63|25/63 (39.7%)|-2,588|-2,251|
-|True|True|True|25|14/25 (56.0%)|+1,584|+2,043|
+|False|False|False|342|117/342 (34.2%)|-2,867|-1,164|
+|False|False|True|66|35/66 (53.0%)|+1,874|+3,587|
+|False|True|False|312|113/312 (36.2%)|-2,982|-1,188|
+|False|True|True|84|48/84 (57.1%)|+3,116|+3,623|
+|True|False|False|86|22/86 (25.6%)|-3,504|-2,308|
+|True|False|True|30|18/30 (60.0%)|+2,658|+3,676|
+|True|True|False|63|25/63 (39.7%)|-2,588|-2,111|
+|True|True|True|25|14/25 (56.0%)|+1,584|+1,690|
 
 ## 特日/通常日 x 周期推定 x 日中周期hit x チャート状態
 
 |special|cycle_plus|intraday_hit|chart_state|件数|陽線率|中央値|平均|
 |---|---|---|---|---:|---:|---:|---:|
-|False|False|False|good|74|28/74 (37.8%)|-2,553|-1,378|
-|False|False|False|neutral|54|15/54 (27.8%)|-6,578|-3,202|
-|False|False|False|weak|224|77/224 (34.4%)|-2,638|-609|
-|False|False|True|good|13|10/13 (76.9%)|+8,522|+9,896|
-|False|False|True|neutral|12|9/12 (75.0%)|+11,056|+9,659|
-|False|False|True|weak|31|13/31 (41.9%)|-1,666|+174|
-|False|True|False|good|98|32/98 (32.7%)|-3,830|-3,103|
-|False|True|False|neutral|61|22/61 (36.1%)|-3,724|-330|
-|False|True|False|weak|166|63/166 (38.0%)|-2,099|-343|
-|False|True|True|good|25|13/25 (52.0%)|+2,488|+3,629|
-|False|True|True|neutral|18|14/18 (77.8%)|+8,504|+7,867|
-|False|True|True|weak|28|17/28 (60.7%)|+3,098|+2,949|
-|True|False|False|good|18|5/18 (27.8%)|-5,780|-4,027|
-|True|False|False|neutral|13|2/13 (15.4%)|-5,992|-6,128|
+|False|False|False|good|82|35/82 (42.7%)|-1,790|-700|
+|False|False|False|neutral|55|15/55 (27.3%)|-6,596|-3,351|
+|False|False|False|weak|205|67/205 (32.7%)|-2,692|-763|
+|False|False|True|good|14|8/14 (57.1%)|+5,070|+8,171|
+|False|False|True|neutral|16|11/16 (68.8%)|+8,028|+7,170|
+|False|False|True|weak|36|16/36 (44.4%)|-791|+212|
+|False|True|False|good|101|34/101 (33.7%)|-3,681|-2,978|
+|False|True|False|neutral|64|24/64 (37.5%)|-3,724|+128|
+|False|True|False|weak|147|55/147 (37.4%)|-2,034|-531|
+|False|True|True|good|32|17/32 (53.1%)|+3,207|+3,448|
+|False|True|True|neutral|25|17/25 (68.0%)|+7,394|+5,832|
+|False|True|True|weak|27|14/27 (51.9%)|+176|+1,785|
+|True|False|False|good|17|4/17 (23.5%)|-6,276|-4,691|
+|True|False|False|neutral|14|3/14 (21.4%)|-5,886|-5,333|
 |True|False|False|weak|55|15/55 (27.3%)|-2,681|-801|
-|True|False|True|good|8|5/8 (62.5%)|+2,283|-165|
-|True|False|True|neutral|7|5/7 (71.4%)|+5,000|+8,480|
+|True|False|True|good|9|6/9 (66.7%)|+4,038|+659|
+|True|False|True|neutral|6|4/6 (66.7%)|+3,855|+9,060|
 |True|False|True|weak|15|8/15 (53.3%)|+1,244|+3,332|
-|True|True|False|good|19|10/19 (52.6%)|+669|-1,892|
+|True|True|False|good|20|10/20 (50.0%)|-960|-2,376|
 |True|True|False|neutral|14|8/14 (57.1%)|+1,954|+2,644|
-|True|True|False|weak|30|7/30 (23.3%)|-4,722|-4,762|
-|True|True|True|good|10|4/10 (40.0%)|-2,961|-2,031|
+|True|True|False|weak|29|7/29 (24.1%)|-4,303|-4,224|
+|True|True|True|good|9|4/9 (44.4%)|-2,482|-972|
 |True|True|True|neutral|8|5/8 (62.5%)|+1,743|+2,665|
-|True|True|True|weak|7|5/7 (71.4%)|+7,676|+7,152|
+|True|True|True|weak|8|5/8 (62.5%)|+4,137|+3,712|
 
 ## マイナス周期からの陽線化
 
@@ -90,41 +90,41 @@
 
 |special|intraday_hit|chart_state|件数|陽線率|中央値|平均|
 |---|---|---|---:|---:|---:|---:|
-|False|False|good|74|28/74 (37.8%)|-2,553|-1,378|
-|False|False|neutral|54|15/54 (27.8%)|-6,578|-3,202|
-|False|False|weak|224|77/224 (34.4%)|-2,638|-609|
-|False|True|good|13|10/13 (76.9%)|+8,522|+9,896|
-|False|True|neutral|12|9/12 (75.0%)|+11,056|+9,659|
-|False|True|weak|31|13/31 (41.9%)|-1,666|+174|
-|True|False|good|18|5/18 (27.8%)|-5,780|-4,027|
-|True|False|neutral|13|2/13 (15.4%)|-5,992|-6,128|
+|False|False|good|82|35/82 (42.7%)|-1,790|-700|
+|False|False|neutral|55|15/55 (27.3%)|-6,596|-3,351|
+|False|False|weak|205|67/205 (32.7%)|-2,692|-763|
+|False|True|good|14|8/14 (57.1%)|+5,070|+8,171|
+|False|True|neutral|16|11/16 (68.8%)|+8,028|+7,170|
+|False|True|weak|36|16/36 (44.4%)|-791|+212|
+|True|False|good|17|4/17 (23.5%)|-6,276|-4,691|
+|True|False|neutral|14|3/14 (21.4%)|-5,886|-5,333|
 |True|False|weak|55|15/55 (27.3%)|-2,681|-801|
-|True|True|good|8|5/8 (62.5%)|+2,283|-165|
-|True|True|neutral|7|5/7 (71.4%)|+5,000|+8,480|
+|True|True|good|9|6/9 (66.7%)|+4,038|+659|
+|True|True|neutral|6|4/6 (66.7%)|+3,855|+9,060|
 |True|True|weak|15|8/15 (53.3%)|+1,244|+3,332|
 
 ### 陽線化した側の頻出特徴
 
 |特徴|件数|
 |---|---:|
-|MA20上向き|81|
-|MA5>MA20|79|
-|MA5>MA75|69|
-|MA5上向き|53|
-|日中周期hit|50|
-|MA強気配列|43|
+|MA20上向き|88|
+|MA5>MA20|85|
+|MA5>MA75|74|
+|MA5上向き|59|
+|日中周期hit|53|
+|MA強気配列|46|
 |特日|40|
-|GC40日以内|37|
-|SL上昇構造|32|
-|確定SL構造|27|
-|Fibo押し目帯|27|
-|GC20日以内|26|
-|Fibo浅押し以上|24|
-|Fibo_blue|21|
-|RR>=1|20|
+|GC40日以内|40|
+|SL上昇構造|34|
+|確定SL構造|29|
+|Fibo押し目帯|28|
+|GC20日以内|27|
+|Fibo浅押し以上|25|
+|Fibo_blue|22|
+|RR>=1|22|
 |MA強気配列+SL構造|19|
-|MA上向き+Fibo浅押し|10|
-|MA5/20上向き+SL構造|9|
+|MA上向き+Fibo浅押し|11|
+|MA5/20上向き+SL構造|11|
 |GC20日以内+Fibo浅押し|9|
 |Fibo_yellow|6|
 
@@ -133,12 +133,12 @@
 |台|実績差玉|日中hit|チャート状態|主な特徴|
 |---:|---:|---|---|---|
 |44|+18,344|-|good|Fibo_yellow / Fibo押し目帯 / GC20日以内 / GC40日以内 / MA5>MA20|
-|57|+16,926|-|neutral|GC20日以内 / GC40日以内 / MA5>MA75|
+|57|+16,926|120分|neutral|GC20日以内 / GC40日以内 / MA5>MA75|
 |66|+10,939|50分|weak|MA5上向き|
 |157|+8,345|-|neutral|MA20上向き / MA5>MA20 / MA5上向き|
 |68|+7,559|-|neutral|Fibo_blue / Fibo押し目帯 / Fibo浅押し以上 / MA20上向き / MA5>MA20|
 |118|+6,972|-|weak|-|
-|64|+3,908|50分|good|MA20上向き / MA5>MA20 / MA5>MA75 / MA強気配列|
+|64|+3,908|-|good|MA20上向き / MA5>MA20 / MA5>MA75 / MA強気配列|
 |1177|+3,514|-|weak|-|
 |43|+3,274|160分|weak|MA5>MA20 / MA5>MA75 / MA5上向き|
 |61|+2,888|-|good|MA20上向き / MA5>MA20 / MA5>MA75 / MA強気配列|

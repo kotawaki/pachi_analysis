@@ -25,6 +25,17 @@ ATARI_KINDS = {"当り", "大当り"}
 DEFAULT_PERIODS = tuple(range(20, 181, 10))
 
 
+def normalize_machine(value):
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        number = int(text)
+    except ValueError:
+        return text
+    return f"{number:03d}" if number < 1000 else str(number)
+
+
 def parse_time(value):
     h, m = str(value).strip().split(":")
     return int(h) * 60 + int(m)
@@ -51,7 +62,7 @@ def parse_machine_spec(spec):
             end = int(right)
             machines.update(f"{n:03d}" for n in range(start, end + 1))
         else:
-            machines.add(f"{int(part):03d}")
+            machines.add(normalize_machine(part))
     return machines
 
 
@@ -67,7 +78,7 @@ def load_machine_days(machine_filter=None):
         per_machine = defaultdict(list)
         with path.open(encoding="utf-8-sig", newline="") as f:
             for row in csv.DictReader(f):
-                machine = str(row.get("Machine", "")).strip().zfill(3)
+                machine = normalize_machine(row.get("Machine", ""))
                 if machine_filter and machine not in machine_filter:
                     continue
                 per_machine[machine].append(row)

@@ -20,6 +20,17 @@ CSV_DIR = ROOT / "csv" / "analyze"
 REPORT_DIR = ROOT / "reports"
 
 
+def normalize_machine(value):
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        number = int(text)
+    except ValueError:
+        return text
+    return f"{number:03d}" if number < 1000 else str(number)
+
+
 @dataclass(frozen=True)
 class Pivot:
     time: str
@@ -50,7 +61,7 @@ def parse_machine_spec(spec):
             left, right = part.split("-", 1)
             machines.update(f"{n:03d}" for n in range(int(left), int(right) + 1))
         else:
-            machines.add(f"{int(part):03d}")
+            machines.add(normalize_machine(part))
     return machines
 
 
@@ -65,7 +76,7 @@ def load_daily_ohlc(machine_filter):
         date = path.parent.name[:8]
         with path.open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
-                machine = str(row.get("Machine", "")).strip().zfill(3)
+                machine = normalize_machine(row.get("Machine", ""))
                 if machine not in machine_filter:
                     continue
                 kind = str(row.get("種別", "")).strip()
