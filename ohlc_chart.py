@@ -19,6 +19,13 @@ RANGES = [
     {'id':'r1173_1180','label':'1173〜1180番','machines':list(range(1173,1181)),'start':'20260301'},
 ]
 
+def machine_id(value):
+    text = str(value).strip()
+    try:
+        return str(int(text))
+    except ValueError:
+        return text.lstrip("0") or text
+
 # -------------------------------------------------------
 # CSV → 台別・日別 OHLC
 # -------------------------------------------------------
@@ -36,7 +43,7 @@ def load_ohlc(csv_dir):
                 m = row.get('Machine', row.get('machine','')).strip()
                 if not m:
                     continue
-                m = m.zfill(3)
+                m = machine_id(m)
                 try:
                     sb = int(row.get('開始差玉', 0) or 0)
                     eb = int(row.get('終了差玉', 0) or 0)
@@ -72,7 +79,7 @@ def build_series(daily, machine_nums, start_date):
       → 色は「当日が勝ちか負けか」を正しく表す（前日比ではない）
       high/low = 当日レンジを累積値に乗せたもの
     """
-    ms = [str(m).zfill(3) for m in machine_nums]
+    ms = [machine_id(m) for m in machine_nums]
     dates = sorted({d for m in ms if m in daily for d in daily[m] if d >= start_date})
     result = []
     cum = 0                                  # 累積差玉

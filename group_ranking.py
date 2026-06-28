@@ -23,7 +23,7 @@ import regime_analysis as ra
 
 OUT_DIR  = 'docs'
 OUT_FILE = os.path.join(OUT_DIR, 'groups.html')
-MIN_FIRES_DAY = 8   # 1日でこの点火数未満のグループは z=null
+MIN_FIRES_DAY = 1   # ヒートマップ用途では低サンプルでも日次ランクを表示する
 
 
 def day_group_z(day_fires, W, K):
