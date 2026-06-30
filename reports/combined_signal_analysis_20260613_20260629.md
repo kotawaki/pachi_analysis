@@ -125,8 +125,8 @@
 |Fibo_blue|27|
 |RR>=1|24|
 |MA強気配列+SL構造|23|
-|MA上向き+Fibo浅押し|14|
 |MA5/20上向き+SL構造|14|
+|MA上向き+Fibo浅押し|14|
 |GC20日以内+Fibo浅押し|9|
 |Fibo_yellow|7|
 

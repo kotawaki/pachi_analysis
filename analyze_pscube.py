@@ -766,9 +766,13 @@ def calibrate_overlay_axes(img: Image.Image, axes: dict) -> dict:
         (y, score) for y, score in horizontal_line_groups(img, 5, min(img.size[1] - 1, 830), 70, width - 32)
         if y > 40
     ]
-    if len(line_groups) >= 2:
-        y0 = line_groups[0][0]
-        y1 = line_groups[1][0]
+    if line_groups:
+        # The first full-width horizontal line in mobile captures is usually the
+        # lower value-axis border, not the zero line. Some charts also have
+        # strong grid lines above it, so prefer a sufficiently long candidate.
+        y1_candidates = [y for y, score in line_groups if score >= width * 0.65]
+        y1 = y1_candidates[0] if y1_candidates else line_groups[0][0]
+        y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
     else:
         y0 = detect_horizontal_line(img, 220, 430, 60, width - 25)
         y1 = detect_horizontal_line(img, y0 + 80, min(img.size[1] - 1, y0 + 430), 60, width - 25)
@@ -777,19 +781,14 @@ def calibrate_overlay_axes(img: Image.Image, axes: dict) -> dict:
     y2 = round(y0 - (y1 - y0) * y2_ratio)
 
     left = detect_vertical_line(img, 65, 85, max(0, y2), y1, prefer_first_group=True)
-    right_border = detect_vertical_line(img, width - 25, width - 5, max(0, y2), y1, prefer_first_group=True)
-    rough_spacing = (right_border - left) / 5.0
-    candidates = vertical_line_groups(img, 60, width - 10, max(0, y2), y1)
-    x1800 = nearest_candidate(candidates, left + rough_spacing * 3.0, rough_spacing * 0.25)
-    x2100 = nearest_candidate(candidates, left + rough_spacing * 4.0, rough_spacing * 0.25)
-    if x1800 is not None and x2100 is not None and x2100 > x1800:
-        pre_spacing = (x1800 - left) / 3.0
-        post_spacing = x2100 - x1800
-    else:
-        pre_spacing = rough_spacing
-        post_spacing = rough_spacing
-        x1800 = round(left + pre_spacing * 3.0)
-        x2100 = round(left + pre_spacing * 4.0)
+    # P'sCUBE mobile captures keep the outer chart frame stable, while internal
+    # grid-line strength changes by machine/range. Anchor the timeline to the
+    # outer 09:00-24:00 frame to avoid per-chart x-axis drift.
+    frame_right = round(left + 461)
+    pre_spacing = (frame_right - left) / 5.0
+    post_spacing = pre_spacing
+    x1800 = round(left + pre_spacing * 3.0)
+    x2100 = round(left + pre_spacing * 4.0)
     x0900 = round(left)
     x1200 = round(left + pre_spacing)
     x2400 = round(x2100 + post_spacing)

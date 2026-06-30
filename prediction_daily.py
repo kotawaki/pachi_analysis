@@ -36,6 +36,7 @@ ISLANDS = {
     "sl1": list(range(1173, 1181)),
 }
 WEIGHTS = (0.30, 0.20, 0.15, 0.10, 0.10, 0.05, 0.10)
+_DAILY_NET_CACHE: dict[int, list[tuple[str, int]]] | None = None
 
 
 def machine_id(value: object) -> int | None:
@@ -48,14 +49,14 @@ def machine_id(value: object) -> int | None:
         return None
 
 
-def load_daily_net(machine: int) -> list[tuple[str, int]]:
-    target = int(machine)
-    daily = []
+def load_all_daily_net() -> dict[int, list[tuple[str, int]]]:
+    daily: dict[int, list[tuple[str, int]]] = {machine: [] for machine in MACHINES}
     for path in sorted(CSV_DIR.glob("*/*_analyze.csv")):
-        rows = []
+        latest_by_machine: dict[int, tuple[str, int]] = {}
         with path.open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
-                if machine_id(row.get("Machine", "")) != target:
+                machine = machine_id(row.get("Machine", ""))
+                if machine not in daily:
                     continue
                 end_time = str(row.get("終了時刻", "")).strip()
                 if not end_time:
@@ -64,10 +65,19 @@ def load_daily_net(machine: int) -> list[tuple[str, int]]:
                     end_ball = int(row.get("終了差玉", 0) or 0)
                 except (TypeError, ValueError):
                     continue
-                rows.append((end_time, end_ball))
-        if rows:
-            daily.append((path.parent.name, max(rows)[1]))
+                current = latest_by_machine.get(machine)
+                if current is None or end_time > current[0]:
+                    latest_by_machine[machine] = (end_time, end_ball)
+        for machine, (_end_time, end_ball) in latest_by_machine.items():
+            daily[machine].append((path.parent.name, end_ball))
     return daily
+
+
+def load_daily_net(machine: int) -> list[tuple[str, int]]:
+    global _DAILY_NET_CACHE
+    if _DAILY_NET_CACHE is None:
+        _DAILY_NET_CACHE = load_all_daily_net()
+    return _DAILY_NET_CACHE.get(int(machine), [])
 
 
 def dft(values: list[float]) -> list[complex]:
