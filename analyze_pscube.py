@@ -118,8 +118,6 @@ def events_from_history(rows: list[list[str]], machine: str, pachinko_mode: str)
             game_count = int(start_text)
             event_kind = "slot_reg_initial" if game_count >= 10 else "slot_reg_continue"
         else:
-            if pachinko_mode == "initial" and status != "初当り":
-                continue
             event_kind = "pachinko_initial" if status == "初当り" else "pachinko_bonus"
 
         minute = t2m(time_text)
