@@ -326,18 +326,22 @@ def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = 
     width, height = img.size
     line_groups = [
         (y, score)
-        for y, score in horizontal_line_groups(img, 5, min(height - 1, 560), 70, width - 32)
+        for y, score in horizontal_line_groups(img, 5, min(height - 1, 930), 70, width - 32)
         if y > 40
     ]
     strong_groups = [(y, score) for y, score in line_groups if score >= width * 0.65]
 
-    bottom_candidates = [y for y, _score in strong_groups if 360 <= y <= 490]
+    bottom_candidates = [
+        y
+        for index, (y, _score) in enumerate(strong_groups[:-1])
+        if y >= 360 and 24 <= strong_groups[index + 1][0] - y <= 45
+    ]
     if bottom_candidates:
-        y1 = bottom_candidates[0]
+        y1 = bottom_candidates[-1]
     elif strong_groups:
         y1 = strong_groups[-1][0]
     else:
-        y1 = detect_horizontal_line(img, 360, min(height - 1, 520), 60, width - 25)
+        y1 = detect_horizontal_line(img, 360, min(height - 1, 820), 60, width - 25)
 
     y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
     y2_ratio = abs(y2_value) / max(1, abs(y1_value))
