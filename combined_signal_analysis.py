@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import csv
 import json
 import re
 from collections import Counter, defaultdict
@@ -229,6 +230,134 @@ def build_intraday_hits(rows, periods_by_machine, tolerance):
         row["event_count"] = day["event_count"] if day else 0
 
 
+def parse_time_value(value):
+    text = str(value or "").strip()
+    if not text or ":" not in text:
+        return None
+    hour, minute = text.split(":", 1)
+    try:
+        return int(hour) * 60 + int(minute)
+    except ValueError:
+        return None
+
+
+def int_value(value, default=0):
+    try:
+        return int(float(str(value).replace(",", "").strip()))
+    except (TypeError, ValueError):
+        return default
+
+
+def row_value(row, *keys, default=""):
+    for key in keys:
+        if key in row:
+            return row.get(key, default)
+    return default
+
+
+def value_at_time(points, minute):
+    if not points:
+        return None
+    ordered = sorted(points)
+    if minute <= ordered[0][0]:
+        return ordered[0][1]
+    if minute >= ordered[-1][0]:
+        return ordered[-1][1]
+    for (left_t, left_v), (right_t, right_v) in zip(ordered, ordered[1:]):
+        if left_t <= minute <= right_t:
+            if right_t == left_t:
+                return right_v
+            ratio = (minute - left_t) / (right_t - left_t)
+            return int(round(left_v + (right_v - left_v) * ratio))
+    return ordered[-1][1]
+
+
+def load_event_timelines(dates, machines):
+    timelines = {}
+    target_machines = set(machines)
+    for date in dates:
+        path = prediction.CSV_DIR / date / f"{date}_analyze.csv"
+        if not path.exists():
+            continue
+        per_machine = defaultdict(list)
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            for csv_row in csv.DictReader(handle):
+                machine = intraday.normalize_machine(row_value(csv_row, "Machine"))
+                if target_machines and machine not in target_machines:
+                    continue
+                per_machine[machine].append(csv_row)
+
+        for machine, csv_rows in per_machine.items():
+            events = []
+            points = []
+            for csv_row in csv_rows:
+                start_t = parse_time_value(row_value(csv_row, "開始時刻", "髢句ｧ区凾蛻ｻ"))
+                end_t = parse_time_value(row_value(csv_row, "終了時刻", "邨ゆｺ・凾蛻ｻ"))
+                start_ball = int_value(row_value(csv_row, "開始差玉", "髢句ｧ句ｷｮ邇・"))
+                end_ball = int_value(row_value(csv_row, "終了差玉", "邨ゆｺ・ｷｮ邇・"))
+                kind = str(row_value(csv_row, "種別", "遞ｮ蛻･")).strip()
+                if start_t is not None:
+                    points.append((start_t, start_ball))
+                    if kind in {"当り", "大当り", "蠖薙ｊ", "螟ｧ蠖薙ｊ"}:
+                        events.append({
+                            "time": start_t,
+                            "time_text": f"{start_t // 60:02d}:{start_t % 60:02d}",
+                            "start_ball": start_ball,
+                            "kind": kind,
+                        })
+                if end_t is not None:
+                    points.append((end_t, end_ball))
+            if not points:
+                continue
+            points = sorted(set(points))
+            events.sort(key=lambda item: item["time"])
+            timelines[(date, machine)] = {
+                "events": events,
+                "points": points,
+                "final_ball": points[-1][1],
+            }
+    return timelines
+
+
+def build_hit_after_metrics(rows, periods_by_machine, tolerance):
+    dates = {row["date"] for row in rows}
+    machines = {row["machine"] for row in rows}
+    timelines = load_event_timelines(dates, machines)
+    for row in rows:
+        for key in (
+            "hit_time", "hit_period", "hit_start_ball", "hit_plus30", "hit_plus60",
+            "hit_final_diff", "hit_max_up", "hit_max_down", "hit_after_positive",
+        ):
+            row[key] = None
+        periods = periods_by_machine.get(row["machine"], ())
+        timeline = timelines.get((row["date"], row["machine"]))
+        if not periods or not timeline:
+            continue
+        events = timeline["events"]
+        points = timeline["points"]
+        for previous, current in zip(events, events[1:]):
+            gap = current["time"] - previous["time"]
+            matched = [period for period in periods if abs(gap - period) <= tolerance]
+            if not matched:
+                continue
+            hit_time = current["time"]
+            hit_ball = current["start_ball"]
+            after_values = [value for minute, value in points if minute >= hit_time]
+            final_diff = timeline["final_ball"] - hit_ball
+            plus30_value = value_at_time(points, min(hit_time + 30, 22 * 60 + 30))
+            plus60_value = value_at_time(points, min(hit_time + 60, 22 * 60 + 30))
+            row["hit_time"] = current["time_text"]
+            row["hit_period"] = matched[0]
+            row["hit_start_ball"] = hit_ball
+            row["hit_plus30"] = None if plus30_value is None else plus30_value - hit_ball
+            row["hit_plus60"] = None if plus60_value is None else plus60_value - hit_ball
+            row["hit_final_diff"] = final_diff
+            row["hit_max_up"] = max(after_values) - hit_ball if after_values else final_diff
+            row["hit_max_down"] = min(after_values) - hit_ball if after_values else final_diff
+            row["hit_after_positive"] = final_diff > 0
+            break
+
+
 def build_chart_features(rows):
     machines = {row["machine"] for row in rows}
     series, meta = chart.load_daily_ohlc(machines)
@@ -314,6 +443,63 @@ def table_by_keys(rows, keys, min_count=1):
             "|" + "|".join(str(value) for value in key_values) +
             f"|{s['total']}|{s['positive']}/{s['total']} ({pct(s['positive'], s['total']):.1f}%)|"
             f"{signed(s['median'])}|{signed(s['avg'])}|"
+        )
+    return "\n".join(lines)
+
+
+def metric_median(rows, key):
+    values = [row[key] for row in rows if row.get(key) is not None]
+    return median(values) if values else 0
+
+
+def hit_after_summary(rows):
+    hit_rows = [row for row in rows if row.get("hit_final_diff") is not None]
+    if not hit_rows:
+        return {
+            "total": 0,
+            "final_positive": 0,
+            "plus30_positive": 0,
+            "plus60_positive": 0,
+            "final_median": 0,
+            "plus30_median": 0,
+            "plus60_median": 0,
+            "max_up_median": 0,
+            "max_down_median": 0,
+        }
+    return {
+        "total": len(hit_rows),
+        "final_positive": sum(row["hit_final_diff"] > 0 for row in hit_rows),
+        "plus30_positive": sum((row.get("hit_plus30") or 0) > 0 for row in hit_rows),
+        "plus60_positive": sum((row.get("hit_plus60") or 0) > 0 for row in hit_rows),
+        "final_median": metric_median(hit_rows, "hit_final_diff"),
+        "plus30_median": metric_median(hit_rows, "hit_plus30"),
+        "plus60_median": metric_median(hit_rows, "hit_plus60"),
+        "max_up_median": metric_median(hit_rows, "hit_max_up"),
+        "max_down_median": metric_median(hit_rows, "hit_max_down"),
+    }
+
+
+def hit_after_table(rows, keys, min_count=1):
+    grouped = defaultdict(list)
+    for row in rows:
+        if row.get("hit_final_diff") is None:
+            continue
+        grouped[tuple(row[key] for key in keys)].append(row)
+    lines = [
+        "|" + "|".join(keys) + "|件数|+30分プラス|+60分プラス|最終プラス|+30分中央値|+60分中央値|最終差分中央値|最大上昇中央値|最大下落中央値|",
+        "|" + "|".join("---" for _ in keys) + "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for key_values, sub in sorted(grouped.items(), key=lambda item: (item[0],)):
+        if len(sub) < min_count:
+            continue
+        s = hit_after_summary(sub)
+        lines.append(
+            "|" + "|".join(str(value) for value in key_values) +
+            f"|{s['total']}|{s['plus30_positive']}/{s['total']} ({pct(s['plus30_positive'], s['total']):.1f}%)|"
+            f"{s['plus60_positive']}/{s['total']} ({pct(s['plus60_positive'], s['total']):.1f}%)|"
+            f"{s['final_positive']}/{s['total']} ({pct(s['final_positive'], s['total']):.1f}%)|"
+            f"{signed(s['plus30_median'])}|{signed(s['plus60_median'])}|{signed(s['final_median'])}|"
+            f"{signed(s['max_up_median'])}|{signed(s['max_down_median'])}|"
         )
     return "\n".join(lines)
 
@@ -418,6 +604,19 @@ def make_report(rows, args):
         "",
         table_by_keys(rows, ["special", "cycle_plus", "intraday_hit", "chart_state"], min_count=args.min_count),
         "",
+        "## 日中周期hit後の差玉推移",
+        "",
+        "- hit確認時刻: 採用日中周期に一致した2回目側の当たり開始時刻",
+        "- hit後差分: hit確認時点の差玉から各評価時点までの差分",
+        "",
+        "### 周期推定 x チャート状態",
+        "",
+        hit_after_table(rows, ["cycle_plus", "chart_state"], min_count=1),
+        "",
+        "### 特日 x 周期推定",
+        "",
+        hit_after_table(rows, ["special", "cycle_plus"], min_count=1),
+        "",
         reverse_pattern_section(rows),
         "",
         "## 注意",
@@ -444,6 +643,8 @@ def make_html(rows, args):
     reverse = [row for row in minus if row["positive"]]
     direction = sum((row["cycle_plus"] and row["positive"]) or ((not row["cycle_plus"]) and (not row["positive"])) for row in rows)
     source_counts = Counter(row.get("source", "unknown") for row in rows)
+    hit_after_rows = [row for row in rows if row.get("hit_final_diff") is not None]
+    hit_after_s = hit_after_summary(hit_after_rows)
     source_text = " / ".join(f"{key}: {value}件" for key, value in sorted(source_counts.items()))
 
     def metric_card(title, sub, group, tone=""):
@@ -461,6 +662,13 @@ def make_html(rows, args):
         metric_card("周期+ × 日中hit", "上向き候補の当日確認", plus_hit, "hit"),
         metric_card("周期- × 日中hit", "下向きからの反転候補", minus_hit, "hit"),
         metric_card("周期- × hitなし", "反転材料なし", minus_no, "weak"),
+        (
+            f'<article class="metric hit"><span>日中hit後プラス</span>'
+            f'<b>{pct(hit_after_s["final_positive"], hit_after_s["total"]):.1f}%</b>'
+            f'<p>{hit_after_s["final_positive"]}/{hit_after_s["total"]} / 最終中央値 {signed_plain(hit_after_s["final_median"])}</p>'
+            f'<small>+30分 {hit_after_s["plus30_positive"]}/{hit_after_s["total"]} / '
+            f'+60分 {hit_after_s["plus60_positive"]}/{hit_after_s["total"]}</small></article>'
+        ),
     ])
 
     condition_rows = []
@@ -482,6 +690,26 @@ def make_html(rows, args):
                     f"<td>{jp_hit(intraday_hit)}</td><td>{count}</td><td>{rate}</td>"
                     f"<td>{signed_plain(s['median'])}</td><td>{signed_plain(s['avg'])}</td></tr>"
                 )
+
+    hit_after_condition_rows = []
+    for cycle_plus in (False, True):
+        for chart_state in ("good", "neutral", "weak"):
+            sub = [
+                row for row in hit_after_rows
+                if row["cycle_plus"] == cycle_plus and row.get("chart_state") == chart_state
+            ]
+            if not sub:
+                continue
+            s = hit_after_summary(sub)
+            hit_after_condition_rows.append(
+                f"<tr><td>{jp_cycle(cycle_plus)}</td><td>{chart_state}</td>"
+                f"<td>{s['total']}</td>"
+                f"<td>{s['plus30_positive']}/{s['total']} ({pct(s['plus30_positive'], s['total']):.1f}%)</td>"
+                f"<td>{s['plus60_positive']}/{s['total']} ({pct(s['plus60_positive'], s['total']):.1f}%)</td>"
+                f"<td>{s['final_positive']}/{s['total']} ({pct(s['final_positive'], s['total']):.1f}%)</td>"
+                f"<td>{signed_plain(s['final_median'])}</td>"
+                f"<td>{signed_plain(s['max_up_median'])}</td></tr>"
+            )
 
     daily_cards = []
     for date in sorted({row["date"] for row in rows}, reverse=True):
@@ -562,6 +790,12 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:9px 10px;border-botto
       {''.join(condition_rows)}
     </tbody></table>
   </section>
+  <section class="panel">
+    <h2>日中hit後の差玉推移</h2>
+    <table><thead><tr><th>周期</th><th>チャート</th><th>件数</th><th>+30分</th><th>+60分</th><th>最終</th><th>最終中央値</th><th>最大上昇中央値</th></tr></thead><tbody>
+      {''.join(hit_after_condition_rows)}
+    </tbody></table>
+  </section>
   <section>
     <h2>日別リスト</h2>
     <div class="day-list">{''.join(daily_cards)}</div>
@@ -596,6 +830,7 @@ def main():
         raise SystemExit("対象のprediction実績がありません。")
     periods = load_intraday_periods(Path(args.period_report))
     build_intraday_hits(rows, periods, args.tolerance)
+    build_hit_after_metrics(rows, periods, args.tolerance)
     build_chart_features(rows)
     out = Path(args.out) if args.out else REPORT_DIR / f"combined_signal_analysis_{args.start}_{args.end}.md"
     out.write_text(make_report(rows, args), encoding="utf-8")
