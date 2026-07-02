@@ -343,7 +343,15 @@ def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = 
     else:
         y1 = detect_horizontal_line(img, 360, min(height - 1, 820), 60, width - 25)
 
-    y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
+    zero_candidates = [
+        y for y, _score in line_groups
+        if 80 <= y <= y1 - 40
+    ]
+    zero_target = y1 * abs(y2_value) / max(1, abs(y2_value) + abs(y1_value))
+    if zero_candidates:
+        y0 = min(zero_candidates, key=lambda y: abs(y - zero_target))
+    else:
+        y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
     y2_ratio = abs(y2_value) / max(1, abs(y1_value))
     y2 = round(y0 - (y1 - y0) * y2_ratio)
 
@@ -458,11 +466,8 @@ def pick_event_segment(event: dict, next_event: dict | None, points: list[dict],
     if next_event:
         end_to = min(end_to, max(event_minute + 5, next_event["minute"] - 1))
 
-    start_candidates = [point for point in points if start_from <= point["t"] <= start_to]
-    if not start_candidates:
-        target_x = time_to_x(event_minute, axes)
-        start_candidates = sorted(points, key=lambda point: abs(point["x"] - target_x))[:1]
-    start_point = min(start_candidates, key=lambda point: point["sv"])
+    target_x = time_to_x(event_minute, axes)
+    start_point = min(points, key=lambda point: (abs(point["t"] - event_minute), abs(point["x"] - target_x)))
 
     end_candidates = [
         point for point in points
@@ -539,17 +544,12 @@ def pick_episode_segment(
     first = episode["first"]
     last = episode["last"]
     event_minute = first["minute"]
-    start_from = max(T_START, event_minute - 12)
-    start_to = min(T_END, event_minute + 6)
     end_to = min(T_END, max(event_minute + 55, last["minute"] + 20))
     if next_episode:
         end_to = min(end_to, max(event_minute + 5, next_episode["first"]["minute"] - 1))
 
-    start_candidates = [point for point in points if start_from <= point["t"] <= start_to]
-    if not start_candidates:
-        target_x = time_to_x(event_minute, axes)
-        start_candidates = sorted(points, key=lambda point: abs(point["x"] - target_x))[:1]
-    start_point = min(start_candidates, key=lambda point: point["sv"])
+    target_x = time_to_x(event_minute, axes)
+    start_point = min(points, key=lambda point: (abs(point["t"] - event_minute), abs(point["x"] - target_x)))
 
     end_candidates = [
         point for point in points
