@@ -322,40 +322,59 @@ def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict
     return axes, points
 
 
-def build_axes_and_points_from_image(chart_path: Path, adjust: dict) -> tuple[dict, list[tuple[int, int]]]:
-    img = Image.open(chart_path).convert("RGB")
-    with contextlib.redirect_stdout(io.StringIO()):
-        time_label_y = analyze.detect_time_label_row(img)
-        gl, gr, gt, gb = analyze.detect_graph_region(img, time_label_y, time_label_y)
-        y2_raw, y0_raw, y1_raw = analyze.detect_y_axes(img, gt, gb)
-        y2_ocr, y0_ocr, y1_ocr, y2_val, y1_val, _ = analyze.detect_y_by_ocr(img, gt, gb)
+def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = -10000) -> dict:
+    width, height = img.size
+    line_groups = [
+        (y, score)
+        for y, score in horizontal_line_groups(img, 5, min(height - 1, 560), 70, width - 32)
+        if y > 40
+    ]
+    strong_groups = [(y, score) for y, score in line_groups if score >= width * 0.65]
 
-    if y2_ocr and y1_ocr:
-        y2 = y2_ocr + adjust.get("y2_offset", 0)
-        y1 = y1_ocr + adjust.get("y1_offset", 0)
-        y0 = y0_ocr + adjust.get("y2_offset", 0) if y0_ocr else (y2 + y1) // 2
+    bottom_candidates = [y for y, _score in strong_groups if 360 <= y <= 490]
+    if bottom_candidates:
+        y1 = bottom_candidates[0]
+    elif strong_groups:
+        y1 = strong_groups[-1][0]
     else:
-        y2 = y2_raw + adjust.get("y2_offset", 0)
-        y1 = y1_raw + adjust.get("y1_offset", 0)
-        y0 = (y2 + y1) // 2
-        y2_val = 10000
-        y1_val = -10000
+        y1 = detect_horizontal_line(img, 360, min(height - 1, 520), 60, width - 25)
 
-    axes = {
-        "graph_left": gl,
-        "graph_right": gr,
-        "graph_top": gt,
-        "graph_bottom": gb,
+    y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
+    y2_ratio = abs(y2_value) / max(1, abs(y1_value))
+    y2 = round(y0 - (y1 - y0) * y2_ratio)
+
+    left = detect_vertical_line(img, 65, 100, max(0, y2), y1, prefer_first_group=True)
+    frame_right = round(left + 461)
+    pre_spacing = (frame_right - left) / 5.0
+    x0900 = left
+    x2100 = round(left + pre_spacing * 4.0)
+
+    return {
+        "graph_left": x0900,
+        "graph_right": frame_right,
+        "graph_top": y2,
+        "graph_bottom": y1,
         "y2_px": y2,
         "y0_px": y0,
         "y1_px": y1,
-        "x1000_px": adjust["x1000"],
-        "x1200_px": adjust["x1200"],
-        "x1800_px": adjust["x1800"],
-        "x2230_px": adjust["x2230"],
-        "y2_value": y2_val,
-        "y1_value": y1_val,
+        "x1000_px": round(x0900 + pre_spacing / 3.0),
+        "x1200_px": round(left + pre_spacing),
+        "x1800_px": round(left + pre_spacing * 3.0),
+        "x2230_px": round(x2100 + pre_spacing * 0.5),
+        "y2_value": y2_value,
+        "y1_value": y1_value,
+        "source": "image",
     }
+
+
+def build_axes_and_points_from_image(
+    chart_path: Path,
+    adjust: dict,
+    y2_value: int | None = None,
+    y1_value: int | None = None,
+) -> tuple[dict, list[tuple[int, int]]]:
+    img = Image.open(chart_path).convert("RGB")
+    axes = build_capture_axes(img, y2_value or 10000, y1_value or -10000)
 
     with contextlib.redirect_stdout(io.StringIO()):
         color = analyze.detect_color(img, axes)
@@ -369,10 +388,22 @@ def build_axes_and_points_from_image(chart_path: Path, adjust: dict) -> tuple[di
 
 
 def build_axes_and_points(chart_path: Path, html_path: Path, date_str: str, adjust: dict) -> tuple[dict, list[tuple[int, int]]]:
+    svg_axes = None
     try:
-        return build_axes_and_points_from_svg(html_path, date_str)
+        svg_axes, _svg_points = build_axes_and_points_from_svg(html_path, date_str)
     except Exception:
-        return build_axes_and_points_from_image(chart_path, adjust)
+        svg_axes = None
+    try:
+        return build_axes_and_points_from_image(
+            chart_path,
+            adjust,
+            svg_axes.get("y2_value") if svg_axes else None,
+            svg_axes.get("y1_value") if svg_axes else None,
+        )
+    except Exception:
+        if svg_axes is None:
+            raise
+        return build_axes_and_points_from_svg(html_path, date_str)
 
 
 def smooth_points(points: list[tuple[int, int]], axes: dict) -> list[dict]:
@@ -759,26 +790,15 @@ def nearest_candidate(candidates: list[tuple[int, int]], target: float, toleranc
 
 
 def calibrate_overlay_axes(img: Image.Image, axes: dict) -> dict:
-    width, _height = img.size
-    line_groups = [
-        (y, score) for y, score in horizontal_line_groups(img, 5, min(img.size[1] - 1, 830), 70, width - 32)
-        if y > 40
-    ]
-    if line_groups:
-        # The first full-width horizontal line in mobile captures is usually the
-        # lower value-axis border, not the zero line. Some charts also have
-        # strong grid lines above it, so prefer a sufficiently long candidate.
-        y1_candidates = [y for y, score in line_groups if score >= width * 0.65]
-        y1 = y1_candidates[0] if y1_candidates else line_groups[0][0]
-        y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
-    else:
-        y0 = detect_horizontal_line(img, 220, 430, 60, width - 25)
-        y1 = detect_horizontal_line(img, y0 + 80, min(img.size[1] - 1, y0 + 430), 60, width - 25)
-
-    y2_ratio = abs(axes.get("y2_value", 20000)) / max(1, abs(axes.get("y1_value", -20000)))
-    y2 = round(y0 - (y1 - y0) * y2_ratio)
-
-    left = detect_vertical_line(img, 65, 85, max(0, y2), y1, prefer_first_group=True)
+    capture_axes = build_capture_axes(
+        img,
+        axes.get("y2_value", 20000),
+        axes.get("y1_value", -20000),
+    )
+    y2 = capture_axes["y2_px"]
+    y0 = capture_axes["y0_px"]
+    y1 = capture_axes["y1_px"]
+    left = capture_axes["graph_left"]
     # P'sCUBE mobile captures keep the outer chart frame stable, while internal
     # grid-line strength changes by machine/range. Anchor the timeline to the
     # outer 09:00-24:00 frame to avoid per-chart x-axis drift.
