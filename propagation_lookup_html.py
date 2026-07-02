@@ -4,6 +4,7 @@ s3・s4の島図から複数の点火台を選べる伝播候補ルックアッ�
 候補率は未来予測ではなく、過去データ上の P(B点火 | A点火)。
 """
 
+import argparse
 import json
 from collections import defaultdict
 from datetime import datetime
@@ -88,11 +89,10 @@ def html_escape_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
-def load_latest_intraday_hits():
-    paths = sorted((ROOT / "data").glob("daytime_hits_20*.json"))
-    if not paths:
-        return {"date": "", "hits": [], "events": {}}
-    path = paths[-1]
+def load_intraday_hits(target_date):
+    path = ROOT / "data" / f"daytime_hits_{target_date}.json"
+    if not path.exists():
+        return {"date": target_date, "hits": [], "events": {}, "missing": True}
     data = json.loads(path.read_text(encoding="utf-8"))
     events = {
         str(int(machine)): values
@@ -104,16 +104,26 @@ def load_latest_intraday_hits():
         "date": data.get("date", path.stem.removeprefix("daytime_hits_")),
         "hits": sorted((int(machine) for machine in hits), key=int),
         "events": events,
+        "missing": False,
     }
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--daytime-date",
+        default=datetime.now().strftime("%Y%m%d"),
+        help="Hマークに使う日中周期hit日付。未取得ならHは表示しない。",
+    )
+    args = parser.parse_args()
+
     snaps = load_snaps()
     if not snaps:
         raise SystemExit("snapshotがありません。daily_ingest.py を先に実行してください。")
 
     dates = sorted(snaps.keys())
-    intraday = load_latest_intraday_hits()
+    intraday = load_intraday_hits(args.daytime_date)
+    intraday_label = f"{intraday['date']}（未取得）" if intraday.get("missing") else intraday["date"]
     payload = {
         "meta": {
             "from": dates[0],
@@ -195,7 +205,7 @@ button{{font:inherit}}
     <span>{payload["meta"]["days"]}日分</span>
     <span>伝播窓 {payload["meta"]["windowMin"]}分</span>
     <span>生成 {payload["meta"]["generated"]}</span>
-    <span>日中周期hit {intraday["date"]}</span>
+    <span>日中周期hit {intraday_label}</span>
   </div>
 </header>
 <main>
