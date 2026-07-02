@@ -458,16 +458,40 @@ def densify_points_by_minute(points: list[tuple[int, int]], axes: dict) -> list[
     return dense
 
 
+def interpolated_point_at_minute(points: list[dict], axes: dict, minute: int) -> dict:
+    target_x = time_to_x(minute, axes)
+    ordered = sorted(points, key=lambda point: point["x"])
+    xs = [point["x"] for point in ordered]
+    index = bisect_left(xs, target_x)
+    if index <= 0:
+        y = ordered[0]["y"]
+    elif index >= len(ordered):
+        y = ordered[-1]["y"]
+    else:
+        left = ordered[index - 1]
+        right = ordered[index]
+        if right["x"] == left["x"]:
+            y = right["y"]
+        else:
+            ratio = (target_x - left["x"]) / (right["x"] - left["x"])
+            y = left["y"] + ratio * (right["y"] - left["y"])
+    value = analyze.px_to_val(y, axes)
+    return {
+        "x": target_x,
+        "y": round(y),
+        "t": minute,
+        "v": value,
+        "sv": value,
+    }
+
+
 def pick_event_segment(event: dict, next_event: dict | None, points: list[dict], axes: dict, min_gain: int, big_gain: int) -> dict | None:
     event_minute = event["minute"]
-    start_from = max(T_START, event_minute - 12)
-    start_to = min(T_END, event_minute + 6)
     end_to = min(T_END, event_minute + 55)
     if next_event:
         end_to = min(end_to, max(event_minute + 5, next_event["minute"] - 1))
 
-    target_x = time_to_x(event_minute, axes)
-    start_point = min(points, key=lambda point: (abs(point["t"] - event_minute), abs(point["x"] - target_x)))
+    start_point = interpolated_point_at_minute(points, axes, event_minute)
 
     end_candidates = [
         point for point in points
@@ -548,8 +572,7 @@ def pick_episode_segment(
     if next_episode:
         end_to = min(end_to, max(event_minute + 5, next_episode["first"]["minute"] - 1))
 
-    target_x = time_to_x(event_minute, axes)
-    start_point = min(points, key=lambda point: (abs(point["t"] - event_minute), abs(point["x"] - target_x)))
+    start_point = interpolated_point_at_minute(points, axes, event_minute)
 
     end_candidates = [
         point for point in points
@@ -858,6 +881,13 @@ def svg_to_image_point(x: int | float, y: int | float, axes: dict, img: Image.Im
     return time_to_overlay_x(minutes, overlay_axes), value_to_image_y(value, axes, overlay_axes)
 
 
+def overlay_source_label(source_time: str) -> str:
+    parts = [part for part in source_time.split("/") if part]
+    if len(parts) <= 1:
+        return source_time
+    return f"{parts[0]} (+{len(parts) - 1})"
+
+
 def save_overlay(chart_path: Path, axes: dict, points: list[tuple[int, int]], segments: list[dict], out_path: Path) -> None:
     img = Image.open(chart_path).convert("RGBA")
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -911,7 +941,7 @@ def save_overlay(chart_path: Path, axes: dict, points: list[tuple[int, int]], se
         draw.ellipse([sx - radius, sy - radius, sx + radius, sy + radius], fill=(255, 64, 64, 235))
         draw.ellipse([ex - radius, ey - radius, ex + radius, ey + radius], fill=end_color)
         draw.text((ex + radius + 2, ey - 10), f"{index}", fill=end_color)
-        draw.text((sx + radius + 2, sy + 2), segment["source_time"], fill=(255, 180, 180, 230))
+        draw.text((sx + radius + 2, sy + 2), overlay_source_label(segment["source_time"]), fill=(255, 180, 180, 230))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     Image.alpha_composite(img, overlay).convert("RGB").save(out_path)
