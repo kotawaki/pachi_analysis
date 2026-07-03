@@ -227,33 +227,42 @@ def interpolate_x(labels: dict[int, float], minute: int) -> float:
 
 def extract_svg_points(block: str) -> list[tuple[int, int]]:
     points: list[tuple[int, int]] = []
-    bullet_pattern = re.compile(
-        r'<circle\b(?=[^>]*class="amcharts-graph-bullet")[^>]*'
-        r'transform="translate\(([-\d.]+),([-\d.]+)\)"',
-        re.S,
-    )
-    for match in bullet_pattern.finditer(block):
-        points.append((round(float(match.group(1))), round(float(match.group(2)))))
+    path_pattern = re.compile(r'<path\b[^>]*class="[^"]*amcharts-graph-stroke[^"]*"[^>]*', re.S)
+    path_match = path_pattern.search(block)
+    if path_match:
+        d_match = re.search(r'd="([^"]+)"', path_match.group(0))
+        if d_match:
+            points = [
+                (round(float(x)), round(float(y)))
+                for x, y in re.findall(r'[ML]\s*([-\d.]+),([-\d.]+)', d_match.group(1))
+                if not (float(x) == 0 and float(y) == 0)
+            ]
 
     if not points:
-        path_pattern = re.compile(r'class="amcharts-graph-stroke"[^>]*>|<path\b[^>]*class="amcharts-graph-stroke"[^>]*', re.S)
-        path_match = path_pattern.search(block)
-        if path_match:
-            tag_start = block.rfind("<path", 0, path_match.end())
-            tag_end = block.find(">", path_match.end())
-            tag = block[tag_start:tag_end]
-            d_match = re.search(r'd="([^"]+)"', tag)
-            if d_match:
-                points = [
-                    (round(float(x)), round(float(y)))
-                    for x, y in re.findall(r'[ML]\s*([-\d.]+),([-\d.]+)', d_match.group(1))
-                ]
+        bullet_pattern = re.compile(
+            r'<circle\b(?=[^>]*class="amcharts-graph-bullet")[^>]*'
+            r'transform="translate\(([-\d.]+),([-\d.]+)\)"',
+            re.S,
+        )
+        for match in bullet_pattern.finditer(block):
+            points.append((round(float(match.group(1))), round(float(match.group(2)))))
 
     by_x: dict[int, int] = {}
     for x, y in points:
         if x >= 0:
             by_x[x] = y
     return sorted(by_x.items())
+
+
+def extract_svg_zero_y(block: str) -> float | None:
+    for match in re.finditer(r'<path\b[^>]*class="[^"]*amcharts-axis-zero-grid[^"]*"[^>]*>', block, re.S):
+        d_match = re.search(r'd="([^"]+)"', match.group(0))
+        if not d_match:
+            continue
+        coord_match = re.search(r'M\s*[-\d.]+,([-\d.]+)', d_match.group(1))
+        if coord_match:
+            return float(coord_match.group(1))
+    return None
 
 
 def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict, list[tuple[int, int]]]:
@@ -285,6 +294,9 @@ def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict
         value = clean_axis_number(label)
         if value is not None and (abs(value) >= 1000 or value == 0):
             value_labels[value] = y
+    zero_y = extract_svg_zero_y(block)
+    if zero_y is not None:
+        value_labels[0] = zero_y
 
     if 0 not in value_labels or not any(v > 0 for v in value_labels) or not any(v < 0 for v in value_labels):
         raise ValueError("insufficient value axis labels")
@@ -343,24 +355,26 @@ def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = 
     else:
         y1 = detect_horizontal_line(img, 360, min(height - 1, 820), 60, width - 25)
 
+    left = detect_vertical_line(img, 65, 100, 5, y1, prefer_first_group=True)
+    y2 = detect_axis_top(img, left, y1)
+    y0_from_frame = round(
+        y2 + (abs(y2_value) / max(1, abs(y2_value) + abs(y1_value))) * (y1 - y2)
+    )
     zero_candidates = [
         y for y, _score in line_groups
         if 80 <= y <= y1 - 40
     ]
-    zero_target = y1 * abs(y2_value) / max(1, abs(y2_value) + abs(y1_value))
+    zero_target = y0_from_frame
     white_zero_candidates = [
         y for y, _score in white_horizontal_line_groups(img, 80, y1 - 40, 70, width - 32)
         if abs(y - zero_target) <= max(35, (y1 - 80) * 0.18)
     ]
     zero_candidates = sorted(set(zero_candidates + white_zero_candidates))
     if zero_candidates:
-        y0 = min(zero_candidates, key=lambda y: abs(y - zero_target))
+        candidate = min(zero_candidates, key=lambda y: abs(y - zero_target))
+        y0 = candidate if abs(candidate - zero_target) <= 12 else y0_from_frame
     else:
-        y0 = detect_horizontal_line(img, max(5, y1 - 600), max(5, y1 - 40), 60, width - 25)
-    y2_ratio = abs(y2_value) / max(1, abs(y1_value))
-    y2 = round(y0 - (y1 - y0) * y2_ratio)
-
-    left = detect_vertical_line(img, 65, 100, max(0, y2), y1, prefer_first_group=True)
+        y0 = y0_from_frame
     frame_right = round(left + 461)
     pre_spacing = (frame_right - left) / 5.0
     x0900 = left
@@ -407,7 +421,7 @@ def build_axes_and_points_from_image(
 def build_axes_and_points(chart_path: Path, html_path: Path, date_str: str, adjust: dict) -> tuple[dict, list[tuple[int, int]]]:
     svg_axes = None
     try:
-        svg_axes, _svg_points = build_axes_and_points_from_svg(html_path, date_str)
+        return build_axes_and_points_from_svg(html_path, date_str)
     except Exception:
         svg_axes = None
     try:
@@ -811,6 +825,20 @@ def white_horizontal_line_groups(
         y = round(sum(y * count for y, count in group) / weight)
         result.append((y, max(count for _y, count in group)))
     return result
+
+
+def detect_axis_top(img: Image.Image, left: int, y1: int) -> int:
+    for y in range(5, max(6, y1 - 80)):
+        hits = 0
+        for dy in range(0, 5):
+            yy = y + dy
+            if yy >= y1:
+                break
+            if any(bright_gray(img.getpixel((max(0, min(img.size[0] - 1, left + dx)), yy)), 65) for dx in range(-1, 2)):
+                hits += 1
+        if hits >= 3:
+            return y
+    return max(5, y1 - 444)
 
 
 def detect_vertical_line(img: Image.Image, x_start: int, x_end: int, y_start: int, y_end: int, prefer_first_group: bool = True) -> int:
