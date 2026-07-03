@@ -348,6 +348,11 @@ def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = 
         if 80 <= y <= y1 - 40
     ]
     zero_target = y1 * abs(y2_value) / max(1, abs(y2_value) + abs(y1_value))
+    white_zero_candidates = [
+        y for y, _score in white_horizontal_line_groups(img, 80, y1 - 40, 70, width - 32)
+        if abs(y - zero_target) <= max(35, (y1 - 80) * 0.18)
+    ]
+    zero_candidates = sorted(set(zero_candidates + white_zero_candidates))
     if zero_candidates:
         y0 = min(zero_candidates, key=lambda y: abs(y - zero_target))
     else:
@@ -753,6 +758,40 @@ def horizontal_line_groups(img: Image.Image, y_start: int, y_end: int, x_start: 
     for y in range(y_start, y_end + 1):
         count = sum(1 for x in range(x_start, x_end + 1) if bright_gray(img.getpixel((x, y)), 35))
         if count > (x_end - x_start) * 0.60:
+            rows.append((y, count))
+
+    groups = []
+    current = []
+    for item in rows:
+        if not current or item[0] <= current[-1][0] + 1:
+            current.append(item)
+        else:
+            groups.append(current)
+            current = [item]
+    if current:
+        groups.append(current)
+
+    result = []
+    for group in groups:
+        weight = sum(count for _y, count in group)
+        y = round(sum(y * count for y, count in group) / weight)
+        result.append((y, max(count for _y, count in group)))
+    return result
+
+
+def white_horizontal_line_groups(
+    img: Image.Image,
+    y_start: int,
+    y_end: int,
+    x_start: int,
+    x_end: int,
+    min_ratio: float = 0.20,
+) -> list[tuple[int, int]]:
+    rows = []
+    width = x_end - x_start + 1
+    for y in range(y_start, y_end + 1):
+        count = sum(1 for x in range(x_start, x_end + 1) if bright_gray(img.getpixel((x, y)), 80))
+        if count >= width * min_ratio:
             rows.append((y, count))
 
     groups = []
