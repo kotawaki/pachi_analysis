@@ -6,6 +6,8 @@ MA5/20/75 + フィボナッチ + ゴールデンクロス(MA5が75→20の順) +
 import csv, os, glob, json
 from collections import defaultdict
 
+import daily_ohlc as daily_source
+
 CSV_DIR   = 'csv/analyze'
 OUT_DIR   = 'docs'          # GitHub Pages は docs/ フォルダを認識する
 OUT_FILE  = os.path.join(OUT_DIR, 'ohlc.html')   # トップ(index.html)から選択する1ページ
@@ -30,6 +32,16 @@ def machine_id(value):
 # CSV → 台別・日別 OHLC
 # -------------------------------------------------------
 def load_ohlc(csv_dir):
+    source, _meta = daily_source.load_daily_ohlc()
+    if source:
+        return {
+            machine: {
+                date: (row["net"], row["high"], row["low"])
+                for date, row in days.items()
+            }
+            for machine, days in source.items()
+        }
+
     sess = defaultdict(lambda: defaultdict(list))
     for path in sorted(glob.glob(os.path.join(csv_dir,'*','*_analyze.csv'))):
         date = os.path.basename(os.path.dirname(path))

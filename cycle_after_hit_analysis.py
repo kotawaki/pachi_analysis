@@ -12,6 +12,7 @@ import csv
 import statistics
 from pathlib import Path
 
+import daily_ohlc as daily_source
 import machine_cycle_positive as cycle
 
 
@@ -72,6 +73,7 @@ def ball_at(rows, minute):
 
 def load_days(machine_set):
     loaded = {}
+    daily, _meta = daily_source.load_daily_ohlc({str(int(machine)) for machine in machine_set})
     for path in sorted(CSV_DIR.glob("*/*_analyze.csv")):
         date = path.parent.name[:8]
         by_machine = {}
@@ -89,6 +91,7 @@ def load_days(machine_set):
             rows.sort(key=lambda r: parse_time(r[5]))
             events = [(parse_time(r[5]), r[5], r[4]) for r in rows if r[4] in ATARI]
             latest = max(rows, key=lambda r: parse_time(r[7]))
+            final = daily.get(str(int(machine)), {}).get(date, {}).get("net", to_int(latest[8]))
             loaded[(date, machine)] = {
                 "date": date,
                 "machine": machine,
@@ -96,7 +99,7 @@ def load_days(machine_set):
                 "island": rows[0][3],
                 "rows": rows,
                 "events": events,
-                "final": to_int(latest[8]),
+                "final": final,
             }
     return loaded
 

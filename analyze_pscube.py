@@ -1024,6 +1024,48 @@ def get_machine_info(machine: str) -> tuple[str, str]:
     return "", ""
 
 
+def chart_daily_ohlc(points: list[tuple[int, int]], axes: dict) -> dict:
+    values = [round(analyze.px_to_val(y, axes)) for _x, y in sorted(points)]
+    if not values:
+        values = [0]
+    return {
+        "open": values[0],
+        "high": max(values),
+        "low": min(values),
+        "close": values[-1],
+        "source": axes.get("source", "chart"),
+        "point_count": len(values),
+    }
+
+
+def save_daily_ohlc_row(ohlc: dict, date_label: str, machine: str, group: str, island: str, ohlc_path: Path) -> None:
+    fields = [
+        "Date", "Machine", "Group", "Island",
+        "Open", "High", "Low", "Close", "Source", "PointCount",
+    ]
+    ohlc_path.parent.mkdir(parents=True, exist_ok=True)
+    row = {
+        "Date": date_label,
+        "Machine": machine.zfill(3),
+        "Group": group,
+        "Island": island,
+        "Open": ohlc["open"],
+        "High": ohlc["high"],
+        "Low": ohlc["low"],
+        "Close": ohlc["close"],
+        "Source": ohlc["source"],
+        "PointCount": ohlc["point_count"],
+    }
+    existing = []
+    if ohlc_path.exists():
+        with ohlc_path.open("r", encoding="utf-8-sig", newline="") as handle:
+            existing = [item for item in csv.DictReader(handle) if item.get("Machine") != machine.zfill(3)]
+    with ohlc_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(existing + [row])
+
+
 def save_csv_rows(segments: list[dict], date_label: str, machine: str, group: str, island: str, csv_path: Path) -> None:
     fields = ["Date", "Machine", "Group", "Island", "種別", "開始時刻", "開始差玉", "終了時刻", "終了差玉", "増減差玉", "時間(分)"]
     csv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1076,9 +1118,11 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
         segments = [segment] if segment else []
         status = "no_history_events"
     csv_path = out_dir / date_str / f"{date_str}_analyze.csv"
+    ohlc_path = out_dir / date_str / f"{date_str}_daily_ohlc.csv"
     overlay_path = out_dir / date_str / "overlay" / f"{date_str}_{machine}_overlay.png"
     if not args.dry_run:
         save_csv_rows(segments, date_label, machine, group, island, csv_path)
+        save_daily_ohlc_row(chart_daily_ohlc(points, axes), date_label, machine, group, island, ohlc_path)
     if args.overlay:
         save_overlay(chart_path, axes, points, segments, overlay_path)
     return {
@@ -1087,6 +1131,7 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
         "events": len(events),
         "segments": len(segments),
         "csv": str(csv_path),
+        "daily_ohlc": str(ohlc_path),
         "overlay": str(overlay_path) if args.overlay else None,
     }
 

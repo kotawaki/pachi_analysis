@@ -21,6 +21,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 import chart_signal_positive as chart
+import daily_ohlc as daily_source
 import daily_intraday_cycle_sync as cycle_sync
 import machine_cycle_positive as intraday
 import prediction_daily as prediction
@@ -275,6 +276,7 @@ def value_at_time(points, minute):
 def load_event_timelines(dates, machines):
     timelines = {}
     target_machines = set(machines)
+    daily, _meta = daily_source.load_daily_ohlc(target_machines)
     for date in dates:
         path = prediction.CSV_DIR / date / f"{date}_analyze.csv"
         if not path.exists():
@@ -311,10 +313,11 @@ def load_event_timelines(dates, machines):
                 continue
             points = sorted(set(points))
             events.sort(key=lambda item: item["time"])
+            final_ball = daily.get(str(int(machine)), {}).get(date, {}).get("net", points[-1][1])
             timelines[(date, machine)] = {
                 "events": events,
                 "points": points,
-                "final_ball": points[-1][1],
+                "final_ball": final_ball,
             }
     return timelines
 

@@ -13,6 +13,8 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import daily_ohlc as daily_source
+
 
 ROOT = Path(__file__).parent
 CSV_DIR = ROOT / "csv" / "analyze"
@@ -50,6 +52,13 @@ def machine_id(value: object) -> int | None:
 
 
 def load_all_daily_net() -> dict[int, list[tuple[str, int]]]:
+    source = daily_source.load_daily_net({str(machine) for machine in MACHINES})
+    if source:
+        return {
+            machine: source.get(str(machine), [])
+            for machine in MACHINES
+        }
+
     daily: dict[int, list[tuple[str, int]]] = {machine: [] for machine in MACHINES}
     for path in sorted(CSV_DIR.glob("*/*_analyze.csv")):
         latest_by_machine: dict[int, tuple[str, int]] = {}

@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import aggregate_cycle_sync_68 as agg
+import daily_ohlc as daily_source
 import machine_cycle_positive as intraday
 
 
@@ -91,6 +92,7 @@ def load_ocr_summary(date):
     path = analyze_csv_path(date)
     if not path.exists():
         return {}
+    daily, _meta = daily_source.load_daily_ohlc()
     by_machine = {}
     atari = {"当り", "大当り"}
     with path.open(encoding="utf-8-sig", newline="") as f:
@@ -116,6 +118,10 @@ def load_ocr_summary(date):
             final = int(float(latest[8] or 0))
         except ValueError:
             final = 0
+        chart_row = daily.get(str(int(machine)), {}).get(date)
+        if chart_row:
+            final = chart_row["net"]
+            vals.extend([chart_row["high"], chart_row["low"], chart_row["net"]])
         hits = [row for row in rows if row[4] in atari]
         out[machine] = {
             "atari": len(hits),

@@ -14,6 +14,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+import daily_ohlc as daily_source
+
 
 ROOT = Path(__file__).parent
 CSV_DIR = ROOT / "csv" / "analyze"
@@ -70,6 +72,30 @@ def iso(date):
 
 
 def load_daily_ohlc(machine_filter):
+    source, meta = daily_source.load_daily_ohlc(machine_filter)
+    if source:
+        out = {}
+        for machine, days in source.items():
+            cum = 0
+            series = []
+            for date, row in sorted(days.items()):
+                net = row["net"]
+                open_value = cum
+                close = cum + net
+                series.append({
+                    "date": date,
+                    "time": iso(date),
+                    "open": open_value,
+                    "high": max(open_value + row["high"], open_value, close),
+                    "low": min(open_value + row["low"], open_value, close),
+                    "close": close,
+                    "net": net,
+                    "positive": net > 0,
+                })
+                cum = close
+            out[machine] = series
+        return out, meta
+
     sessions = defaultdict(lambda: defaultdict(list))
     meta = {}
     for path in sorted(CSV_DIR.glob("*/*_analyze.csv")):
