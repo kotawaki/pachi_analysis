@@ -217,7 +217,14 @@ export async function captureMachine(tab, browser, options) {
       throw error;
     }
   }
-  await tab.playwright.waitForLoadState({ state: "domcontentloaded", timeoutMs: 30000 });
+  try {
+    await tab.playwright.waitForLoadState({ state: "domcontentloaded", timeoutMs: 30000 });
+  } catch (error) {
+    const currentUrl = (await tab.url()) || "";
+    if (!currentUrl.includes(`cd_dai=${machine}`)) {
+      throw error;
+    }
+  }
   await tab.playwright.waitForTimeout(openWaitMs);
 
   const expansion = await expandHistory(tab, {
