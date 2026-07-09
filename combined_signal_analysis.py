@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import ast
 import csv
+import html
 import json
 import re
 from collections import Counter, defaultdict
@@ -635,6 +636,56 @@ def make_report(rows, args):
     return "\n".join(lines)
 
 
+def load_daytime_candidates(date):
+    if not date:
+        return None
+    path = ROOT / "data" / f"daytime_hits_{date}.json"
+    if not path.exists():
+        return {"date": date, "missing": True, "hits": [], "machines": {}}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "date": data.get("date", date),
+        "missing": False,
+        "hits": data.get("hits", []),
+        "machines": data.get("machines", {}),
+    }
+
+
+def make_daytime_candidate_panel(args):
+    data = load_daytime_candidates(getattr(args, "daytime_date", None))
+    if not data:
+        return ""
+    date = html.escape(str(data["date"]))
+    if data.get("missing"):
+        body = '<p class="note">daytime未取得のため、当日H候補はありません。</p>'
+    else:
+        cards = []
+        machines = data.get("machines", {})
+        for machine in sorted((str(item) for item in data.get("hits", [])), key=lambda value: int(value)):
+            detail = machines.get(machine, {})
+            periods = ", ".join(f"{p}分" for p in detail.get("periods", [])) or "-"
+            hit_periods = ", ".join(f"{p}分" for p in detail.get("hit_periods", [])) or "-"
+            times = " / ".join(detail.get("event_times", [])) or "-"
+            cards.append(
+                "<li>"
+                f"<b>{html.escape(machine)}</b>"
+                f"<span>hit {html.escape(hit_periods)}</span>"
+                f"<em>周期 {html.escape(periods)} / 初当り {html.escape(times)}</em>"
+                "</li>"
+            )
+        body = (
+            '<ul class="reverse-list">'
+            + ("".join(cards) if cards else "<li><em>現時点のdaytime hit候補はありません。</em></li>")
+            + "</ul>"
+        )
+    return f"""
+  <section class="panel">
+    <h2>daytime日中周期hit候補 {date}</h2>
+    {body}
+    <p class="note">当日監視用です。実績一覧・陽線率への反映は翌朝morning取得後に行います。</p>
+  </section>"""
+
+
 def make_html(rows, args):
     all_s = summarize(rows)
     plus = [row for row in rows if row["cycle_plus"]]
@@ -783,6 +834,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:9px 10px;border-botto
   <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: {source_text}</div>
 </header>
 <main>
+{make_daytime_candidate_panel(args)}
   <section class="panel">
     <h2>全期間 {args.start}〜{args.end}</h2>
     <div class="summary">{top_cards}</div>
@@ -823,6 +875,7 @@ def parse_args():
     parser.add_argument("--backfill-mode", choices=("asof", "structural"), default="asof", help="asof=前日までで再計算、structural=全履歴周期構造で高速補完")
     parser.add_argument("--out", default=None, help="出力先")
     parser.add_argument("--html-out", default=str(ROOT / "docs" / "combined_signal_analysis.html"), help="HTML出力先")
+    parser.add_argument("--daytime-date", default=None, help="当日候補リストに使うdaytime hit日付")
     return parser.parse_args()
 
 
