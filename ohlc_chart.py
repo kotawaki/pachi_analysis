@@ -19,6 +19,7 @@ RANGES = [
     {'id':'r148_153', 'label':'148〜153番','machines':list(range(148,154)), 'start':'20251114'},
     {'id':'r154_158', 'label':'154〜158番','machines':list(range(154,159)), 'start':'20260428'},
     {'id':'r1173_1180','label':'1173〜1180番','machines':list(range(1173,1181)),'start':'20260301'},
+    {'id':'r1015_1018','label':'1015〜1018番','machines':list(range(1015,1019)),'start':'20260706'},
 ]
 
 def machine_id(value):
