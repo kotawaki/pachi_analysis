@@ -27,6 +27,151 @@ async function saveBytes(filePath, bytes) {
   await fs.writeFile(filePath, bytes);
 }
 
+async function fileExists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function imageSize(bytes) {
+  if (
+    bytes.length >= 24 &&
+    bytes.toString("ascii", 1, 4) === "PNG" &&
+    bytes.toString("ascii", 12, 16) === "IHDR"
+  ) {
+    return {
+      width: bytes.readUInt32BE(16),
+      height: bytes.readUInt32BE(20),
+    };
+  }
+
+  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+  const sofMarkers = new Set([
+    0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7,
+    0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
+  ]);
+  let offset = 2;
+  while (offset + 8 < bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    while (offset < bytes.length && bytes[offset] === 0xff) offset += 1;
+    const marker = bytes[offset++];
+    if (marker === 0xd8 || marker === 0xd9) continue;
+    if (offset + 2 > bytes.length) break;
+    const length = bytes.readUInt16BE(offset);
+    if (length < 2 || offset + length > bytes.length) break;
+    if (sofMarkers.has(marker) && length >= 7) {
+      return {
+        width: bytes.readUInt16BE(offset + 5),
+        height: bytes.readUInt16BE(offset + 3),
+      };
+    }
+    offset += length;
+  }
+  return null;
+}
+
+export async function loadEnabledMachines(targetsPath) {
+  const data = JSON.parse(await fs.readFile(targetsPath, "utf8"));
+  const machines = (data.targets || [])
+    .filter((target) => target.enabled !== false)
+    .flatMap((target) => target.machines || [])
+    .map(zfillMachine);
+  return [...new Set(machines)];
+}
+
+export async function validateCaptureSet(options) {
+  const machines = options.machines || await loadEnabledMachines(options.targetsPath);
+  const date = String(options.date);
+  const outRoot = options.outRoot;
+  const requireChart = options.requireChart !== false;
+  const requireSvg = options.requireSvg !== false;
+  const chartWidth = options.chartWidth ?? 575;
+  const chartHeight = options.chartHeight ?? 975;
+  const missingHtml = [];
+  const missingChart = [];
+  const invalidChartSize = [];
+  const missingSvg = [];
+
+  for (const machine of machines) {
+    const htmlPath = path.join(outRoot, "html", `${date}_${machine}.html`);
+    const chartPath = path.join(outRoot, "chart", `${date}_${machine}_chart.png`);
+    if (!(await fileExists(htmlPath))) {
+      missingHtml.push(machine);
+    } else if (requireSvg) {
+      const html = await fs.readFile(htmlPath, "utf8");
+      const svgReady =
+        html.includes(`id="CHART-${date}"`) &&
+        html.includes("amcharts-graph-stroke") &&
+        html.includes("amcharts-axis-zero-grid") &&
+        html.includes("amcharts-plot-area");
+      if (!svgReady) missingSvg.push(machine);
+    }
+
+    if (!requireChart) continue;
+    if (!(await fileExists(chartPath))) {
+      missingChart.push(machine);
+      continue;
+    }
+    const size = imageSize(await fs.readFile(chartPath));
+    if (!size || size.width !== chartWidth || size.height !== chartHeight) {
+      invalidChartSize.push({ machine, ...(size || { width: null, height: null }) });
+    }
+  }
+
+  const pending = [...new Set([
+    ...missingHtml,
+    ...missingChart,
+    ...invalidChartSize.map((item) => item.machine),
+    ...missingSvg,
+  ])];
+  return {
+    expected: machines.length,
+    complete: machines.length - pending.length,
+    pending,
+    missingHtml,
+    missingChart,
+    invalidChartSize,
+    missingSvg,
+  };
+}
+
+export async function capturePendingBatch(tab, browser, options) {
+  const machines = options.machines || await loadEnabledMachines(options.targetsPath);
+  const before = await validateCaptureSet({
+    ...options,
+    machines,
+    requireChart: options.captureChart !== false,
+    requireSvg: options.requireChartSvg !== false,
+  });
+  const batch = before.pending.slice(0, options.batchSize ?? 20);
+  const results = batch.length
+    ? await captureMachines(tab, browser, { ...options, machines: batch })
+    : [];
+  const after = await validateCaptureSet({
+    ...options,
+    machines,
+    requireChart: options.captureChart !== false,
+    requireSvg: options.requireChartSvg !== false,
+  });
+  return {
+    attempted: batch,
+    captured: results.length,
+    expected: after.expected,
+    complete: after.complete,
+    remaining: after.pending,
+    missingHtml: after.missingHtml,
+    missingChart: after.missingChart,
+    invalidChartSize: after.invalidChartSize,
+    missingSvg: after.missingSvg,
+  };
+}
+
 function retryDeadlineToday(hour, minute = 0) {
   const now = new Date();
   const deadline = new Date(now);
