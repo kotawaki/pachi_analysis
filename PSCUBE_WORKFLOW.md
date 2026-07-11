@@ -24,6 +24,7 @@ This file is the fixed runbook for morning/daytime acquisition. The user can req
   `python tools/run_pscube_morning_pipeline.py --date YYYYMMDD --capture-root captures/pscube/YYYYMMDD/morning`
 - The wrapper calls the existing scripts without changing their calculations or order and only prints a compact JSON summary.
 - The same summary is saved as `pipeline_summary.json` under the capture root so it can be checked without rerunning the pipeline.
+- It also updates `intraday_hit_regime.html`, tracking daily hit density, adjusted hit quality, and the concentration/diffusion/rest regime.
 - Run the external Cycle Watch folder command from the summary separately because it writes outside the repository.
 
 ## Daytime

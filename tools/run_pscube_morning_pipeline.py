@@ -188,6 +188,14 @@ def main() -> int:
         )
         run_step("cyclewatch_top", ["cycle_watch.py", "top", "--refresh"])
         run_step("cycle_after_hit", ["cycle_after_hit_analysis.py"])
+        run_step(
+            "intraday_hit_regime",
+            [
+                "intraday_hit_regime_analysis.py",
+                "--start", args.combined_start,
+                "--end", target_date,
+            ],
+        )
 
         event_rows = csv_rows(event_source)
         ohlc_rows = csv_rows(ohlc_source)
@@ -196,6 +204,10 @@ def main() -> int:
             source = row.get("Source", "unknown")
             source_counts[source] = source_counts.get(source, 0) + 1
 
+        regime_payload = json.loads(
+            (ROOT / "data" / "intraday_hit_regime.json").read_text(encoding="utf-8")
+        )
+        latest_regime = regime_payload["days"][-1]
         summary = {
             "status": "ok",
             "date": target_date,
@@ -208,6 +220,13 @@ def main() -> int:
             },
             "prediction": prediction_summary(prediction_output),
             "propagation": propagation_summary(next_date),
+            "intraday_regime": {
+                "date": latest_regime["date"],
+                "regime": latest_regime["regime"],
+                "hit_density": round(latest_regime["hit_density"], 4),
+                "adjusted_quality": round(latest_regime["adjusted_quality"], 4),
+                "source": latest_regime["source"],
+            },
             "history": pair_history_summary(),
             "external_cyclewatch": (
                 f"python cycle_watch.py folders --date {target_date} --refresh"

@@ -834,6 +834,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:9px 10px;border-botto
   <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: {source_text}</div>
 </header>
 <main>
+  <p><a href="intraday_hit_regime.html">日中周期hitの日次レジーム追跡を見る</a></p>
 {make_daytime_candidate_panel(args)}
   <section class="panel">
     <h2>全期間 {args.start}〜{args.end}</h2>
