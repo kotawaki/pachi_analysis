@@ -9,8 +9,8 @@ from collections import defaultdict
 import daily_ohlc as daily_source
 
 CSV_DIR   = 'csv/analyze'
-OUT_DIR   = 'docs'          # GitHub Pages は docs/ フォルダを認識する
-OUT_FILE  = os.path.join(OUT_DIR, 'ohlc.html')   # トップ(index.html)から選択する1ページ
+OUT_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs')
+OUT_FILE  = os.path.join(OUT_DIR, 'ohlc.html')
 
 RANGES = [
     {'id':'r35_38',   'label':'35〜38番',  'machines':list(range(35,39)),   'start':'20250604'},
