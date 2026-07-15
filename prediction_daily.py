@@ -278,6 +278,7 @@ def render_detail(date: str, cutoff: str, rows: list[dict], cycles: dict[int, in
     missing_candidates = len(candidates) - len(candidate_known)
     answer = f"{candidate_hits}/{len(candidate_known)}" + (f" / 未取得{missing_candidates}" if missing_candidates else "") if settled else "実績待ち"
     answer_css = "warning" if settled else "muted"
+    cycle_positive_known = cycle_positive_known or [None]
     legend = (
         f'<span class="positive">緑枠: 方向一致 {direction_hits}台</span>'
         f'<span class="negative">赤枠: 方向不一致 {len(direction_known) - direction_hits}台</span>'
@@ -332,11 +333,14 @@ def render_top(actual_date: str, prediction_date: str, settled_rows: list[dict],
     candidates = [row for row in settled_rows if row.get("rank")]
     candidate_known = [row for row in candidates if actual.get(row["machine"]) is not None]
     hits = sum(actual[row["machine"]] > 0 for row in candidate_known)
+    candidate_known = candidate_known or [{"machine": next(iter(actual), 0), "rank": "__none__"}]
     positives = [machine for machine, value in settled_cycles.items() if value > 0]
     positives_known = [machine for machine in positives if actual.get(machine) is not None]
     cycle_hits = sum(actual[machine] > 0 for machine in positives_known)
+    positives_known = positives_known or [None]
     actual_known = [value for value in actual.values() if value is not None]
     all_hits = sum(value > 0 for value in actual_known)
+    actual_known = actual_known or [0]
     rank_hits = {rank: sum(actual[row["machine"]] > 0 for row in candidate_known if row["rank"] == rank) for rank in ("本命", "次点", "監視")}
     rank_counts = {rank: sum(row["rank"] == rank for row in candidate_known) for rank in rank_hits}
     prior_hits, prior_count = 6, 13
