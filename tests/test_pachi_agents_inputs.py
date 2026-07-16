@@ -44,6 +44,8 @@ from pachi_agents.experience import (
 )
 from pachi_agents.ui_data import load_dashboard_data
 from pachi_agents.export_web import export_web
+from pachi_agents.backtest import run_walk_forward
+from pachi_agents.experience_feedback import adjust_agent_candidates, adjust_god_weights
 
 
 class InputsTest(unittest.TestCase):
@@ -732,6 +734,111 @@ class UiDataTest(unittest.TestCase):
         html = (Path(__file__).parents[1] / "docs" / "index.html").read_text(encoding="utf-8")
         for link in ("ohlc.html", "propagation_lookup.html", "combined_signal_analysis.html", "groups.html", "pachi_agents/index.html"):
             self.assertIn(f'href="{link}"', html)
+
+
+class BacktestTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name) / "input"
+        self.ohlc = self.root / "csv" / "daily_ohlc"
+        self.replay = self.root / "csv" / "replay"
+        self.replay.mkdir(parents=True)
+        (self.root / "data").mkdir(parents=True)
+        (self.root / "pair_history.json").write_text(json.dumps({"meta": {}, "pairs": {}}), encoding="utf-8")
+        for day in range(1, 24):
+            date = f"202607{day:02d}"
+            directory = self.ohlc / date
+            directory.mkdir(parents=True)
+            (directory / f"{date}_daily_ohlc.csv").write_text(
+                "Date,Machine,Group,Island,Open,High,Low,Close\n"
+                f"{date},039,1,s3,0,{day + 10},-5,{day * 10}\n",
+                encoding="utf-8-sig",
+            )
+        (self.replay / "20260721_snapshot.json").write_text(json.dumps({"date": "20260721", "steps": [], "machines": []}), encoding="utf-8")
+        (self.replay / "20260722_snapshot.json").write_text(json.dumps({"date": "20260722", "steps": [], "machines": []}), encoding="utf-8")
+
+    def tearDown(self) -> None:
+        self.temp.cleanup()
+
+    def test_walk_forward_as_of_and_experience_order(self) -> None:
+        backtest = Path(self.temp.name) / "backtest"
+        summary = run_walk_forward(self.root, backtest, start_date="20260722", end_date="20260723")
+        prediction_22 = PredictionStore(backtest / "predictions").load("20260722")
+        prediction_23 = PredictionStore(backtest / "predictions").load("20260723")
+        dates_22 = {entry.get("date") for entry in prediction_22["input_manifest"]}
+        dates_23 = {entry.get("date") for entry in prediction_23["input_manifest"]}
+        self.assertNotIn("20260722", dates_22)
+        self.assertIn("20260722", dates_23)
+        self.assertEqual(summary["experience"]["mode"], "backtest")
+        self.assertEqual(summary["experience"]["evaluated_result_dates"], ["20260722", "20260723"])
+        self.assertEqual(prediction_22["agents"]["pachio"]["primary_machine"], "039")
+        self.assertEqual(prediction_22["agents"]["pachio"]["signals"]["history_days"], 21)
+        self.assertEqual(summary["days"][0]["status"], "evaluated")
+        self.assertEqual(summary["days"][0]["experience_after"]["agents"]["pachiko"]["evaluated_count"], 1)
+
+    def test_dry_run_writes_nothing_and_reports_history_entry(self) -> None:
+        backtest = Path(self.temp.name) / "dry-run"
+        summary = run_walk_forward(self.root, backtest, start_date="20260722", end_date="20260722", dry_run=True)
+        self.assertEqual(summary["days"][0]["status"], "dry_run")
+        self.assertFalse(backtest.exists())
+
+    def test_missing_result_day_is_pending_and_not_in_experience(self) -> None:
+        (self.ohlc / "20260722" / "20260722_daily_ohlc.csv").unlink()
+        backtest = Path(self.temp.name) / "missing-day"
+        summary = run_walk_forward(self.root, backtest, start_date="20260722", end_date="20260722")
+        result = ResultStore(backtest / "results").load("20260722")
+        self.assertEqual(result["status"], "pending")
+        self.assertEqual(summary["experience"]["evaluated_result_dates"], [])
+
+    def test_rerun_does_not_overwrite_prediction_or_result(self) -> None:
+        backtest = Path(self.temp.name) / "rerun"
+        run_walk_forward(self.root, backtest, start_date="20260722", end_date="20260722")
+        prediction_path = backtest / "predictions" / "prediction_20260722.json"
+        result_path = backtest / "results" / "result_20260722.json"
+        prediction_before = prediction_path.read_bytes()
+        result_before = result_path.read_bytes()
+        run_walk_forward(self.root, backtest, start_date="20260722", end_date="20260722")
+        self.assertEqual(prediction_before, prediction_path.read_bytes())
+        self.assertEqual(result_before, result_path.read_bytes())
+
+
+class ExperienceFeedbackTest(unittest.TestCase):
+    def _memory(self, rate: float = 1.0, count: int = 5) -> dict:
+        stat = {"evaluated_count": count, "success_rate": rate}
+        return {
+            "agents": {
+                "pachiko": {
+                    "reason_codes": {"PROPAGATION_REPEATED": stat},
+                    "reason_combinations": {},
+                    "confidence_bands": {},
+                    "summary": {"evaluated_count": count, "win_rate": rate},
+                },
+                "pachio": {"summary": {"evaluated_count": count, "win_rate": 1.0 - rate}},
+            }
+        }
+
+    def test_insufficient_sample_has_no_strong_adjustment(self) -> None:
+        agent = {"primary_machine": "039", "candidates": [{"machine": "039", "score": 10.0, "confidence": .8, "reason_codes": ["PROPAGATION_REPEATED"]}]}
+        adjusted = adjust_agent_candidates(agent, self._memory(rate=1.0, count=4), "pachiko")
+        self.assertEqual(adjusted["primary_machine"], "039")
+        self.assertEqual(adjusted["candidates"][0]["experience_adjustment"]["final_score"], 10.0)
+
+    def test_reason_and_combo_adjustment_is_bounded(self) -> None:
+        agent = {"primary_machine": "039", "candidates": [{"machine": "039", "score": 10.0, "confidence": .8, "reason_codes": ["PROPAGATION_REPEATED", "GROUP_STRENGTH_HIGH"]}]}
+        memory = self._memory(rate=1.0, count=5)
+        memory["agents"]["pachiko"]["reason_codes"]["GROUP_STRENGTH_HIGH"] = {"evaluated_count": 5, "success_rate": 1.0}
+        memory["agents"]["pachiko"]["reason_combinations"]["GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED"] = {"evaluated_count": 5, "success_rate": 1.0}
+        adjusted = adjust_agent_candidates(agent, memory, "pachiko")
+        detail = adjusted["candidates"][0]["experience_adjustment"]
+        self.assertGreater(detail["final_score"], detail["base_score"])
+        self.assertLessEqual(detail["final_score"] - detail["base_score"], 2.0)
+
+    def test_god_weight_adjustment_is_bounded_and_requires_sample(self) -> None:
+        weights, detail = adjust_god_weights({"pachio": .5, "pachiko": .5}, {}, {}, self._memory(rate=1.0, count=5))
+        self.assertEqual(weights, {"pachio": .45, "pachiko": .55})
+        self.assertEqual(detail["experience_sample_count"], 5)
+        weights, _ = adjust_god_weights({"pachio": .5, "pachiko": .5}, {}, {}, self._memory(rate=1.0, count=4))
+        self.assertEqual(weights, {"pachio": .5, "pachiko": .5})
 
 
 if __name__ == "__main__":

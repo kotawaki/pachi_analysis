@@ -104,6 +104,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--capture-root", type=Path, required=True)
     parser.add_argument("--daytime-date", help="Default: date + 1 day")
     parser.add_argument("--combined-start", default="20260613")
+    parser.add_argument(
+        "--pachi-agents",
+        action="store_true",
+        help="Run the production Pachi Agents step after the existing analysis steps.",
+    )
+    parser.add_argument(
+        "--pachi-agents-dry-run",
+        action="store_true",
+        help="Plan the Pachi Agents step without writing Pachi Agents data.",
+    )
     return parser.parse_args()
 
 
@@ -197,6 +207,25 @@ def main() -> int:
             ],
         )
 
+        pachi_agents_report: dict[str, object] | None = None
+        if args.pachi_agents or args.pachi_agents_dry_run:
+            try:
+                from pachi_agents.daily_run import run_daily
+
+                pachi_agents_report = run_daily(
+                    ROOT,
+                    base_date=target_date,
+                    dry_run=args.pachi_agents_dry_run,
+                )
+            except Exception as error:
+                # Pachi Agents is an optional post-processing step. Keep the
+                # completed pachi_analyze outputs intact and expose the error
+                # in the pipeline summary for later retry.
+                pachi_agents_report = {
+                    "status": "error",
+                    "error": f"{type(error).__name__}: {error}",
+                }
+
         event_rows = csv_rows(event_source)
         ohlc_rows = csv_rows(ohlc_source)
         source_counts: dict[str, int] = {}
@@ -231,6 +260,7 @@ def main() -> int:
             "external_cyclewatch": (
                 f"python cycle_watch.py folders --date {target_date} --refresh"
             ),
+            "pachi_agents": pachi_agents_report,
         }
         write_summary(capture_root, summary)
         return 0

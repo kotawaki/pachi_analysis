@@ -179,12 +179,20 @@ def generate_pachikamisama_prediction(
     pachio: dict[str, Any],
     pachiko: dict[str, Any],
     input_manifest: list[dict[str, Any]] | None = None,
+    experience_agent_weights: dict[str, float] | None = None,
+    experience_adjustment: dict[str, Any] | None = None,
     top_n: int = 5,
 ) -> Path:
     """2エージェントのpayloadを統合し、完全な予測をlocked保存する。"""
     target = normalize_date(prediction_date)
     cutoff = normalize_date(cutoff_date)
     god = build_pachikamisama_agent(pachio, pachiko, top_n=top_n)
+    if experience_agent_weights is not None:
+        god["base_agent_weights"] = dict(god.get("agent_weights", {}))
+        god["experience_adjusted_weights"] = dict(experience_agent_weights)
+        god["agent_weights"] = dict(experience_agent_weights)
+    if experience_adjustment is not None:
+        god["experience_adjustment"] = dict(experience_adjustment)
     payload = {
         "prediction_date": target,
         "cutoff_date": cutoff,
