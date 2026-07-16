@@ -494,6 +494,865 @@
         }
       }
     },
+    "result": {
+      "prediction_date": "20260716",
+      "evaluated_at": "2026-07-17T06:24:11.447191+09:00",
+      "result_version": "pachi_agents_result_v1",
+      "status": "evaluated",
+      "source_manifest": [
+        {
+          "kind": "daily_ohlc",
+          "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
+          "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+        }
+      ],
+      "agents": {
+        "pachio": {
+          "primary_machine": null,
+          "result": {
+            "machine": null,
+            "status": "not_selected",
+            "outcome": null
+          }
+        },
+        "pachiko": {
+          "primary_machine": "075",
+          "result": {
+            "machine": "075",
+            "status": "available",
+            "open": 0.0,
+            "high": 7931.0,
+            "low": -6578.0,
+            "close": -2044.0,
+            "direction": "non_positive",
+            "max_up": 7931.0,
+            "max_down": -6578.0,
+            "outcome": "failure"
+          }
+        },
+        "pachikamisama": {
+          "honmei": {
+            "machine": "075",
+            "status": "available",
+            "open": 0.0,
+            "high": 7931.0,
+            "low": -6578.0,
+            "close": -2044.0,
+            "direction": "non_positive",
+            "max_up": 7931.0,
+            "max_down": -6578.0,
+            "outcome": "failure"
+          },
+          "taikou": {
+            "machine": "039",
+            "status": "available",
+            "open": 0.0,
+            "high": 0.0,
+            "low": -9600.0,
+            "close": -1689.0,
+            "direction": "non_positive",
+            "max_up": 0.0,
+            "max_down": -9600.0,
+            "outcome": "failure"
+          },
+          "ana": {
+            "machine": "063",
+            "status": "available",
+            "open": 0.0,
+            "high": 1379.0,
+            "low": -6578.0,
+            "close": -533.0,
+            "direction": "non_positive",
+            "max_up": 1379.0,
+            "max_down": -6578.0,
+            "outcome": "failure"
+          },
+          "honmei_outcome": "failure"
+        }
+      }
+    },
+    "reflection": {
+      "date": "20260716",
+      "events": [
+        {
+          "event": "PACHIKO_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "DAYTIME_HIT_RECENT",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "GROUP_STRENGTH_HIGH",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "PROPAGATION_REPEATED",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_HONMEI_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_TAIKOU_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_ANA_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "PACHIKO_DOMINANT"
+        },
+        {
+          "event": "AGENT_DISAGREEMENT"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "AGENT_DISAGREEMENT",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "HIGH_COMBINED_CONFIDENCE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "PACHIKO_WEIGHTED",
+          "outcome": "failure"
+        }
+      ],
+      "agents": {
+        "pachiko": {
+          "outcome": "failure",
+          "confidence": 0.9
+        },
+        "pachikamisama": {
+          "role_outcomes": {
+            "honmei": "failure",
+            "taikou": "failure",
+            "ana": "failure"
+          },
+          "confidence": 0.338
+        }
+      },
+      "agent_weights": {
+        "pachio": 0.25,
+        "pachiko": 0.75
+      }
+    }
+  },
+  {
+    "prediction_date": "20260717",
+    "prediction": {
+      "prediction_date": "20260717",
+      "cutoff_date": "20260716",
+      "created_at": "2026-07-17T06:24:16.415726+09:00",
+      "status": "locked",
+      "logic_version": "pachi_agents_v1",
+      "input_manifest": [
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260627\\20260627_daily_ohlc.csv",
+          "date": "20260627",
+          "sha256": "85407b1dedb891c763473ccfb923ec34efc4a4fee0dbd24f23ace9cad4075822"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260628\\20260628_daily_ohlc.csv",
+          "date": "20260628",
+          "sha256": "a64a34ec00e70b1e8881eb8ddd934787aa13ee4dae5747c3011424bf5674e7b7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260629\\20260629_daily_ohlc.csv",
+          "date": "20260629",
+          "sha256": "16ab51b3c7ebb0790c8495bd2a27a0b30c0556f880ffaf7064e6b0c0fab8eb16"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260630\\20260630_daily_ohlc.csv",
+          "date": "20260630",
+          "sha256": "b1817e25879bd2a53841b0e39e420068ed8671c9a417c6bc45cfb032ce1879f0"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260701\\20260701_daily_ohlc.csv",
+          "date": "20260701",
+          "sha256": "212fcf4e7acbdd414c571d7c0c8c6bbe42dea79c0255b1262f238a6622f1b35e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260702\\20260702_daily_ohlc.csv",
+          "date": "20260702",
+          "sha256": "ef05abd45fa58ac9477609c78327b33c949d48be37a8edfe2dfd73a59cae45ac"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260703\\20260703_daily_ohlc.csv",
+          "date": "20260703",
+          "sha256": "99723b171d0497e34e720351f96191daef2554c4678a80a2ee240c21c6350508"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260704\\20260704_daily_ohlc.csv",
+          "date": "20260704",
+          "sha256": "503bc5dbe81f3b1f17047bd4944a0f3ad0d585f88659acfcb647107061b96539"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260705\\20260705_daily_ohlc.csv",
+          "date": "20260705",
+          "sha256": "ffe18984b8c52c55f9a6ade0cbecf712a71c39da3dd992ed087f43a5224cb2ed"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260706\\20260706_daily_ohlc.csv",
+          "date": "20260706",
+          "sha256": "fa7d027421d3cb3d823408feee73746b4b7339cab974f35925ee477218bc62fd"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260707\\20260707_daily_ohlc.csv",
+          "date": "20260707",
+          "sha256": "a77bb3fa2aa8b7fe941c3887cb774c9c9039cd0e7ef6720b72a7b2ba4575a5f7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260708\\20260708_daily_ohlc.csv",
+          "date": "20260708",
+          "sha256": "77f127ff28ec0f822c692d60e2bfb0d842663eeeb6dfc8af9d80bd9b966cda82"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260709\\20260709_daily_ohlc.csv",
+          "date": "20260709",
+          "sha256": "f94d0a275548d91bfacf67144a848036dc2c2215d44659e30e0cb2d76f28ea9a"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260710\\20260710_daily_ohlc.csv",
+          "date": "20260710",
+          "sha256": "084636dc09ac85bc665f31dfbc043552f87fb747d0cd7b1a9b61ea9714b59277"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260711\\20260711_daily_ohlc.csv",
+          "date": "20260711",
+          "sha256": "cae5b2a65267aa70f7aa5f95a61737a877c73d27bed851492f0ac84a60f2e888"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260712\\20260712_daily_ohlc.csv",
+          "date": "20260712",
+          "sha256": "41e9bcf36f768ad32a2efc2857f1ee5588e8acdfca697bff6d928cf707a00150"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260713\\20260713_daily_ohlc.csv",
+          "date": "20260713",
+          "sha256": "b09196992de33465aa976755db80957f34a8544f35f7fc3215867a2b903d6685"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260714\\20260714_daily_ohlc.csv",
+          "date": "20260714",
+          "sha256": "f9e08be547b24d25138aee2081722ad8e678c11e39b885a307f9500a6ff3d42f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260715\\20260715_daily_ohlc.csv",
+          "date": "20260715",
+          "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
+          "date": "20260716",
+          "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260709_snapshot.json",
+          "date": "20260709",
+          "sha256": "eac7c72ee3303ab1e6f74d513a325bdf2414fd794f298b3432bf823f3af5bd4f"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260710_snapshot.json",
+          "date": "20260710",
+          "sha256": "554f943d7793a5d85dd40608e6e3543423722352a6f086a68d114aa7a85af220"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260711_snapshot.json",
+          "date": "20260711",
+          "sha256": "5156f189babd1d2a00869ff84c938ace9c5f948b22a4d361c233909392b84826"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260712_snapshot.json",
+          "date": "20260712",
+          "sha256": "f3a4dfcf8eed3dedbeafb9c7e40f96299f4ae2d13831ad344a7c073a432d1b05"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260713_snapshot.json",
+          "date": "20260713",
+          "sha256": "e93464d6534bd3abbc2c6c1c13c5314e96260a3991b8d34e9ad58fbbce6ba8d6"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260715_snapshot.json",
+          "date": "20260715",
+          "sha256": "315795b673741d11df970942c2db74e4751f57fcc596d66852e081601943af62"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260716_snapshot.json",
+          "date": "20260716",
+          "sha256": "5364773afe35cf0674a55200233ca45ce3e02921efbe9746b7f7606b9b585cdf"
+        },
+        {
+          "kind": "propagation_history",
+          "path": "pair_history.json",
+          "date": "20260716",
+          "sha256": "9fe91c473cbb93668810f44f433344fac9c70fa13c4e73170ab9fdaefbde580d"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260628.json",
+          "date": "20260628",
+          "sha256": "3b252a20bc2f40856319df1c5738c3186813f922845141015b6a65e025b617ca"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260629.json",
+          "date": "20260629",
+          "sha256": "c92c78fdc588123adb0affe23768b80c6e0e19ca9b46d00ef454279115c47488"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260709.json",
+          "date": "20260709",
+          "sha256": "de2f5b44b53a95c5f991a177733973f830c579f40d5bba55cba3fd2c8141279e"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260712.json",
+          "date": "20260712",
+          "sha256": "c73ef2c15c4e987747d028f89ec5c62364e72e46ac4cd255c06afb2eed481bde"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260627\\20260627_daily_ohlc.csv",
+          "date": "20260627",
+          "sha256": "85407b1dedb891c763473ccfb923ec34efc4a4fee0dbd24f23ace9cad4075822"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260628\\20260628_daily_ohlc.csv",
+          "date": "20260628",
+          "sha256": "a64a34ec00e70b1e8881eb8ddd934787aa13ee4dae5747c3011424bf5674e7b7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260629\\20260629_daily_ohlc.csv",
+          "date": "20260629",
+          "sha256": "16ab51b3c7ebb0790c8495bd2a27a0b30c0556f880ffaf7064e6b0c0fab8eb16"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260630\\20260630_daily_ohlc.csv",
+          "date": "20260630",
+          "sha256": "b1817e25879bd2a53841b0e39e420068ed8671c9a417c6bc45cfb032ce1879f0"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260701\\20260701_daily_ohlc.csv",
+          "date": "20260701",
+          "sha256": "212fcf4e7acbdd414c571d7c0c8c6bbe42dea79c0255b1262f238a6622f1b35e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260702\\20260702_daily_ohlc.csv",
+          "date": "20260702",
+          "sha256": "ef05abd45fa58ac9477609c78327b33c949d48be37a8edfe2dfd73a59cae45ac"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260703\\20260703_daily_ohlc.csv",
+          "date": "20260703",
+          "sha256": "99723b171d0497e34e720351f96191daef2554c4678a80a2ee240c21c6350508"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260704\\20260704_daily_ohlc.csv",
+          "date": "20260704",
+          "sha256": "503bc5dbe81f3b1f17047bd4944a0f3ad0d585f88659acfcb647107061b96539"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260705\\20260705_daily_ohlc.csv",
+          "date": "20260705",
+          "sha256": "ffe18984b8c52c55f9a6ade0cbecf712a71c39da3dd992ed087f43a5224cb2ed"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260706\\20260706_daily_ohlc.csv",
+          "date": "20260706",
+          "sha256": "fa7d027421d3cb3d823408feee73746b4b7339cab974f35925ee477218bc62fd"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260707\\20260707_daily_ohlc.csv",
+          "date": "20260707",
+          "sha256": "a77bb3fa2aa8b7fe941c3887cb774c9c9039cd0e7ef6720b72a7b2ba4575a5f7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260708\\20260708_daily_ohlc.csv",
+          "date": "20260708",
+          "sha256": "77f127ff28ec0f822c692d60e2bfb0d842663eeeb6dfc8af9d80bd9b966cda82"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260709\\20260709_daily_ohlc.csv",
+          "date": "20260709",
+          "sha256": "f94d0a275548d91bfacf67144a848036dc2c2215d44659e30e0cb2d76f28ea9a"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260710\\20260710_daily_ohlc.csv",
+          "date": "20260710",
+          "sha256": "084636dc09ac85bc665f31dfbc043552f87fb747d0cd7b1a9b61ea9714b59277"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260711\\20260711_daily_ohlc.csv",
+          "date": "20260711",
+          "sha256": "cae5b2a65267aa70f7aa5f95a61737a877c73d27bed851492f0ac84a60f2e888"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260712\\20260712_daily_ohlc.csv",
+          "date": "20260712",
+          "sha256": "41e9bcf36f768ad32a2efc2857f1ee5588e8acdfca697bff6d928cf707a00150"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260713\\20260713_daily_ohlc.csv",
+          "date": "20260713",
+          "sha256": "b09196992de33465aa976755db80957f34a8544f35f7fc3215867a2b903d6685"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260714\\20260714_daily_ohlc.csv",
+          "date": "20260714",
+          "sha256": "f9e08be547b24d25138aee2081722ad8e678c11e39b885a307f9500a6ff3d42f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260715\\20260715_daily_ohlc.csv",
+          "date": "20260715",
+          "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
+          "date": "20260716",
+          "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+        }
+      ],
+      "agents": {
+        "pachio": {
+          "logic_version": "pachi_agents_pachio_v1",
+          "primary_machine": null,
+          "candidates": [],
+          "confidence": 0.0,
+          "comment": "利用可能なOHLC履歴が不足しているため、パチおの指名台を決定できません。",
+          "signals": {
+            "eligible_machines": 0,
+            "minimum_history_days": 21
+          },
+          "reason_codes": [
+            "INSUFFICIENT_HISTORY"
+          ]
+        },
+        "pachiko": {
+          "logic_version": "pachi_agents_pachiko_v1",
+          "primary_machine": "075",
+          "candidates": [
+            {
+              "machine": "075",
+              "score": 6.0,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 10.135,
+                "propagation_repeat_days": 44,
+                "group": "3",
+                "group_strength": 1.0,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": null,
+                "cycle_history_days": 0,
+                "same_condition_records": 44
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.0,
+                "reason_adjustment": 0.0,
+                "combo_adjustment": 0.0,
+                "confidence_adjustment": 0.0,
+                "adjustment_cap": 1.2,
+                "final_score": 6.0,
+                "experience_sample_count": 0,
+                "used_stats": []
+              }
+            },
+            {
+              "machine": "039",
+              "score": 6.0,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 4.75,
+                "propagation_repeat_days": 58,
+                "group": "3",
+                "group_strength": 1.0,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": null,
+                "cycle_history_days": 0,
+                "same_condition_records": 58
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.0,
+                "reason_adjustment": 0.0,
+                "combo_adjustment": 0.0,
+                "confidence_adjustment": 0.0,
+                "adjustment_cap": 1.2,
+                "final_score": 6.0,
+                "experience_sample_count": 0,
+                "used_stats": []
+              }
+            },
+            {
+              "machine": "063",
+              "score": 5.9712,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 6.08,
+                "propagation_repeat_days": 57,
+                "group": "9",
+                "group_strength": 0.981,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": null,
+                "cycle_history_days": 0,
+                "same_condition_records": 57
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT"
+              ],
+              "experience_adjustment": {
+                "base_score": 5.9712,
+                "reason_adjustment": 0.0,
+                "combo_adjustment": 0.0,
+                "confidence_adjustment": 0.0,
+                "adjustment_cap": 1.1942,
+                "final_score": 5.9712,
+                "experience_sample_count": 0,
+                "used_stats": []
+              }
+            },
+            {
+              "machine": "073",
+              "score": 5.9103,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 5.7,
+                "propagation_repeat_days": 41,
+                "group": "1",
+                "group_strength": 0.94,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": null,
+                "cycle_history_days": 0,
+                "same_condition_records": 41
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT"
+              ],
+              "experience_adjustment": {
+                "base_score": 5.9103,
+                "reason_adjustment": 0.0,
+                "combo_adjustment": 0.0,
+                "confidence_adjustment": 0.0,
+                "adjustment_cap": 1.1821,
+                "final_score": 5.9103,
+                "experience_sample_count": 0,
+                "used_stats": []
+              }
+            },
+            {
+              "machine": "057",
+              "score": 5.5,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 3.847,
+                "propagation_repeat_days": 56,
+                "group": "3",
+                "group_strength": 1.0,
+                "daytime_hit_days_7": 2,
+                "cycle_forecast": null,
+                "cycle_history_days": 0,
+                "same_condition_records": 56
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT"
+              ],
+              "experience_adjustment": {
+                "base_score": 5.5,
+                "reason_adjustment": 0.0,
+                "combo_adjustment": 0.0,
+                "confidence_adjustment": 0.0,
+                "adjustment_cap": 1.1,
+                "final_score": 5.5,
+                "experience_sample_count": 0,
+                "used_stats": []
+              }
+            }
+          ],
+          "confidence": 0.9,
+          "comment": "075番を、伝播・グループ強度・日中hit・周期の統計証拠で本命指名しました。",
+          "signals": {
+            "propagation_best_mean_lift": 10.135,
+            "propagation_repeat_days": 44,
+            "group": "3",
+            "group_strength": 1.0,
+            "daytime_hit_days_7": 3,
+            "cycle_forecast": null,
+            "cycle_history_days": 0,
+            "same_condition_records": 44
+          },
+          "reason_codes": [
+            "PROPAGATION_REPEATED",
+            "GROUP_STRENGTH_HIGH",
+            "DAYTIME_HIT_RECENT"
+          ],
+          "experience_adjustment": {
+            "base_score": 6.0,
+            "reason_adjustment": 0.0,
+            "combo_adjustment": 0.0,
+            "confidence_adjustment": 0.0,
+            "adjustment_cap": 1.2,
+            "final_score": 6.0,
+            "experience_sample_count": 0,
+            "used_stats": []
+          }
+        },
+        "pachikamisama": {
+          "logic_version": "pachi_agents_pachikamisama_v1",
+          "honmei": "075",
+          "taikou": "039",
+          "ana": "063",
+          "confidence": 0.338,
+          "candidates": [
+            {
+              "machine": "075",
+              "score": 0.675,
+              "confidence": 0.338,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 1,
+                "pachio_score": null,
+                "pachiko_score": 6.0,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.675,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIKO_WEIGHTED"
+              ]
+            },
+            {
+              "machine": "039",
+              "score": 0.3375,
+              "confidence": 0.169,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 2,
+                "pachio_score": null,
+                "pachiko_score": 6.0,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.3375,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIKO_WEIGHTED"
+              ]
+            },
+            {
+              "machine": "063",
+              "score": 0.225,
+              "confidence": 0.113,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 3,
+                "pachio_score": null,
+                "pachiko_score": 5.9712,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.225,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIKO_WEIGHTED"
+              ]
+            },
+            {
+              "machine": "073",
+              "score": 0.1688,
+              "confidence": 0.084,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 4,
+                "pachio_score": null,
+                "pachiko_score": 5.9103,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.1688,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIKO_WEIGHTED"
+              ]
+            },
+            {
+              "machine": "057",
+              "score": 0.135,
+              "confidence": 0.068,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 5,
+                "pachio_score": null,
+                "pachiko_score": 5.5,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.135,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIKO_WEIGHTED"
+              ]
+            }
+          ],
+          "agent_weights": {
+            "pachio": 0.25,
+            "pachiko": 0.75
+          },
+          "signals": {
+            "pachio_rank": null,
+            "pachiko_rank": 1,
+            "pachio_score": null,
+            "pachiko_score": 6.0,
+            "pachio_confidence": null,
+            "pachiko_confidence": 0.9,
+            "pachio_contribution": 0.0,
+            "pachiko_contribution": 0.675,
+            "primary_agreement": false,
+            "candidate_overlap": false,
+            "both_top3": false,
+            "cross_agent_top5": false,
+            "diverse_signal_support": false
+          },
+          "reason_codes": [
+            "AGENT_DISAGREEMENT",
+            "HIGH_COMBINED_CONFIDENCE",
+            "PACHIKO_WEIGHTED"
+          ],
+          "comment": "075番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
+          "base_agent_weights": {
+            "pachio": 0.25,
+            "pachiko": 0.75
+          },
+          "experience_adjusted_weights": {
+            "pachio": 0.25,
+            "pachiko": 0.75
+          },
+          "experience_adjustment": {
+            "base_agent_weights": {
+              "pachio": 0.25,
+              "pachiko": 0.75
+            },
+            "experience_adjusted_weights": {
+              "pachio": 0.25,
+              "pachiko": 0.75
+            },
+            "weight_delta": 0.0,
+            "experience_sample_count": 1,
+            "used_stats": [],
+            "condition_rates": {},
+            "weight_pattern": "pachiko_dominant",
+            "weight_pattern_rate": null,
+            "max_weight_delta": 0.05
+          }
+        }
+      }
+    },
     "result": null,
     "reflection": null
   }

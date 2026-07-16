@@ -1,7 +1,7 @@
 {
-  "prediction_date": "20260717",
-  "cutoff_date": "20260716",
-  "created_at": "2026-07-17T06:24:16.415726+09:00",
+  "prediction_date": "20260716",
+  "cutoff_date": "20260715",
+  "created_at": "2026-07-16T19:05:04.240953+09:00",
   "status": "locked",
   "logic_version": "pachi_agents_v1",
   "input_manifest": [
@@ -120,10 +120,10 @@
       "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
     },
     {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
-      "date": "20260716",
-      "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+      "kind": "snapshot",
+      "path": "csv\\replay\\20260708_snapshot.json",
+      "date": "20260708",
+      "sha256": "1432da72ebc2ce84277879c4f1b13ae3781b9344efd63b57671a6268136df813"
     },
     {
       "kind": "snapshot",
@@ -162,16 +162,10 @@
       "sha256": "315795b673741d11df970942c2db74e4751f57fcc596d66852e081601943af62"
     },
     {
-      "kind": "snapshot",
-      "path": "csv\\replay\\20260716_snapshot.json",
-      "date": "20260716",
-      "sha256": "5364773afe35cf0674a55200233ca45ce3e02921efbe9746b7f7606b9b585cdf"
-    },
-    {
       "kind": "propagation_history",
       "path": "pair_history.json",
-      "date": "20260716",
-      "sha256": "9fe91c473cbb93668810f44f433344fac9c70fa13c4e73170ab9fdaefbde580d"
+      "date": "20260715",
+      "sha256": "82aa8af5e56fda289b2648bad604d44b43056c9475b6f8ca90304b8222311b5c"
     },
     {
       "kind": "daytime_hits",
@@ -196,126 +190,6 @@
       "path": "data\\daytime_hits_20260712.json",
       "date": "20260712",
       "sha256": "c73ef2c15c4e987747d028f89ec5c62364e72e46ac4cd255c06afb2eed481bde"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260627\\20260627_daily_ohlc.csv",
-      "date": "20260627",
-      "sha256": "85407b1dedb891c763473ccfb923ec34efc4a4fee0dbd24f23ace9cad4075822"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260628\\20260628_daily_ohlc.csv",
-      "date": "20260628",
-      "sha256": "a64a34ec00e70b1e8881eb8ddd934787aa13ee4dae5747c3011424bf5674e7b7"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260629\\20260629_daily_ohlc.csv",
-      "date": "20260629",
-      "sha256": "16ab51b3c7ebb0790c8495bd2a27a0b30c0556f880ffaf7064e6b0c0fab8eb16"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260630\\20260630_daily_ohlc.csv",
-      "date": "20260630",
-      "sha256": "b1817e25879bd2a53841b0e39e420068ed8671c9a417c6bc45cfb032ce1879f0"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260701\\20260701_daily_ohlc.csv",
-      "date": "20260701",
-      "sha256": "212fcf4e7acbdd414c571d7c0c8c6bbe42dea79c0255b1262f238a6622f1b35e"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260702\\20260702_daily_ohlc.csv",
-      "date": "20260702",
-      "sha256": "ef05abd45fa58ac9477609c78327b33c949d48be37a8edfe2dfd73a59cae45ac"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260703\\20260703_daily_ohlc.csv",
-      "date": "20260703",
-      "sha256": "99723b171d0497e34e720351f96191daef2554c4678a80a2ee240c21c6350508"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260704\\20260704_daily_ohlc.csv",
-      "date": "20260704",
-      "sha256": "503bc5dbe81f3b1f17047bd4944a0f3ad0d585f88659acfcb647107061b96539"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260705\\20260705_daily_ohlc.csv",
-      "date": "20260705",
-      "sha256": "ffe18984b8c52c55f9a6ade0cbecf712a71c39da3dd992ed087f43a5224cb2ed"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260706\\20260706_daily_ohlc.csv",
-      "date": "20260706",
-      "sha256": "fa7d027421d3cb3d823408feee73746b4b7339cab974f35925ee477218bc62fd"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260707\\20260707_daily_ohlc.csv",
-      "date": "20260707",
-      "sha256": "a77bb3fa2aa8b7fe941c3887cb774c9c9039cd0e7ef6720b72a7b2ba4575a5f7"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260708\\20260708_daily_ohlc.csv",
-      "date": "20260708",
-      "sha256": "77f127ff28ec0f822c692d60e2bfb0d842663eeeb6dfc8af9d80bd9b966cda82"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260709\\20260709_daily_ohlc.csv",
-      "date": "20260709",
-      "sha256": "f94d0a275548d91bfacf67144a848036dc2c2215d44659e30e0cb2d76f28ea9a"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260710\\20260710_daily_ohlc.csv",
-      "date": "20260710",
-      "sha256": "084636dc09ac85bc665f31dfbc043552f87fb747d0cd7b1a9b61ea9714b59277"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260711\\20260711_daily_ohlc.csv",
-      "date": "20260711",
-      "sha256": "cae5b2a65267aa70f7aa5f95a61737a877c73d27bed851492f0ac84a60f2e888"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260712\\20260712_daily_ohlc.csv",
-      "date": "20260712",
-      "sha256": "41e9bcf36f768ad32a2efc2857f1ee5588e8acdfca697bff6d928cf707a00150"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260713\\20260713_daily_ohlc.csv",
-      "date": "20260713",
-      "sha256": "b09196992de33465aa976755db80957f34a8544f35f7fc3215867a2b903d6685"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260714\\20260714_daily_ohlc.csv",
-      "date": "20260714",
-      "sha256": "f9e08be547b24d25138aee2081722ad8e678c11e39b885a307f9500a6ff3d42f"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260715\\20260715_daily_ohlc.csv",
-      "date": "20260715",
-      "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
-    },
-    {
-      "kind": "ohlc",
-      "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
-      "date": "20260716",
-      "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
     }
   ],
   "agents": {
@@ -355,17 +229,7 @@
             "PROPAGATION_REPEATED",
             "GROUP_STRENGTH_HIGH",
             "DAYTIME_HIT_RECENT"
-          ],
-          "experience_adjustment": {
-            "base_score": 6.0,
-            "reason_adjustment": 0.0,
-            "combo_adjustment": 0.0,
-            "confidence_adjustment": 0.0,
-            "adjustment_cap": 1.2,
-            "final_score": 6.0,
-            "experience_sample_count": 0,
-            "used_stats": []
-          }
+          ]
         },
         {
           "machine": "039",
@@ -385,17 +249,7 @@
             "PROPAGATION_REPEATED",
             "GROUP_STRENGTH_HIGH",
             "DAYTIME_HIT_RECENT"
-          ],
-          "experience_adjustment": {
-            "base_score": 6.0,
-            "reason_adjustment": 0.0,
-            "combo_adjustment": 0.0,
-            "confidence_adjustment": 0.0,
-            "adjustment_cap": 1.2,
-            "final_score": 6.0,
-            "experience_sample_count": 0,
-            "used_stats": []
-          }
+          ]
         },
         {
           "machine": "063",
@@ -415,17 +269,7 @@
             "PROPAGATION_REPEATED",
             "GROUP_STRENGTH_HIGH",
             "DAYTIME_HIT_RECENT"
-          ],
-          "experience_adjustment": {
-            "base_score": 5.9712,
-            "reason_adjustment": 0.0,
-            "combo_adjustment": 0.0,
-            "confidence_adjustment": 0.0,
-            "adjustment_cap": 1.1942,
-            "final_score": 5.9712,
-            "experience_sample_count": 0,
-            "used_stats": []
-          }
+          ]
         },
         {
           "machine": "073",
@@ -445,17 +289,7 @@
             "PROPAGATION_REPEATED",
             "GROUP_STRENGTH_HIGH",
             "DAYTIME_HIT_RECENT"
-          ],
-          "experience_adjustment": {
-            "base_score": 5.9103,
-            "reason_adjustment": 0.0,
-            "combo_adjustment": 0.0,
-            "confidence_adjustment": 0.0,
-            "adjustment_cap": 1.1821,
-            "final_score": 5.9103,
-            "experience_sample_count": 0,
-            "used_stats": []
-          }
+          ]
         },
         {
           "machine": "057",
@@ -475,17 +309,7 @@
             "PROPAGATION_REPEATED",
             "GROUP_STRENGTH_HIGH",
             "DAYTIME_HIT_RECENT"
-          ],
-          "experience_adjustment": {
-            "base_score": 5.5,
-            "reason_adjustment": 0.0,
-            "combo_adjustment": 0.0,
-            "confidence_adjustment": 0.0,
-            "adjustment_cap": 1.1,
-            "final_score": 5.5,
-            "experience_sample_count": 0,
-            "used_stats": []
-          }
+          ]
         }
       ],
       "confidence": 0.9,
@@ -504,17 +328,7 @@
         "PROPAGATION_REPEATED",
         "GROUP_STRENGTH_HIGH",
         "DAYTIME_HIT_RECENT"
-      ],
-      "experience_adjustment": {
-        "base_score": 6.0,
-        "reason_adjustment": 0.0,
-        "combo_adjustment": 0.0,
-        "confidence_adjustment": 0.0,
-        "adjustment_cap": 1.2,
-        "final_score": 6.0,
-        "experience_sample_count": 0,
-        "used_stats": []
-      }
+      ]
     },
     "pachikamisama": {
       "logic_version": "pachi_agents_pachikamisama_v1",
@@ -673,32 +487,7 @@
         "HIGH_COMBINED_CONFIDENCE",
         "PACHIKO_WEIGHTED"
       ],
-      "comment": "075番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
-      "base_agent_weights": {
-        "pachio": 0.25,
-        "pachiko": 0.75
-      },
-      "experience_adjusted_weights": {
-        "pachio": 0.25,
-        "pachiko": 0.75
-      },
-      "experience_adjustment": {
-        "base_agent_weights": {
-          "pachio": 0.25,
-          "pachiko": 0.75
-        },
-        "experience_adjusted_weights": {
-          "pachio": 0.25,
-          "pachiko": 0.75
-        },
-        "weight_delta": 0.0,
-        "experience_sample_count": 1,
-        "used_stats": [],
-        "condition_rates": {},
-        "weight_pattern": "pachiko_dominant",
-        "weight_pattern_rate": null,
-        "max_weight_delta": 0.05
-      }
+      "comment": "075番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。"
     }
   }
 }
