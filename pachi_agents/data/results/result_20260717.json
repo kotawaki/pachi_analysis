@@ -1,0 +1,77 @@
+{
+  "prediction_date": "20260717",
+  "evaluated_at": "2026-07-18T13:02:45.708255+09:00",
+  "result_version": "pachi_agents_result_v1",
+  "status": "evaluated",
+  "source_manifest": [
+    {
+      "kind": "daily_ohlc",
+      "path": "csv\\daily_ohlc\\20260717\\20260717_daily_ohlc.csv",
+      "sha256": "c41f9f4a072db225c869f40e264ec8a0d2a7c68b6c37c98f4085c08939c58e91"
+    }
+  ],
+  "agents": {
+    "pachio": {
+      "primary_machine": null,
+      "result": {
+        "machine": null,
+        "status": "not_selected",
+        "outcome": null
+      }
+    },
+    "pachiko": {
+      "primary_machine": "075",
+      "result": {
+        "machine": "075",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -17600.0,
+        "close": -15467.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -17600.0,
+        "outcome": "failure"
+      }
+    },
+    "pachikamisama": {
+      "honmei": {
+        "machine": "075",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -17600.0,
+        "close": -15467.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -17600.0,
+        "outcome": "failure"
+      },
+      "taikou": {
+        "machine": "039",
+        "status": "available",
+        "open": 0.0,
+        "high": 862.0,
+        "low": -15644.0,
+        "close": -15644.0,
+        "direction": "non_positive",
+        "max_up": 862.0,
+        "max_down": -15644.0,
+        "outcome": "failure"
+      },
+      "ana": {
+        "machine": "063",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -15822.0,
+        "close": -4089.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -15822.0,
+        "outcome": "failure"
+      },
+      "honmei_outcome": "failure"
+    }
+  }
+}
