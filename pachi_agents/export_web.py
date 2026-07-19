@@ -14,6 +14,7 @@ from typing import Any
 
 from .predictions import PredictionError, PredictionStore
 from .results import ResultError, ResultStore
+from .candidate_origin import enrich_prediction
 
 
 def _read_json(path: Path, default: Any) -> Any:
@@ -68,6 +69,8 @@ def export_web(data_root: str | Path, output_root: str | Path, mode: str = "prod
     predictions_dir = data / "predictions"
     results_dir = data / "results"
     latest = _latest_prediction(predictions_dir) if predictions_dir.exists() else None
+    if latest is not None:
+        latest = enrich_prediction(latest)
     date = latest.get("prediction_date") if latest else None
     latest_result = _result_for(results_dir, date) if results_dir.exists() else None
     experience = _read_json(data / "experience" / mode / "experience.json", None)
@@ -87,7 +90,7 @@ def export_web(data_root: str | Path, output_root: str | Path, mode: str = "prod
             result = None
             if result_store:
                 result = _result_for(results_dir, day)
-            history.append({"prediction_date": day, "prediction": prediction, "result": result, "reflection": reflections.get(day)})
+            history.append({"prediction_date": day, "prediction": enrich_prediction(prediction), "result": result, "reflection": reflections.get(day)})
 
     _atomic_json(output / "latest_prediction.json", latest)
     _atomic_json(output / "latest_result.json", latest_result)

@@ -13,6 +13,7 @@ from typing import Any
 
 from .inputs import normalize_date
 from .predictions import PredictionStore
+from .candidate_origin import enrich_pachikamisama
 
 
 LOGIC_VERSION = "pachi_agents_pachikamisama_v1"
@@ -139,7 +140,7 @@ def build_pachikamisama_agent(pachio: dict[str, Any], pachiko: dict[str, Any], *
 
     scored.sort(key=lambda item: (item["score"], item["machine"]), reverse=True)
     if not scored:
-        return {
+        return enrich_pachikamisama({
             "logic_version": LOGIC_VERSION,
             "honmei": None,
             "taikou": None,
@@ -150,14 +151,14 @@ def build_pachikamisama_agent(pachio: dict[str, Any], pachiko: dict[str, Any], *
             "signals": {"candidate_count": 0},
             "reason_codes": ["INSUFFICIENT_AGENT_INPUT"],
             "comment": "パチお・パチこの候補入力が不足しているため、啓示を出せません。",
-        }
+        }, pachio, pachiko)
 
     top = scored[:top_n]
     honmei = top[0]
     taikou = top[1] if len(top) > 1 else None
     ana = next((item for item in top[2:] if not (item["machine"] in pachi_o and item["machine"] in pachi_k)), None)
     ana = ana or (top[2] if len(top) > 2 else taikou)
-    return {
+    result = {
         "logic_version": LOGIC_VERSION,
         "honmei": honmei["machine"],
         "taikou": taikou["machine"] if taikou else None,
@@ -169,6 +170,7 @@ def build_pachikamisama_agent(pachio: dict[str, Any], pachiko: dict[str, Any], *
         "reason_codes": honmei["reason_codes"],
         "comment": f"{honmei['machine']}番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
     }
+    return enrich_pachikamisama(result, pachio, pachiko)
 
 
 def generate_pachikamisama_prediction(

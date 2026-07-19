@@ -750,7 +750,23 @@
           "reason_codes": [
             "AGENT_DISAGREEMENT",
             "PACHIKO_WEIGHTED"
-          ]
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachiko"
+            ],
+            "pachio": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "pachiko": {
+              "selected": true,
+              "rank": 1,
+              "is_primary": true
+            },
+            "origin_type": "PACHIKO_ONLY"
+          }
         },
         {
           "machine": "157",
@@ -774,7 +790,23 @@
           "reason_codes": [
             "AGENT_DISAGREEMENT",
             "PACHIO_WEIGHTED"
-          ]
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachio"
+            ],
+            "pachio": {
+              "selected": true,
+              "rank": 1,
+              "is_primary": true
+            },
+            "pachiko": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "origin_type": "PACHIO_ONLY"
+          }
         },
         {
           "machine": "056",
@@ -798,7 +830,23 @@
           "reason_codes": [
             "AGENT_DISAGREEMENT",
             "PACHIKO_WEIGHTED"
-          ]
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachiko"
+            ],
+            "pachio": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "pachiko": {
+              "selected": true,
+              "rank": 2,
+              "is_primary": false
+            },
+            "origin_type": "PACHIKO_ONLY"
+          }
         },
         {
           "machine": "148",
@@ -822,7 +870,23 @@
           "reason_codes": [
             "AGENT_DISAGREEMENT",
             "PACHIO_WEIGHTED"
-          ]
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachio"
+            ],
+            "pachio": {
+              "selected": true,
+              "rank": 2,
+              "is_primary": false
+            },
+            "pachiko": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "origin_type": "PACHIO_ONLY"
+          }
         },
         {
           "machine": "062",
@@ -846,7 +910,23 @@
           "reason_codes": [
             "AGENT_DISAGREEMENT",
             "PACHIKO_WEIGHTED"
-          ]
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachiko"
+            ],
+            "pachio": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "pachiko": {
+              "selected": true,
+              "rank": 3,
+              "is_primary": false
+            },
+            "origin_type": "PACHIKO_ONLY"
+          }
         }
       ],
       "agent_weights": {
@@ -897,6 +977,56 @@
         "weight_pattern": "balanced",
         "weight_pattern_rate": null,
         "max_weight_delta": 0.05
+      },
+      "role_origins": {
+        "honmei": {
+          "agents": [
+            "pachiko"
+          ],
+          "pachio": {
+            "selected": false,
+            "rank": null,
+            "is_primary": false
+          },
+          "pachiko": {
+            "selected": true,
+            "rank": 1,
+            "is_primary": true
+          },
+          "origin_type": "PACHIKO_ONLY"
+        },
+        "taikou": {
+          "agents": [
+            "pachio"
+          ],
+          "pachio": {
+            "selected": true,
+            "rank": 1,
+            "is_primary": true
+          },
+          "pachiko": {
+            "selected": false,
+            "rank": null,
+            "is_primary": false
+          },
+          "origin_type": "PACHIO_ONLY"
+        },
+        "ana": {
+          "agents": [
+            "pachiko"
+          ],
+          "pachio": {
+            "selected": false,
+            "rank": null,
+            "is_primary": false
+          },
+          "pachiko": {
+            "selected": true,
+            "rank": 2,
+            "is_primary": false
+          },
+          "origin_type": "PACHIKO_ONLY"
+        }
       }
     }
   }

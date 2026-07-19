@@ -19,6 +19,7 @@ from typing import Any, Iterable
 from .inputs import normalize_date
 from .predictions import PredictionStore
 from .results import ResultStore
+from .candidate_origin import ORIGIN_TYPES, role_origin
 
 
 MODES = {"production", "backtest"}
@@ -30,6 +31,18 @@ CONFIDENCE_BANDS = (
     ("0_70_0_85", 0.7, 0.85),
     ("gte_0_85", 0.85, 1.01),
 )
+
+
+def _origin_source(origin: dict[str, Any]) -> str:
+    pachio_primary = bool(origin.get("pachio", {}).get("is_primary"))
+    pachiko_primary = bool(origin.get("pachiko", {}).get("is_primary"))
+    if pachio_primary and pachiko_primary:
+        return "BOTH_PRIMARY"
+    if pachio_primary:
+        return "PACHIO_PRIMARY"
+    if pachiko_primary:
+        return "PACHIKO_PRIMARY"
+    return "NO_PRIMARY"
 
 
 class ExperienceError(Exception):
@@ -234,6 +247,17 @@ class ExperienceBuilder:
                 "weight_patterns": {name: _empty_agent()["summary"] for name in ("pachio_dominant", "balanced", "pachiko_dominant")},
                 "honmei_confidence_bands": {name: _empty_stat() for name, _lo, _hi in CONFIDENCE_BANDS},
                 "conditions": {code: _empty_stat() for code in CONDITION_CODES},
+                "origin_stats": {
+                    "candidate_origins": {origin: _empty_summary() for origin in ORIGIN_TYPES},
+                    "roles": {
+                        role: {origin: _empty_summary() for origin in ORIGIN_TYPES}
+                        for role in ("honmei", "taikou", "ana")
+                    },
+                    "primary_sources": {
+                        source: _empty_summary()
+                        for source in ("PACHIO_PRIMARY", "PACHIKO_PRIMARY", "BOTH_PRIMARY", "NO_PRIMARY")
+                    },
+                },
             },
             "reflections": [],
             "data_quality": {
@@ -290,6 +314,14 @@ class ExperienceBuilder:
                 for condition in CONDITION_CODES:
                     if condition in condition_codes:
                         _record_prediction_stat(details["conditions"][condition], confidence)
+                for role in ("honmei", "taikou", "ana"):
+                    if agent.get(role) is None:
+                        continue
+                    origin = role_origin(prediction, role)
+                    origin_type = origin.get("origin_type", "OTHER")
+                    details["origin_stats"]["candidate_origins"][origin_type]["total_predictions"] += 1
+                    details["origin_stats"]["roles"][role][origin_type]["total_predictions"] += 1
+                    details["origin_stats"]["primary_sources"][_origin_source(origin)]["total_predictions"] += 1
         return True
 
     def add_result(self, result: dict[str, Any]) -> bool:
@@ -334,6 +366,20 @@ class ExperienceBuilder:
             reflection["agent_weights"] = pred_god.get("agent_weights", {})
             reflection["events"].extend({"event": "reason_outcome", "reason_code": code, "outcome": honmei_outcome} for code in _codes(pred_god))
             self._add_god_details(pred_god, god_result, honmei_outcome)
+            origin_stats = self.memory["pachikamisama"]["origin_stats"]
+            for role in ("honmei", "taikou", "ana"):
+                outcome = _outcome(god_result.get(role, {}).get("outcome"))
+                if not outcome:
+                    continue
+                origin = role_origin(prediction, role)
+                origin_type = origin.get("origin_type", "OTHER")
+                confidence = float(pred_god.get("confidence") or 0.0)
+                _record_evaluation(origin_stats["candidate_origins"][origin_type], outcome, confidence)
+                _record_evaluation(origin_stats["roles"][role][origin_type], outcome, confidence)
+                _record_evaluation(origin_stats["primary_sources"][_origin_source(origin)], outcome, confidence)
+            reflection["agents"]["pachikamisama"]["role_origins"] = {
+                role: role_origin(prediction, role) for role in ("honmei", "taikou", "ana")
+            }
         self.memory["reflections"].append(reflection)
         return True
 
@@ -389,6 +435,14 @@ class ExperienceBuilder:
             _finalize_stat(stat, self.minimum_sample)
         for stat in details["honmei_confidence_bands"].values():
             _finalize_stat(stat, self.minimum_sample)
+        origin_stats = details["origin_stats"]
+        for stat in origin_stats["candidate_origins"].values():
+            _finalize_summary(stat)
+        for role_stats in origin_stats["roles"].values():
+            for stat in role_stats.values():
+                _finalize_summary(stat)
+        for stat in origin_stats["primary_sources"].values():
+            _finalize_summary(stat)
         empty_reasons = self.memory["data_quality"]["empty_reasons"]
         for name, agent in self.memory["agents"].items():
             if agent["summary"]["total_predictions"] == 0:
