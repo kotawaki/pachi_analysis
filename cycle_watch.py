@@ -715,6 +715,19 @@ def write_watch_page(date, rows):
         items = []
         for rank, item in enumerate(priority, 1):
             row = item["row"]
+            hit_periods = sorted(set(item["hit_periods"]))
+            hit_counts = {
+                period: sum(period in gap["hits"] for gap in item["gaps"])
+                for period in hit_periods
+            }
+            hit_count_text = " / ".join(
+                f"{period}分×{hit_counts[period]}" for period in hit_periods
+            )
+            item["advice"] = (
+                f"hit周期: {fmt_periods(hit_periods)}分 / "
+                f"hit回数: {sum(hit_counts.values())}回（{hit_count_text}） / "
+                + item["advice"]
+            )
             items.append(f"""
 <tr data-title="{rank}. {int(row['machine'])}番">
   <td data-label="優先">{rank}</td>
