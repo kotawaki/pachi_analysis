@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>周期hitタイマー</title>
+  <style>
+    :root { color-scheme: dark; --bg:#111827; --panel:#1f2937; --line:#374151; --accent:#38bdf8; --warn:#fbbf24; --good:#34d399; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:#f3f4f6; }
+    main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+    h1 { margin:0 0 6px; font-size:1.6rem; }
+    .note { color:#9ca3af; font-size:.9rem; margin:0 0 18px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin:12px 0; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    select, input[type=file], button { font:inherit; }
+    select, input[type=file] { max-width:100%; padding:9px; background:#111827; color:#f3f4f6; border:1px solid #4b5563; border-radius:8px; }
+    button { cursor:pointer; border:0; border-radius:9px; padding:10px 14px; background:var(--accent); color:#082f49; font-weight:700; }
+    button.secondary { background:#4b5563; color:#f3f4f6; }
+    button.danger { background:#7f1d1d; color:#fecaca; }
+    .machine-title { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+    .machine-title h2 { margin:0; }
+    .muted { color:#9ca3af; }
+    .periods { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+    .chip { padding:6px 10px; border-radius:999px; background:#0c4a6e; color:#bae6fd; }
+    .hit-button { width:100%; font-size:1.15rem; padding:14px; margin:8px 0 4px; }
+    .window { display:grid; grid-template-columns:90px 1fr auto; gap:10px; align-items:center; padding:12px 0; border-top:1px solid var(--line); }
+    .window:first-child { border-top:0; }
+    .window strong { color:#bae6fd; }
+    .window.active strong, .window.active .countdown { color:var(--good); }
+    .window.expired { opacity:.5; }
+    .countdown { font-variant-numeric:tabular-nums; color:var(--warn); white-space:nowrap; }
+    .empty { color:#9ca3af; padding:14px 0; }
+    @media (max-width:520px) { .window { grid-template-columns:76px 1fr; } .countdown { grid-column:2; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>周期hitタイマー</h1>
+  <p class="note">当たりを押した時刻を基準に、登録周期の±5分窓を表示します。予測ではなく、実戦中の監視補助です。</p>
+
+  <section class="panel">
+    <div class="controls">
+      <label>周期設定JSON：<input id="configFile" type="file" accept=".json,application/json"></label>
+      <button id="clearConfig" class="secondary" type="button">設定を消去</button>
+    </div>
+    <p id="configStatus" class="muted">まず data/cycle_watch_config.json を選択してください。</p>
+  </section>
+
+  <section class="panel">
+    <div class="controls">
+      <label for="machine">台番号：</label>
+      <select id="machine"></select>
+      <button id="clearDay" class="danger" type="button">今日の記録を消去</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="machine-title"><h2 id="machineTitle">台を選択</h2><span id="clock" class="muted"></span></div>
+    <div id="periods" class="periods"></div>
+    <button id="hit" class="hit-button" type="button">当たった時に押す</button>
+    <div id="lastHit" class="muted"></div>
+    <div id="windows" class="empty">周期設定を読み込むと、ここに次回窓が表示されます。</div>
+  </section>
+</main>
+<script>
+(() => {
+  const TOLERANCE = 5;
+  const CONFIG_KEY = "cycle-hit-config-v1";
+  const STATE_KEY = "cycle-hit-state-v1";
+  let config = null;
+  let state = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+  const $ = (id) => document.getElementById(id);
+
+  for (let n = 1; n <= 377; n++) {
+    const option = document.createElement("option");
+    option.value = String(n).padStart(3, "0");
+    option.textContent = `${n}番`;
+    $("machine").appendChild(option);
+  }
+  $("machine").value = localStorage.getItem("cycle-hit-machine") || "046";
+
+  function saveState() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+  function fmtTime(ms) { return new Date(ms).toLocaleTimeString("ja-JP", {hour:"2-digit", minute:"2-digit"}); }
+  function fmtDuration(ms) {
+    const sec = Math.max(0, Math.ceil(ms / 1000));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return h ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}` : `${m}:${String(s).padStart(2,"0")}`;
+  }
+  function machineConfig() { return config?.machines?.[$("machine").value]; }
+  function currentRecord() { return state[$("machine").value] || null; }
+
+  function render() {
+    const machine = $("machine").value;
+    localStorage.setItem("cycle-hit-machine", machine);
+    const cfg = machineConfig();
+    const record = currentRecord();
+    $("machineTitle").textContent = `${Number(machine)}番`;
+    $("periods").innerHTML = cfg?.periods?.length
+      ? cfg.periods.map(p => `<span class="chip">${p}分</span>`).join("")
+      : `<span class="muted">周期設定なし</span>`;
+    $("lastHit").textContent = record?.lastHit ? `直近hit：${fmtTime(record.lastHit)}　（この端末での記録 ${record.count || 1}回）` : "直近hit：未入力";
+    const windows = $("windows");
+    if (!cfg?.periods?.length || !record?.lastHit) {
+      windows.className = "empty";
+      windows.textContent = record?.lastHit ? "この台の周期設定がありません。" : "当たった時にボタンを押すと、次回の周期窓を表示します。";
+      return;
+    }
+    windows.className = "";
+    const now = Date.now();
+    windows.innerHTML = cfg.periods.map(period => {
+      const center = record.lastHit + period * 60000;
+      const start = center - TOLERANCE * 60000;
+      const end = center + TOLERANCE * 60000;
+      const active = now >= start && now <= end;
+      const expired = now > end;
+      const status = active ? `hit窓中　残り ${fmtDuration(end - now)}` : expired ? "終了" : `開始まで ${fmtDuration(start - now)}`;
+      return `<div class="window ${active ? "active" : ""} ${expired ? "expired" : ""}"><strong>${period}分</strong><span>${fmtTime(start)}〜${fmtTime(end)}<br><small class="muted">中心 ${fmtTime(center)}</small></span><span class="countdown">${status}</span></div>`;
+    }).join("");
+  }
+
+  $("configFile").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      config = JSON.parse(await file.text());
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+      $("configStatus").textContent = `読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
+      render();
+    } catch (error) { $("configStatus").textContent = `JSON読み込みエラー：${error.message}`; }
+  });
+  $("clearConfig").addEventListener("click", () => { localStorage.removeItem(CONFIG_KEY); config = null; $("configStatus").textContent = "設定を消去しました。"; render(); });
+  $("machine").addEventListener("change", render);
+  $("hit").addEventListener("click", () => {
+    const machine = $("machine").value, old = state[machine];
+    state[machine] = { lastHit: Date.now(), count: (old?.count || 0) + 1 };
+    saveState(); render();
+  });
+  $("clearDay").addEventListener("click", () => { delete state[$("machine").value]; saveState(); render(); });
+
+  try {
+    const saved = localStorage.getItem(CONFIG_KEY);
+    if (saved) { config = JSON.parse(saved); $("configStatus").textContent = `読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`; }
+  } catch (_) { localStorage.removeItem(CONFIG_KEY); }
+  setInterval(() => { $("clock").textContent = new Date().toLocaleString("ja-JP"); render(); }, 1000);
+  render();
+})();
+</script>
+</body>
+</html>
