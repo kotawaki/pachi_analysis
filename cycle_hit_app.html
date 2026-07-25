@@ -67,6 +67,7 @@
 (() => {
   const TOLERANCE = 5;
   const CONFIG_KEY = "cycle-hit-config-v1";
+  const CONFIG_URL = "data/cycle_watch_config.json";
   const STATE_KEY = "cycle-hit-state-v1";
   let config = null;
   let state = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
@@ -142,6 +143,19 @@
     const saved = localStorage.getItem(CONFIG_KEY);
     if (saved) { config = JSON.parse(saved); $("configStatus").textContent = `読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`; }
   } catch (_) { localStorage.removeItem(CONFIG_KEY); }
+  async function loadFixedConfig() {
+    try {
+      const response = await fetch(CONFIG_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      config = await response.json();
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+      $("configStatus").textContent = `自動読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
+      render();
+    } catch (error) {
+      if (!config) $("configStatus").textContent = "自動読み込み失敗。必要ならJSONを手動選択してください。";
+    }
+  }
+  loadFixedConfig();
   setInterval(() => { $("clock").textContent = new Date().toLocaleString("ja-JP"); render(); }, 1000);
   render();
 })();

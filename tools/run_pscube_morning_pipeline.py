@@ -197,6 +197,12 @@ def main() -> int:
             ["cycle_watch.py", "page", "--date", next_date, "--refresh"],
         )
         run_step("cyclewatch_top", ["cycle_watch.py", "top", "--refresh"])
+        docs_data_dir = ROOT / "docs" / "data"
+        docs_data_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(
+            ROOT / "data" / "cycle_watch_config.json",
+            docs_data_dir / "cycle_watch_config.json",
+        )
         run_step("cycle_after_hit", ["cycle_after_hit_analysis.py"])
         run_step(
             "intraday_hit_regime",
