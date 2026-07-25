@@ -1,0 +1,22 @@
+{
+  "reflection_version": "pachi_agents_reflection_v1",
+  "prediction_date": "20260725",
+  "cutoff_date": "20260724",
+  "generated_at": "2026-07-26T07:05:28.964573+09:00",
+  "result_status": "evaluated",
+  "pachio": {
+    "reason": "1173番はMA5の傾き、MA20の傾き、サイクル予測、強気構造を評価し、reason_code（MA5_UP、MA20_UP、CYCLE_NEGATIVE、BULL_STRUCTURE、FIB_GREEN）とconfidence 0.950をもとに本命候補としました。",
+    "evaluation": "パチおの本命は一時431.0まで上昇しましたが、最終的には陰線となりました。",
+    "learning": "MA5_UPは過去8件中12.5%成功、confidence帯も過去8件中12.5%成功です。条件単独と組み合わせの両方を継続して観察します。"
+  },
+  "pachiko": {
+    "reason": "056番は伝播の反復性、グループ強度、最近の日中hit、周期傾向を評価し、reason_code（PROPAGATION_REPEATED、GROUP_STRENGTH_HIGH、DAYTIME_HIT_RECENT、CYCLE_POSITIVE）とconfidence 0.900をもとに本命候補としました。",
+    "evaluation": "パチこの本命は一時8017.0まで上昇しましたが、最終的には陰線となりました。",
+    "learning": "PROPAGATION_REPEATEDは過去10件中60.0%成功、confidence帯も過去10件中60.0%成功です。条件単独と組み合わせの両方を継続して観察します。"
+  },
+  "pachikamisama": {
+    "reason": "パチおとパチこの候補を統合し、本命1173、対抗056、穴054を選択しました（パチお0.455、パチこ0.545）（本命はPACHIO_ONLY、対抗はPACHIKO_ONLY、穴はPACHIO_ONLY）。",
+    "evaluation": "本命は一時431.0まで上昇しましたが、最終的には陰線となりました。／対抗は一時8017.0まで上昇しましたが、最終的には陰線となりました。／穴は陰線となり、期待した上昇には至りませんでした。",
+    "learning": "本命・対抗の結果とagent weightの組み合わせを蓄積し、十分なサンプルが集まるまで大きな判断変更は行いません。"
+  }
+}

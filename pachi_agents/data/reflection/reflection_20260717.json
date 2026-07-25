@@ -1,0 +1,22 @@
+{
+  "reflection_version": "pachi_agents_reflection_v1",
+  "prediction_date": "20260717",
+  "cutoff_date": "20260716",
+  "generated_at": "2026-07-26T07:05:28.007048+09:00",
+  "result_status": "evaluated",
+  "pachio": {
+    "reason": "未選出番はINSUFFICIENT_HISTORYを評価し、reason_code（INSUFFICIENT_HISTORY）とconfidence 0.000をもとに本命候補としました。",
+    "evaluation": "パチおの本命は結果データがなく、判定できませんでした。",
+    "learning": "まだ十分な評価済みサンプルがないため、同じ条件の結果を蓄積してから判断します。"
+  },
+  "pachiko": {
+    "reason": "075番は伝播の反復性、グループ強度、最近の日中hitを評価し、reason_code（PROPAGATION_REPEATED、GROUP_STRENGTH_HIGH、DAYTIME_HIT_RECENT）とconfidence 0.900をもとに本命候補としました。",
+    "evaluation": "パチこの本命は陰線となり、期待した上昇には至りませんでした。",
+    "learning": "PROPAGATION_REPEATEDは過去2件中0.0%成功、confidence帯も過去2件中0.0%成功です。条件単独と組み合わせの両方を継続して観察します。"
+  },
+  "pachikamisama": {
+    "reason": "パチおとパチこの候補を統合し、本命075、対抗039、穴063を選択しました（パチお0.250、パチこ0.750）。",
+    "evaluation": "本命は陰線となり、期待した上昇には至りませんでした。／対抗は一時862.0まで上昇しましたが、最終的には陰線となりました。／穴は陰線となり、期待した上昇には至りませんでした。",
+    "learning": "本命・対抗の結果とagent weightの組み合わせを蓄積し、十分なサンプルが集まるまで大きな判断変更は行いません。"
+  }
+}

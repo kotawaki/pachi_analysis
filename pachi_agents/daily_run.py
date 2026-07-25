@@ -30,6 +30,7 @@ from .results import (
     evaluate_prediction,
 )
 from .export_web import export_web
+from .reflection import generate_reflection_for_date
 
 
 def _add_days(value: str, days: int) -> str:
@@ -231,6 +232,10 @@ def run_daily(
         if report["evaluation"].get("status") == "evaluated":
             assert experience_store is not None
             experience_store.save(builder.finalize())
+            reflection_path = generate_reflection_for_date(data_root, base, "production")
+            report["reflection"] = {"generated": True, "path": str(reflection_path)}
+        else:
+            report["reflection"] = {"generated": False, "reason": "result_not_evaluated"}
         exported = export_web(data_root, root / "docs" / "pachi_agents" / "data", "production")
         report["export"] = {"planned": True, "history_count": len(exported["history"]), "output": str(root / "docs" / "pachi_agents" / "data")}
     else:

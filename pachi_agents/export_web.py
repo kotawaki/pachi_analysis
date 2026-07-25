@@ -74,6 +74,8 @@ def export_web(data_root: str | Path, output_root: str | Path, mode: str = "prod
     date = latest.get("prediction_date") if latest else None
     latest_result = _result_for(results_dir, date) if results_dir.exists() else None
     experience = _read_json(data / "experience" / mode / "experience.json", None)
+    reflection_dir = data / "reflection" if mode == "production" else data / "reflection" / mode
+    latest_reflection = _read_json(reflection_dir / f"reflection_{date}.json", None) if date else None
 
     history: list[dict[str, Any]] = []
     if predictions_dir.exists():
@@ -90,13 +92,15 @@ def export_web(data_root: str | Path, output_root: str | Path, mode: str = "prod
             result = None
             if result_store:
                 result = _result_for(results_dir, day)
-            history.append({"prediction_date": day, "prediction": enrich_prediction(prediction), "result": result, "reflection": reflections.get(day)})
+            reflection = _read_json(reflection_dir / f"reflection_{day}.json", None)
+            history.append({"prediction_date": day, "prediction": enrich_prediction(prediction), "result": result, "reflection": reflection or reflections.get(day)})
 
     _atomic_json(output / "latest_prediction.json", latest)
     _atomic_json(output / "latest_result.json", latest_result)
     _atomic_json(output / "experience.json", experience)
+    _atomic_json(output / "latest_reflection.json", latest_reflection)
     _atomic_json(output / "history.json", history)
-    return {"prediction": latest, "result": latest_result, "experience": experience, "history": history}
+    return {"prediction": latest, "result": latest_result, "experience": experience, "reflection": latest_reflection, "history": history}
 
 
 def main() -> None:
