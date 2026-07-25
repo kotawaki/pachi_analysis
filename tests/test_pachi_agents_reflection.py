@@ -67,10 +67,16 @@ class ReflectionTests(unittest.TestCase):
     def test_reflection_uses_prediction_result_and_experience(self):
         reflection = build_reflection(self.prediction(), self.result(), self.experience())
         self.assertEqual(reflection["prediction_date"], "20260725")
-        self.assertIn("MA5の傾き", reflection["pachio"]["reason"])
-        self.assertIn("過去14件中61.0%成功", reflection["pachio"]["learning"])
-        self.assertIn("一致しました", reflection["pachiko"]["evaluation"] or "")
-        self.assertIn("本命", reflection["pachikamisama"]["reason"])
+        self.assertIn("短期移動平均線が上向き", reflection["pachio"]["reason"])
+        self.assertIn("過去14件中9件成功（61.0%）", reflection["pachio"]["learning"])
+        self.assertIn("予測方向への動きが確認できました", reflection["pachiko"]["evaluation"] or "")
+        self.assertIn("本命118", reflection["pachikamisama"]["reason"])
+        self.assertIn("パチおをやや高く重視", reflection["pachikamisama"]["reason"])
+
+    def test_learning_changes_for_failure_and_success(self):
+        reflection = build_reflection(self.prediction(), self.result(), self.experience())
+        self.assertIn("他条件との組み合わせを継続して評価", reflection["pachio"]["learning"])
+        self.assertIn("引き続き優先候補として評価", reflection["pachiko"]["learning"])
 
     def test_reflection_store_is_atomic_and_separate(self):
         store = ReflectionStore(self.root / "reflection")

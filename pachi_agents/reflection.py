@@ -58,8 +58,33 @@ def _rate_text(stat: dict[str, Any] | None) -> str | None:
     if not stat or stat.get("evaluated_count", 0) <= 0 or stat.get("success_rate") is None:
         return None
     count = int(stat["evaluated_count"])
+    success = int(stat.get("success", round(count * float(stat["success_rate"]))))
     rate = float(stat["success_rate"]) * 100
-    return f"過去{count}件中{rate:.1f}%成功"
+    return f"過去{count}件中{success}件成功（{rate:.1f}%）"
+
+
+REASON_LABELS = {
+    "MA5_UP": "短期移動平均線が上向き",
+    "MA20_UP": "中期移動平均線が上向き",
+    "BULL_STRUCTURE": "強気のチャート構造",
+    "FIB_BLUE": "Fibonacciの支持水準",
+    "SUPPORT_BOUNCE": "支持線からの反発",
+    "RESISTANCE_BREAK": "抵抗線の上抜け",
+    "CYCLE_POSITIVE": "上向きの周期傾向",
+    "PROPAGATION_REPEATED": "伝播が繰り返し発生",
+    "GROUP_STRENGTH_HIGH": "グループ全体の勢いが強い",
+    "DAYTIME_HIT_RECENT": "最近の日中の当たり傾向",
+    "CANDIDATE_OVERLAP": "両エージェントの候補重複",
+    "BOTH_TOP3": "両エージェントがTOP3以内で支持",
+    "CROSS_AGENT_TOP5": "両エージェントのTOP5に含まれる",
+    "PRIMARY_AGREEMENT": "両エージェントの本命一致",
+    "AGENT_DISAGREEMENT": "両エージェントの本命不一致",
+    "DIVERSE_SIGNAL_SUPPORT": "異なる分析視点から支持",
+}
+
+
+def _code_phrases(codes: list[str]) -> list[str]:
+    return [REASON_LABELS.get(code, code) for code in codes]
 
 
 def _signal_phrase(agent: dict[str, Any], name: str) -> str:
@@ -75,18 +100,8 @@ def _signal_phrase(agent: dict[str, Any], name: str) -> str:
             parts.append("サイクル予測")
         if signals.get("bullish_structure"):
             parts.append("強気構造")
-        return "、".join(parts or codes or ["テクニカル指標"])
-    parts = []
-    labels = {
-        "PROPAGATION_REPEATED": "伝播の反復性",
-        "GROUP_STRENGTH_HIGH": "グループ強度",
-        "DAYTIME_HIT_RECENT": "最近の日中hit",
-        "CYCLE_POSITIVE": "周期傾向",
-    }
-    for code in codes:
-        if code in labels:
-            parts.append(labels[code])
-    return "、".join(parts or codes or ["統計・伝播指標"])
+        return "、".join(parts or _code_phrases(codes) or ["テクニカル指標"])
+    return "、".join(_code_phrases(codes) or ["統計・伝播指標"])
 
 
 def _reason(agent: dict[str, Any], name: str, memory: dict[str, Any]) -> str:
@@ -97,19 +112,31 @@ def _reason(agent: dict[str, Any], name: str, memory: dict[str, Any]) -> str:
         weights = agent.get("agent_weights") or {}
         weight_text = ""
         if weights:
-            weight_text = f"（パチお{float(weights.get('pachio', 0)):.3f}、パチこ{float(weights.get('pachiko', 0)):.3f}）"
+            pachio_weight = float(weights.get("pachio", 0))
+            pachiko_weight = float(weights.get("pachiko", 0))
+            if pachio_weight > pachiko_weight:
+                preference = "パチおをやや高く重視"
+            elif pachiko_weight > pachio_weight:
+                preference = "パチこをやや高く重視"
+            else:
+                preference = "両者を同程度に重視"
+            weight_text = f"{preference}（パチお{pachio_weight:.3f}、パチこ{pachiko_weight:.3f}）"
         origins = agent.get("role_origins", {})
         origin_text = []
         for role, label in (("honmei", "本命"), ("taikou", "対抗"), ("ana", "穴")):
             origin = origins.get(role, {})
             if origin.get("origin_type"):
-                origin_text.append(f"{label}は{origin['origin_type']}")
+                rank_text = []
+                for key, agent_name in (("pachio_rank", "パチお"), ("pachiko_rank", "パチこ")):
+                    if origin.get(key) is not None:
+                        rank_text.append(f"{agent_name}{origin[key]}位")
+                origin_text.append(f"{label}は{origin['origin_type']}由来" + (f"（{'・'.join(rank_text)}）" if rank_text else ""))
         suffix = "。" if not origin_text else "（" + "、".join(origin_text) + "）。"
-        return f"パチおとパチこの候補を統合し、本命{honmei}、対抗{taikou}、穴{ana}を選択しました{weight_text}{suffix}"
+        return f"パチおとパチこの候補を統合し、{weight_text}を踏まえて本命{honmei}、対抗{taikou}、穴{ana}を選択しました{suffix}"
     machine = _machine(agent.get("primary_machine")) or "未選出"
     confidence = float(agent.get("confidence") or 0.0)
-    codes = "、".join(_codes(agent)) or "明示されたreason_codeなし"
-    return f"{machine}番は{_signal_phrase(agent, name)}を評価し、reason_code（{codes}）とconfidence {confidence:.3f}をもとに本命候補としました。"
+    codes = "、".join(_code_phrases(_codes(agent))) or "明示されたreason_codeなし"
+    return f"{machine}番は{_signal_phrase(agent, name)}を評価しました。{codes}を根拠に、confidence {confidence:.3f}を踏まえて本命候補としました。"
 
 
 def _result_text(item: dict[str, Any] | None, label: str) -> str:
@@ -120,14 +147,24 @@ def _result_text(item: dict[str, Any] | None, label: str) -> str:
         return f"{label}は結果データが未確定です。"
     direction = item.get("direction")
     close = item.get("close")
+    high = item.get("high")
+    low = item.get("low")
     if outcome == "success":
-        return f"{label}は{('陽線' if direction == 'positive' else '終値がプラス')}{f'（終値{close}）' if close is not None else ''}となり、予測時の上昇判断と一致しました。"
+        if high is not None and close is not None and float(high) > float(close):
+            flow = f"高値{high}まで上昇する場面を経て、終値{close}"
+        elif close is not None:
+            flow = f"終値{close}"
+        else:
+            flow = "終値が始値を上回り"
+        return f"{label}は{flow}となり、最終的に{('陽線' if direction == 'positive' else 'プラス') }でした。予測方向への動きが確認できました。"
     if item.get("max_up", 0) and float(item.get("max_up") or 0) > 0:
-        return f"{label}は一時{item.get('max_up')}まで上昇しましたが、最終的には{('陰線' if direction != 'positive' else '期待未達')}となりました。"
+        return f"{label}は途中で{item.get('max_up')}まで上昇する場面がありましたが、勢いを維持できず、最終的には{('陰線' if direction != 'positive' else '期待未達')}となりました。"
+    if low is not None:
+        return f"{label}は下方向への動きが優勢で、安値{low}を付け、期待した上昇には至りませんでした。"
     return f"{label}は{('陰線' if direction != 'positive' else '期待未達')}となり、期待した上昇には至りませんでした。"
 
 
-def _learning(agent: dict[str, Any], name: str, memory: dict[str, Any]) -> str:
+def _learning(agent: dict[str, Any], name: str, memory: dict[str, Any], outcome: str | None) -> str:
     if name == "pachikamisama":
         details = memory.get("pachikamisama", {})
         pattern = agent.get("experience_adjustment", {}).get("weight_pattern") or "balanced"
@@ -141,16 +178,20 @@ def _learning(agent: dict[str, Any], name: str, memory: dict[str, Any]) -> str:
     for code in codes:
         quote = _rate_text(_stat(memory, name, code))
         if quote:
-            quotes.append(f"{code}は{quote}")
+            quotes.append(f"{REASON_LABELS.get(code, code)}は{quote}")
     confidence = float(agent.get("confidence") or 0.0)
     band_quote = _rate_text(_confidence_stat(memory, name, confidence))
     if quotes and band_quote:
-        return f"{quotes[0]}、confidence帯も{band_quote}です。条件単独と組み合わせの両方を継続して観察します。"
+        if outcome == "success":
+            return f"{quotes[0]}、confidence帯も{band_quote}でした。今回の条件を引き続き優先候補として評価します。"
+        return f"{quotes[0]}、confidence帯は{band_quote}でした。今回の条件だけでは十分でない可能性があるため、他条件との組み合わせを継続して評価します。"
     if quotes:
-        return f"{quotes[0]}。同じreason_codeの組み合わせが再現するか、次回以降も継続して確認します。"
+        if outcome == "success":
+            return f"{quotes[0]}でした。同条件を引き続き優先候補として評価します。"
+        return f"{quotes[0]}でした。同条件だけでは十分ではないため、他条件との組み合わせを継続して評価します。"
     if band_quote:
-        return f"confidence {_band(confidence)}帯は{band_quote}です。confidenceと条件別成績を分けて再評価します。"
-    return "まだ十分な評価済みサンプルがないため、同じ条件の結果を蓄積してから判断します。"
+        return f"confidence {_band(confidence)}帯は{band_quote}でした。confidence帯と条件別成績を分けて次回も再評価します。"
+    return "まだ十分な評価済みサンプルがないため、同じ条件の結果を蓄積し、十分なサンプルが集まるまで慎重に評価します。"
 
 
 def build_reflection(prediction: dict[str, Any], result: dict[str, Any] | None, experience: dict[str, Any] | None) -> dict[str, Any]:
@@ -182,17 +223,17 @@ def build_reflection(prediction: dict[str, Any], result: dict[str, Any] | None, 
         "pachio": {
             "reason": _reason(agents.get("pachio", {}), "pachio", memory),
             "evaluation": _result_text(pachio_result, "パチおの本命"),
-            "learning": _learning(agents.get("pachio", {}), "pachio", memory),
+            "learning": _learning(agents.get("pachio", {}), "pachio", memory, _outcome(pachio_result.get("outcome") if pachio_result else None)),
         },
         "pachiko": {
             "reason": _reason(agents.get("pachiko", {}), "pachiko", memory),
             "evaluation": _result_text(pachiko_result, "パチこの本命"),
-            "learning": _learning(agents.get("pachiko", {}), "pachiko", memory),
+            "learning": _learning(agents.get("pachiko", {}), "pachiko", memory, _outcome(pachiko_result.get("outcome") if pachiko_result else None)),
         },
         "pachikamisama": {
             "reason": _reason(agents.get("pachikamisama", {}), "pachikamisama", memory),
             "evaluation": god_evaluation,
-            "learning": _learning(agents.get("pachikamisama", {}), "pachikamisama", memory),
+            "learning": _learning(agents.get("pachikamisama", {}), "pachikamisama", memory, _outcome(god_result.get("honmei", {}).get("outcome"))),
         },
     }
 
