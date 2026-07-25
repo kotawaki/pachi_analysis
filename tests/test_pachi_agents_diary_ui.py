@@ -28,6 +28,13 @@ class DiaryReflectionUITests(unittest.TestCase):
         self.assertIn("ref.pachiko?.evaluation", self.source)
         self.assertIn("ref.pachikamisama?.learning", self.source)
 
+    def test_prediction_machines_link_to_existing_ohlc_viewer(self):
+        self.assertIn("function machineLink", self.source)
+        self.assertIn("../ohlc.html?machine=", self.source)
+        self.assertIn("machineLink(c.machine", self.source)
+        self.assertIn("machineLink(a?.taikou", self.source)
+        self.assertIn("machineLink(a?.ana", self.source)
+
 
 if __name__ == "__main__":
     unittest.main()
