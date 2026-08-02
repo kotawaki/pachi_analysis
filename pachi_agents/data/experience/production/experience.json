@@ -2,7 +2,7 @@
   "schema_version": 1,
   "mode": "production",
   "minimum_sample": 5,
-  "generated_at": "2026-08-02T07:33:27.101999+09:00",
+  "generated_at": "2026-08-03T07:53:57.043749+09:00",
   "processed_prediction_dates": [
     "20260716",
     "20260717",
@@ -20,7 +20,8 @@
     "20260729",
     "20260730",
     "20260731",
-    "20260801"
+    "20260801",
+    "20260802"
   ],
   "evaluated_result_dates": [
     "20260716",
@@ -39,21 +40,22 @@
     "20260729",
     "20260730",
     "20260731",
-    "20260801"
+    "20260801",
+    "20260802"
   ],
   "agents": {
     "pachio": {
       "summary": {
-        "total_predictions": 15,
-        "evaluated_count": 15,
+        "total_predictions": 16,
+        "evaluated_count": 16,
         "success": 2,
-        "failure": 13,
-        "win_rate": 0.1333,
-        "average_confidence": 0.9178,
+        "failure": 14,
+        "win_rate": 0.125,
+        "average_confidence": 0.9198,
         "max_win_streak": 1,
         "max_loss_streak": 13,
         "current_streak": {
-          "type": "success",
+          "type": "failure",
           "count": 1
         }
       },
@@ -89,56 +91,56 @@
           "sample_count": 0
         },
         "gte_0_85": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 2,
-          "failure": 13,
-          "success_rate": 0.1333,
-          "average_confidence": 0.9178,
+          "failure": 14,
+          "success_rate": 0.125,
+          "average_confidence": 0.9198,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         }
       },
       "reason_codes": {
         "CYCLE_POSITIVE": {
+          "occurrences": 11,
+          "evaluated_count": 11,
+          "success": 1,
+          "failure": 10,
+          "success_rate": 0.0909,
+          "average_confidence": 0.9091,
+          "insufficient_data": false,
+          "sample_count": 11
+        },
+        "MA20_UP": {
+          "occurrences": 16,
+          "evaluated_count": 16,
+          "success": 2,
+          "failure": 14,
+          "success_rate": 0.125,
+          "average_confidence": 0.9198,
+          "insufficient_data": false,
+          "sample_count": 16
+        },
+        "MA5_UP": {
+          "occurrences": 16,
+          "evaluated_count": 16,
+          "success": 2,
+          "failure": 14,
+          "success_rate": 0.125,
+          "average_confidence": 0.9198,
+          "insufficient_data": false,
+          "sample_count": 16
+        },
+        "BULL_STRUCTURE": {
           "occurrences": 10,
           "evaluated_count": 10,
           "success": 1,
           "failure": 9,
           "success_rate": 0.1,
-          "average_confidence": 0.905,
+          "average_confidence": 0.9467,
           "insufficient_data": false,
           "sample_count": 10
-        },
-        "MA20_UP": {
-          "occurrences": 15,
-          "evaluated_count": 15,
-          "success": 2,
-          "failure": 13,
-          "success_rate": 0.1333,
-          "average_confidence": 0.9178,
-          "insufficient_data": false,
-          "sample_count": 15
-        },
-        "MA5_UP": {
-          "occurrences": 15,
-          "evaluated_count": 15,
-          "success": 2,
-          "failure": 13,
-          "success_rate": 0.1333,
-          "average_confidence": 0.9178,
-          "insufficient_data": false,
-          "sample_count": 15
-        },
-        "BULL_STRUCTURE": {
-          "occurrences": 9,
-          "evaluated_count": 9,
-          "success": 1,
-          "failure": 8,
-          "success_rate": 0.1111,
-          "average_confidence": 0.9463,
-          "insufficient_data": false,
-          "sample_count": 9
         },
         "CYCLE_NEGATIVE": {
           "occurrences": 5,
@@ -171,14 +173,14 @@
           "sample_count": 3
         },
         "FIB_BLUE": {
-          "occurrences": 4,
-          "evaluated_count": 4,
+          "occurrences": 5,
+          "evaluated_count": 5,
           "success": 0,
-          "failure": 4,
+          "failure": 5,
           "success_rate": 0.0,
           "average_confidence": 0.95,
-          "insufficient_data": true,
-          "sample_count": 4
+          "insufficient_data": false,
+          "sample_count": 5
         },
         "FIB_RED": {
           "occurrences": 1,
@@ -193,34 +195,34 @@
       },
       "reason_combinations": {
         "CYCLE_POSITIVE+MA20_UP": {
-          "occurrences": 10,
-          "evaluated_count": 10,
+          "occurrences": 11,
+          "evaluated_count": 11,
           "success": 1,
-          "failure": 9,
-          "success_rate": 0.1,
-          "average_confidence": 0.905,
+          "failure": 10,
+          "success_rate": 0.0909,
+          "average_confidence": 0.9091,
           "insufficient_data": false,
-          "sample_count": 10
+          "sample_count": 11
         },
         "CYCLE_POSITIVE+MA5_UP": {
-          "occurrences": 10,
-          "evaluated_count": 10,
+          "occurrences": 11,
+          "evaluated_count": 11,
           "success": 1,
-          "failure": 9,
-          "success_rate": 0.1,
-          "average_confidence": 0.905,
+          "failure": 10,
+          "success_rate": 0.0909,
+          "average_confidence": 0.9091,
           "insufficient_data": false,
-          "sample_count": 10
+          "sample_count": 11
         },
         "MA20_UP+MA5_UP": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 2,
-          "failure": 13,
-          "success_rate": 0.1333,
-          "average_confidence": 0.9178,
+          "failure": 14,
+          "success_rate": 0.125,
+          "average_confidence": 0.9198,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         },
         "BULL_STRUCTURE+CYCLE_NEGATIVE": {
           "occurrences": 5,
@@ -243,24 +245,24 @@
           "sample_count": 1
         },
         "BULL_STRUCTURE+MA20_UP": {
-          "occurrences": 9,
-          "evaluated_count": 9,
+          "occurrences": 10,
+          "evaluated_count": 10,
           "success": 1,
-          "failure": 8,
-          "success_rate": 0.1111,
-          "average_confidence": 0.9463,
+          "failure": 9,
+          "success_rate": 0.1,
+          "average_confidence": 0.9467,
           "insufficient_data": false,
-          "sample_count": 9
+          "sample_count": 10
         },
         "BULL_STRUCTURE+MA5_UP": {
-          "occurrences": 9,
-          "evaluated_count": 9,
+          "occurrences": 10,
+          "evaluated_count": 10,
           "success": 1,
-          "failure": 8,
-          "success_rate": 0.1111,
-          "average_confidence": 0.9463,
+          "failure": 9,
+          "success_rate": 0.1,
+          "average_confidence": 0.9467,
           "insufficient_data": false,
-          "sample_count": 9
+          "sample_count": 10
         },
         "CYCLE_NEGATIVE+FIB_YELLOW": {
           "occurrences": 1,
@@ -353,54 +355,54 @@
           "sample_count": 3
         },
         "BULL_STRUCTURE+CYCLE_POSITIVE": {
-          "occurrences": 4,
-          "evaluated_count": 4,
+          "occurrences": 5,
+          "evaluated_count": 5,
           "success": 0,
-          "failure": 4,
+          "failure": 5,
           "success_rate": 0.0,
           "average_confidence": 0.95,
-          "insufficient_data": true,
-          "sample_count": 4
+          "insufficient_data": false,
+          "sample_count": 5
         },
         "BULL_STRUCTURE+FIB_BLUE": {
-          "occurrences": 4,
-          "evaluated_count": 4,
+          "occurrences": 5,
+          "evaluated_count": 5,
           "success": 0,
-          "failure": 4,
+          "failure": 5,
           "success_rate": 0.0,
           "average_confidence": 0.95,
-          "insufficient_data": true,
-          "sample_count": 4
+          "insufficient_data": false,
+          "sample_count": 5
         },
         "CYCLE_POSITIVE+FIB_BLUE": {
-          "occurrences": 3,
-          "evaluated_count": 3,
+          "occurrences": 4,
+          "evaluated_count": 4,
           "success": 0,
-          "failure": 3,
+          "failure": 4,
           "success_rate": 0.0,
           "average_confidence": 0.95,
           "insufficient_data": true,
-          "sample_count": 3
+          "sample_count": 4
         },
         "FIB_BLUE+MA20_UP": {
-          "occurrences": 4,
-          "evaluated_count": 4,
+          "occurrences": 5,
+          "evaluated_count": 5,
           "success": 0,
-          "failure": 4,
+          "failure": 5,
           "success_rate": 0.0,
           "average_confidence": 0.95,
-          "insufficient_data": true,
-          "sample_count": 4
+          "insufficient_data": false,
+          "sample_count": 5
         },
         "FIB_BLUE+MA5_UP": {
-          "occurrences": 4,
-          "evaluated_count": 4,
+          "occurrences": 5,
+          "evaluated_count": 5,
           "success": 0,
-          "failure": 4,
+          "failure": 5,
           "success_rate": 0.0,
           "average_confidence": 0.95,
-          "insufficient_data": true,
-          "sample_count": 4
+          "insufficient_data": false,
+          "sample_count": 5
         },
         "BULL_STRUCTURE+FIB_RED": {
           "occurrences": 1,
@@ -456,17 +458,17 @@
     },
     "pachiko": {
       "summary": {
-        "total_predictions": 17,
-        "evaluated_count": 17,
+        "total_predictions": 18,
+        "evaluated_count": 18,
         "success": 10,
-        "failure": 7,
-        "win_rate": 0.5882,
+        "failure": 8,
+        "win_rate": 0.5556,
         "average_confidence": 0.9,
         "max_win_streak": 6,
         "max_loss_streak": 3,
         "current_streak": {
-          "type": "success",
-          "count": 2
+          "type": "failure",
+          "count": 1
         }
       },
       "confidence_bands": {
@@ -501,133 +503,133 @@
           "sample_count": 0
         },
         "gte_0_85": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         }
       },
       "reason_codes": {
         "DAYTIME_HIT_RECENT": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "GROUP_STRENGTH_HIGH": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "PROPAGATION_REPEATED": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "CYCLE_POSITIVE": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 10,
-          "failure": 5,
-          "success_rate": 0.6667,
+          "failure": 6,
+          "success_rate": 0.625,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         }
       },
       "reason_combinations": {
         "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED": {
-          "occurrences": 17,
-          "evaluated_count": 17,
+          "occurrences": 18,
+          "evaluated_count": 18,
           "success": 10,
-          "failure": 7,
-          "success_rate": 0.5882,
+          "failure": 8,
+          "success_rate": 0.5556,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 17
+          "sample_count": 18
         },
         "CYCLE_POSITIVE+DAYTIME_HIT_RECENT": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 10,
-          "failure": 5,
-          "success_rate": 0.6667,
+          "failure": 6,
+          "success_rate": 0.625,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         },
         "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 10,
-          "failure": 5,
-          "success_rate": 0.6667,
+          "failure": 6,
+          "success_rate": 0.625,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         },
         "CYCLE_POSITIVE+PROPAGATION_REPEATED": {
-          "occurrences": 15,
-          "evaluated_count": 15,
+          "occurrences": 16,
+          "evaluated_count": 16,
           "success": 10,
-          "failure": 5,
-          "success_rate": 0.6667,
+          "failure": 6,
+          "success_rate": 0.625,
           "average_confidence": 0.9,
           "insufficient_data": false,
-          "sample_count": 15
+          "sample_count": 16
         }
       }
     },
     "pachikamisama": {
       "summary": {
-        "total_predictions": 17,
-        "evaluated_count": 17,
+        "total_predictions": 18,
+        "evaluated_count": 18,
         "success": 7,
-        "failure": 10,
-        "win_rate": 0.4118,
-        "average_confidence": 0.4509,
+        "failure": 11,
+        "win_rate": 0.3889,
+        "average_confidence": 0.4609,
         "max_win_streak": 4,
         "max_loss_streak": 3,
         "current_streak": {
-          "type": "success",
+          "type": "failure",
           "count": 1
         }
       },
@@ -643,14 +645,14 @@
           "sample_count": 11
         },
         "0_50_0_70": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 1,
-          "failure": 1,
-          "success_rate": 0.5,
-          "average_confidence": 0.66,
+          "failure": 2,
+          "success_rate": 0.3333,
+          "average_confidence": 0.6503,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "0_70_0_85": {
           "occurrences": 3,
@@ -675,24 +677,24 @@
       },
       "reason_codes": {
         "AGENT_DISAGREEMENT": {
-          "occurrences": 16,
-          "evaluated_count": 16,
+          "occurrences": 17,
+          "evaluated_count": 17,
           "success": 7,
-          "failure": 9,
-          "success_rate": 0.4375,
-          "average_confidence": 0.4197,
+          "failure": 10,
+          "success_rate": 0.4118,
+          "average_confidence": 0.4321,
           "insufficient_data": false,
-          "sample_count": 16
+          "sample_count": 17
         },
         "HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 10,
-          "evaluated_count": 10,
+          "occurrences": 11,
+          "evaluated_count": 11,
           "success": 4,
-          "failure": 6,
-          "success_rate": 0.4,
-          "average_confidence": 0.6023,
+          "failure": 7,
+          "success_rate": 0.3636,
+          "average_confidence": 0.6049,
           "insufficient_data": false,
-          "sample_count": 10
+          "sample_count": 11
         },
         "PACHIKO_WEIGHTED": {
           "occurrences": 10,
@@ -705,54 +707,54 @@
           "sample_count": 10
         },
         "BOTH_TOP3": {
-          "occurrences": 6,
-          "evaluated_count": 6,
-          "success": 3,
-          "failure": 3,
-          "success_rate": 0.5,
-          "average_confidence": 0.7498,
-          "insufficient_data": false,
-          "sample_count": 6
-        },
-        "CANDIDATE_OVERLAP": {
-          "occurrences": 8,
-          "evaluated_count": 8,
-          "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
-          "insufficient_data": false,
-          "sample_count": 8
-        },
-        "CROSS_AGENT_TOP5": {
-          "occurrences": 8,
-          "evaluated_count": 8,
-          "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
-          "insufficient_data": false,
-          "sample_count": 8
-        },
-        "DIVERSE_SIGNAL_SUPPORT": {
-          "occurrences": 8,
-          "evaluated_count": 8,
-          "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
-          "insufficient_data": false,
-          "sample_count": 8
-        },
-        "PACHIO_WEIGHTED": {
           "occurrences": 7,
           "evaluated_count": 7,
-          "success": 1,
-          "failure": 6,
-          "success_rate": 0.1429,
-          "average_confidence": 0.413,
+          "success": 3,
+          "failure": 4,
+          "success_rate": 0.4286,
+          "average_confidence": 0.7329,
           "insufficient_data": false,
           "sample_count": 7
+        },
+        "CANDIDATE_OVERLAP": {
+          "occurrences": 9,
+          "evaluated_count": 9,
+          "success": 4,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
+          "insufficient_data": false,
+          "sample_count": 9
+        },
+        "CROSS_AGENT_TOP5": {
+          "occurrences": 9,
+          "evaluated_count": 9,
+          "success": 4,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
+          "insufficient_data": false,
+          "sample_count": 9
+        },
+        "DIVERSE_SIGNAL_SUPPORT": {
+          "occurrences": 9,
+          "evaluated_count": 9,
+          "success": 4,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
+          "insufficient_data": false,
+          "sample_count": 9
+        },
+        "PACHIO_WEIGHTED": {
+          "occurrences": 8,
+          "evaluated_count": 8,
+          "success": 1,
+          "failure": 7,
+          "success_rate": 0.125,
+          "average_confidence": 0.4403,
+          "insufficient_data": false,
+          "sample_count": 8
         },
         "PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -767,14 +769,14 @@
       },
       "reason_combinations": {
         "AGENT_DISAGREEMENT+HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 9,
-          "evaluated_count": 9,
+          "occurrences": 10,
+          "evaluated_count": 10,
           "success": 4,
-          "failure": 5,
-          "success_rate": 0.4444,
-          "average_confidence": 0.5637,
+          "failure": 6,
+          "success_rate": 0.4,
+          "average_confidence": 0.5704,
           "insufficient_data": false,
-          "sample_count": 9
+          "sample_count": 10
         },
         "AGENT_DISAGREEMENT+PACHIKO_WEIGHTED": {
           "occurrences": 10,
@@ -797,84 +799,84 @@
           "sample_count": 8
         },
         "AGENT_DISAGREEMENT+BOTH_TOP3": {
-          "occurrences": 5,
-          "evaluated_count": 5,
+          "occurrences": 6,
+          "evaluated_count": 6,
           "success": 3,
-          "failure": 2,
-          "success_rate": 0.6,
-          "average_confidence": 0.7098,
+          "failure": 3,
+          "success_rate": 0.5,
+          "average_confidence": 0.6967,
           "insufficient_data": false,
-          "sample_count": 5
+          "sample_count": 6
         },
         "AGENT_DISAGREEMENT+CANDIDATE_OVERLAP": {
-          "occurrences": 7,
-          "evaluated_count": 7,
+          "occurrences": 8,
+          "evaluated_count": 8,
           "success": 4,
-          "failure": 3,
-          "success_rate": 0.5714,
-          "average_confidence": 0.6281,
+          "failure": 4,
+          "success_rate": 0.5,
+          "average_confidence": 0.6285,
           "insufficient_data": false,
-          "sample_count": 7
+          "sample_count": 8
         },
         "AGENT_DISAGREEMENT+CROSS_AGENT_TOP5": {
-          "occurrences": 7,
-          "evaluated_count": 7,
+          "occurrences": 8,
+          "evaluated_count": 8,
           "success": 4,
-          "failure": 3,
-          "success_rate": 0.5714,
-          "average_confidence": 0.6281,
+          "failure": 4,
+          "success_rate": 0.5,
+          "average_confidence": 0.6285,
           "insufficient_data": false,
-          "sample_count": 7
+          "sample_count": 8
         },
         "AGENT_DISAGREEMENT+DIVERSE_SIGNAL_SUPPORT": {
+          "occurrences": 8,
+          "evaluated_count": 8,
+          "success": 4,
+          "failure": 4,
+          "success_rate": 0.5,
+          "average_confidence": 0.6285,
+          "insufficient_data": false,
+          "sample_count": 8
+        },
+        "BOTH_TOP3+CANDIDATE_OVERLAP": {
           "occurrences": 7,
           "evaluated_count": 7,
-          "success": 4,
-          "failure": 3,
-          "success_rate": 0.5714,
-          "average_confidence": 0.6281,
+          "success": 3,
+          "failure": 4,
+          "success_rate": 0.4286,
+          "average_confidence": 0.7329,
           "insufficient_data": false,
           "sample_count": 7
         },
-        "BOTH_TOP3+CANDIDATE_OVERLAP": {
-          "occurrences": 6,
-          "evaluated_count": 6,
-          "success": 3,
-          "failure": 3,
-          "success_rate": 0.5,
-          "average_confidence": 0.7498,
-          "insufficient_data": false,
-          "sample_count": 6
-        },
         "BOTH_TOP3+CROSS_AGENT_TOP5": {
-          "occurrences": 6,
-          "evaluated_count": 6,
+          "occurrences": 7,
+          "evaluated_count": 7,
           "success": 3,
-          "failure": 3,
-          "success_rate": 0.5,
-          "average_confidence": 0.7498,
+          "failure": 4,
+          "success_rate": 0.4286,
+          "average_confidence": 0.7329,
           "insufficient_data": false,
-          "sample_count": 6
+          "sample_count": 7
         },
         "BOTH_TOP3+DIVERSE_SIGNAL_SUPPORT": {
-          "occurrences": 6,
-          "evaluated_count": 6,
+          "occurrences": 7,
+          "evaluated_count": 7,
           "success": 3,
-          "failure": 3,
-          "success_rate": 0.5,
-          "average_confidence": 0.7498,
+          "failure": 4,
+          "success_rate": 0.4286,
+          "average_confidence": 0.7329,
           "insufficient_data": false,
-          "sample_count": 6
+          "sample_count": 7
         },
         "BOTH_TOP3+HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 6,
-          "evaluated_count": 6,
+          "occurrences": 7,
+          "evaluated_count": 7,
           "success": 3,
-          "failure": 3,
-          "success_rate": 0.5,
-          "average_confidence": 0.7498,
+          "failure": 4,
+          "success_rate": 0.4286,
+          "average_confidence": 0.7329,
           "insufficient_data": false,
-          "sample_count": 6
+          "sample_count": 7
         },
         "BOTH_TOP3+PACHIKO_WEIGHTED": {
           "occurrences": 4,
@@ -887,34 +889,34 @@
           "sample_count": 4
         },
         "CANDIDATE_OVERLAP+CROSS_AGENT_TOP5": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "CANDIDATE_OVERLAP+DIVERSE_SIGNAL_SUPPORT": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "CANDIDATE_OVERLAP+HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "CANDIDATE_OVERLAP+PACHIKO_WEIGHTED": {
           "occurrences": 6,
@@ -927,24 +929,24 @@
           "sample_count": 6
         },
         "CROSS_AGENT_TOP5+DIVERSE_SIGNAL_SUPPORT": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "CROSS_AGENT_TOP5+HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "CROSS_AGENT_TOP5+PACHIKO_WEIGHTED": {
           "occurrences": 6,
@@ -957,14 +959,14 @@
           "sample_count": 6
         },
         "DIVERSE_SIGNAL_SUPPORT+HIGH_COMBINED_CONFIDENCE": {
-          "occurrences": 8,
-          "evaluated_count": 8,
+          "occurrences": 9,
+          "evaluated_count": 9,
           "success": 4,
-          "failure": 4,
-          "success_rate": 0.5,
-          "average_confidence": 0.6684,
+          "failure": 5,
+          "success_rate": 0.4444,
+          "average_confidence": 0.6642,
           "insufficient_data": false,
-          "sample_count": 8
+          "sample_count": 9
         },
         "DIVERSE_SIGNAL_SUPPORT+PACHIKO_WEIGHTED": {
           "occurrences": 6,
@@ -977,24 +979,24 @@
           "sample_count": 6
         },
         "AGENT_DISAGREEMENT+PACHIO_WEIGHTED": {
-          "occurrences": 6,
-          "evaluated_count": 6,
+          "occurrences": 7,
+          "evaluated_count": 7,
           "success": 1,
-          "failure": 5,
-          "success_rate": 0.1667,
-          "average_confidence": 0.3235,
+          "failure": 6,
+          "success_rate": 0.1429,
+          "average_confidence": 0.3674,
           "insufficient_data": false,
-          "sample_count": 6
+          "sample_count": 7
         },
         "BOTH_TOP3+PACHIO_WEIGHTED": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 0,
-          "failure": 2,
+          "failure": 3,
           "success_rate": 0.0,
-          "average_confidence": 0.8505,
+          "average_confidence": 0.7773,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "BOTH_TOP3+PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -1007,14 +1009,14 @@
           "sample_count": 1
         },
         "CANDIDATE_OVERLAP+PACHIO_WEIGHTED": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 0,
-          "failure": 2,
+          "failure": 3,
           "success_rate": 0.0,
-          "average_confidence": 0.8505,
+          "average_confidence": 0.7773,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "CANDIDATE_OVERLAP+PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -1027,14 +1029,14 @@
           "sample_count": 1
         },
         "CROSS_AGENT_TOP5+PACHIO_WEIGHTED": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 0,
-          "failure": 2,
+          "failure": 3,
           "success_rate": 0.0,
-          "average_confidence": 0.8505,
+          "average_confidence": 0.7773,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "CROSS_AGENT_TOP5+PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -1047,14 +1049,14 @@
           "sample_count": 1
         },
         "DIVERSE_SIGNAL_SUPPORT+PACHIO_WEIGHTED": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 0,
-          "failure": 2,
+          "failure": 3,
           "success_rate": 0.0,
-          "average_confidence": 0.8505,
+          "average_confidence": 0.7773,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "DIVERSE_SIGNAL_SUPPORT+PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -1067,14 +1069,14 @@
           "sample_count": 1
         },
         "HIGH_COMBINED_CONFIDENCE+PACHIO_WEIGHTED": {
-          "occurrences": 2,
-          "evaluated_count": 2,
+          "occurrences": 3,
+          "evaluated_count": 3,
           "success": 0,
-          "failure": 2,
+          "failure": 3,
           "success_rate": 0.0,
-          "average_confidence": 0.8505,
+          "average_confidence": 0.7773,
           "insufficient_data": true,
-          "sample_count": 2
+          "sample_count": 3
         },
         "HIGH_COMBINED_CONFIDENCE+PRIMARY_AGREEMENT": {
           "occurrences": 1,
@@ -1102,44 +1104,44 @@
   "pachikamisama": {
     "roles": {
       "honmei": {
-        "total_predictions": 17,
-        "evaluated_count": 17,
+        "total_predictions": 18,
+        "evaluated_count": 18,
         "success": 7,
-        "failure": 10,
-        "win_rate": 0.4118,
-        "average_confidence": 0.4509,
+        "failure": 11,
+        "win_rate": 0.3889,
+        "average_confidence": 0.4609,
         "max_win_streak": 4,
         "max_loss_streak": 3,
         "current_streak": {
-          "type": "success",
+          "type": "failure",
           "count": 1
         }
       },
       "taikou": {
-        "total_predictions": 17,
-        "evaluated_count": 17,
+        "total_predictions": 18,
+        "evaluated_count": 18,
         "success": 5,
-        "failure": 12,
-        "win_rate": 0.2941,
-        "average_confidence": 0.4509,
+        "failure": 13,
+        "win_rate": 0.2778,
+        "average_confidence": 0.4609,
         "max_win_streak": 2,
         "max_loss_streak": 5,
         "current_streak": {
-          "type": "success",
-          "count": 2
+          "type": "failure",
+          "count": 1
         }
       },
       "ana": {
-        "total_predictions": 17,
-        "evaluated_count": 17,
+        "total_predictions": 18,
+        "evaluated_count": 18,
         "success": 7,
-        "failure": 10,
-        "win_rate": 0.4118,
-        "average_confidence": 0.4509,
+        "failure": 11,
+        "win_rate": 0.3889,
+        "average_confidence": 0.4609,
         "max_win_streak": 3,
         "max_loss_streak": 5,
         "current_streak": {
-          "type": "success",
+          "type": "failure",
           "count": 1
         }
       }
@@ -1160,16 +1162,16 @@
         }
       },
       "balanced": {
-        "total_predictions": 15,
-        "evaluated_count": 15,
+        "total_predictions": 16,
+        "evaluated_count": 16,
         "success": 7,
-        "failure": 8,
-        "win_rate": 0.4667,
-        "average_confidence": 0.4659,
+        "failure": 9,
+        "win_rate": 0.4375,
+        "average_confidence": 0.4763,
         "max_win_streak": 4,
         "max_loss_streak": 3,
         "current_streak": {
-          "type": "success",
+          "type": "failure",
           "count": 1
         }
       },
@@ -1200,14 +1202,14 @@
         "sample_count": 11
       },
       "0_50_0_70": {
-        "occurrences": 2,
-        "evaluated_count": 2,
+        "occurrences": 3,
+        "evaluated_count": 3,
         "success": 1,
-        "failure": 1,
-        "success_rate": 0.5,
-        "average_confidence": 0.66,
+        "failure": 2,
+        "success_rate": 0.3333,
+        "average_confidence": 0.6503,
         "insufficient_data": true,
-        "sample_count": 2
+        "sample_count": 3
       },
       "0_70_0_85": {
         "occurrences": 3,
@@ -1242,64 +1244,64 @@
         "sample_count": 1
       },
       "AGENT_DISAGREEMENT": {
-        "occurrences": 16,
-        "evaluated_count": 16,
+        "occurrences": 17,
+        "evaluated_count": 17,
         "success": 7,
-        "failure": 9,
-        "success_rate": 0.4375,
-        "average_confidence": 0.4197,
+        "failure": 10,
+        "success_rate": 0.4118,
+        "average_confidence": 0.4321,
         "insufficient_data": false,
-        "sample_count": 16
+        "sample_count": 17
       },
       "CROSS_AGENT_TOP5": {
-        "occurrences": 8,
-        "evaluated_count": 8,
+        "occurrences": 9,
+        "evaluated_count": 9,
         "success": 4,
-        "failure": 4,
-        "success_rate": 0.5,
-        "average_confidence": 0.6684,
+        "failure": 5,
+        "success_rate": 0.4444,
+        "average_confidence": 0.6642,
         "insufficient_data": false,
-        "sample_count": 8
+        "sample_count": 9
       },
       "BOTH_TOP3": {
-        "occurrences": 6,
-        "evaluated_count": 6,
+        "occurrences": 7,
+        "evaluated_count": 7,
         "success": 3,
-        "failure": 3,
-        "success_rate": 0.5,
-        "average_confidence": 0.7498,
+        "failure": 4,
+        "success_rate": 0.4286,
+        "average_confidence": 0.7329,
         "insufficient_data": false,
-        "sample_count": 6
+        "sample_count": 7
       },
       "CANDIDATE_OVERLAP": {
-        "occurrences": 8,
-        "evaluated_count": 8,
+        "occurrences": 9,
+        "evaluated_count": 9,
         "success": 4,
-        "failure": 4,
-        "success_rate": 0.5,
-        "average_confidence": 0.6684,
+        "failure": 5,
+        "success_rate": 0.4444,
+        "average_confidence": 0.6642,
         "insufficient_data": false,
-        "sample_count": 8
+        "sample_count": 9
       },
       "DIVERSE_SIGNAL_SUPPORT": {
-        "occurrences": 8,
-        "evaluated_count": 8,
+        "occurrences": 9,
+        "evaluated_count": 9,
         "success": 4,
-        "failure": 4,
-        "success_rate": 0.5,
-        "average_confidence": 0.6684,
+        "failure": 5,
+        "success_rate": 0.4444,
+        "average_confidence": 0.6642,
         "insufficient_data": false,
-        "sample_count": 8
+        "sample_count": 9
       }
     },
     "origin_stats": {
       "candidate_origins": {
         "PACHIO_ONLY": {
-          "total_predictions": 18,
-          "evaluated_count": 18,
+          "total_predictions": 19,
+          "evaluated_count": 19,
           "success": 4,
-          "failure": 14,
-          "win_rate": 0.2222,
+          "failure": 15,
+          "win_rate": 0.2105,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -1309,11 +1311,11 @@
           }
         },
         "PACHIKO_ONLY": {
-          "total_predictions": 22,
-          "evaluated_count": 22,
+          "total_predictions": 23,
+          "evaluated_count": 23,
           "success": 10,
-          "failure": 12,
-          "win_rate": 0.4545,
+          "failure": 13,
+          "win_rate": 0.4348,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -1323,11 +1325,11 @@
           }
         },
         "BOTH": {
-          "total_predictions": 11,
-          "evaluated_count": 11,
+          "total_predictions": 12,
+          "evaluated_count": 12,
           "success": 5,
-          "failure": 6,
-          "win_rate": 0.4545,
+          "failure": 7,
+          "win_rate": 0.4167,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -1382,11 +1384,11 @@
             }
           },
           "BOTH": {
-            "total_predictions": 8,
-            "evaluated_count": 8,
+            "total_predictions": 9,
+            "evaluated_count": 9,
             "success": 4,
-            "failure": 4,
-            "win_rate": 0.5,
+            "failure": 5,
+            "win_rate": 0.4444,
             "average_confidence": 0.0,
             "max_win_streak": 0,
             "max_loss_streak": 0,
@@ -1412,11 +1414,11 @@
         },
         "taikou": {
           "PACHIO_ONLY": {
-            "total_predictions": 5,
-            "evaluated_count": 5,
+            "total_predictions": 6,
+            "evaluated_count": 6,
             "success": 1,
-            "failure": 4,
-            "win_rate": 0.2,
+            "failure": 5,
+            "win_rate": 0.1667,
             "average_confidence": 0.0,
             "max_win_streak": 0,
             "max_loss_streak": 0,
@@ -1484,11 +1486,11 @@
             }
           },
           "PACHIKO_ONLY": {
-            "total_predictions": 9,
-            "evaluated_count": 9,
+            "total_predictions": 10,
+            "evaluated_count": 10,
             "success": 5,
-            "failure": 4,
-            "win_rate": 0.5556,
+            "failure": 5,
+            "win_rate": 0.5,
             "average_confidence": 0.0,
             "max_win_streak": 0,
             "max_loss_streak": 0,
@@ -1529,11 +1531,11 @@
       },
       "primary_sources": {
         "PACHIO_PRIMARY": {
-          "total_predictions": 13,
-          "evaluated_count": 13,
+          "total_predictions": 14,
+          "evaluated_count": 14,
           "success": 2,
-          "failure": 11,
-          "win_rate": 0.1538,
+          "failure": 12,
+          "win_rate": 0.1429,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -1543,11 +1545,11 @@
           }
         },
         "PACHIKO_PRIMARY": {
-          "total_predictions": 16,
-          "evaluated_count": 16,
+          "total_predictions": 17,
+          "evaluated_count": 17,
           "success": 10,
-          "failure": 6,
-          "win_rate": 0.625,
+          "failure": 7,
+          "win_rate": 0.5882,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -1571,11 +1573,11 @@
           }
         },
         "NO_PRIMARY": {
-          "total_predictions": 21,
-          "evaluated_count": 21,
+          "total_predictions": 22,
+          "evaluated_count": 22,
           "success": 7,
-          "failure": 14,
-          "win_rate": 0.3333,
+          "failure": 15,
+          "win_rate": 0.3182,
           "average_confidence": 0.0,
           "max_win_streak": 0,
           "max_loss_streak": 0,
@@ -4438,12 +4440,208 @@
         "pachio": 0.4559,
         "pachiko": 0.5441
       }
+    },
+    {
+      "date": "20260802",
+      "events": [
+        {
+          "event": "PACHIO_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "BULL_STRUCTURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "CYCLE_POSITIVE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "FIB_BLUE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "MA20_UP",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "MA5_UP",
+          "outcome": "failure"
+        },
+        {
+          "event": "PACHIKO_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "CYCLE_POSITIVE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "DAYTIME_HIT_RECENT",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "GROUP_STRENGTH_HIGH",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "PROPAGATION_REPEATED",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_HONMEI_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_TAIKOU_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "KAMISAMA_ANA_FAILURE",
+          "outcome": "failure"
+        },
+        {
+          "event": "BALANCED"
+        },
+        {
+          "event": "AGENT_DISAGREEMENT"
+        },
+        {
+          "event": "BOTH_TOP3"
+        },
+        {
+          "event": "CANDIDATE_OVERLAP"
+        },
+        {
+          "event": "CROSS_AGENT_TOP5"
+        },
+        {
+          "event": "DIVERSE_SIGNAL_SUPPORT"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "AGENT_DISAGREEMENT",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "BOTH_TOP3",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "CANDIDATE_OVERLAP",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "CROSS_AGENT_TOP5",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "DIVERSE_SIGNAL_SUPPORT",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "HIGH_COMBINED_CONFIDENCE",
+          "outcome": "failure"
+        },
+        {
+          "event": "reason_outcome",
+          "reason_code": "PACHIO_WEIGHTED",
+          "outcome": "failure"
+        }
+      ],
+      "agents": {
+        "pachio": {
+          "outcome": "failure",
+          "confidence": 0.95
+        },
+        "pachiko": {
+          "outcome": "failure",
+          "confidence": 0.9
+        },
+        "pachikamisama": {
+          "role_outcomes": {
+            "honmei": "failure",
+            "taikou": "failure",
+            "ana": "failure"
+          },
+          "confidence": 0.631,
+          "role_origins": {
+            "honmei": {
+              "agents": [
+                "pachio",
+                "pachiko"
+              ],
+              "pachio": {
+                "selected": true,
+                "rank": 2,
+                "is_primary": false
+              },
+              "pachiko": {
+                "selected": true,
+                "rank": 2,
+                "is_primary": false
+              },
+              "origin_type": "BOTH"
+            },
+            "taikou": {
+              "agents": [
+                "pachio"
+              ],
+              "pachio": {
+                "selected": true,
+                "rank": 1,
+                "is_primary": true
+              },
+              "pachiko": {
+                "selected": false,
+                "rank": null,
+                "is_primary": false
+              },
+              "origin_type": "PACHIO_ONLY"
+            },
+            "ana": {
+              "agents": [
+                "pachiko"
+              ],
+              "pachio": {
+                "selected": false,
+                "rank": null,
+                "is_primary": false
+              },
+              "pachiko": {
+                "selected": true,
+                "rank": 1,
+                "is_primary": true
+              },
+              "origin_type": "PACHIKO_ONLY"
+            }
+          }
+        }
+      },
+      "agent_weights": {
+        "pachio": 0.4595,
+        "pachiko": 0.5405
+      }
     }
   ],
   "data_quality": {
-    "prediction_files_seen": 17,
-    "locked_predictions": 17,
-    "evaluated_results_seen": 17,
+    "prediction_files_seen": 18,
+    "locked_predictions": 18,
+    "evaluated_results_seen": 18,
     "pending_results_skipped": 0,
     "incomplete_results_skipped": 0,
     "unlocked_predictions_skipped": 0,
