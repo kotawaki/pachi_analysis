@@ -23,41 +23,60 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
 <header>
   <a href="index.html">← ダッシュボード</a>
   <h1>複合シグナル検証</h1>
-  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: backfill: 68件 / html: 3355件</div>
+  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: backfill: 68件 / html: 3421件</div>
 </header>
 <main>
   <p><a href="intraday_hit_regime.html">日中周期hitの日次レジーム追跡を見る</a></p>
 
   <section class="panel">
-    <h2>daytime日中周期hit候補 20260804</h2>
+    <h2>daytime日中周期hit候補 20260805</h2>
     <p class="note">daytime未取得のため、当日H候補はありません。</p>
     <p class="note">当日監視用です。実績一覧・陽線率への反映は翌朝morning取得後に行います。</p>
   </section>
   <section class="panel">
-    <h2>全期間 20260613〜20260803</h2>
-    <div class="summary"><article class="metric base"><span>全体陽線率</span><b>39.0%</b><p>1334/3423 / 中央値 -1,778</p><small>3423件 / 方向一致 1749/3423 (51.1%)</small></article>
-<article class="metric plus"><span>周期プラス</span><b>40.0%</b><p>676/1692 / 中央値 -1,740</p><small>朝時点の上向き候補</small></article>
-<article class="metric minus"><span>周期マイナス</span><b>38.0%</b><p>658/1731 / 中央値 -1,894</p><small>朝時点の下向き候補</small></article>
-<article class="metric hit"><span>周期+ × 日中hit</span><b>54.8%</b><p>236/431 / 中央値 +1,532</p><small>上向き候補の当日確認</small></article>
-<article class="metric hit"><span>周期- × 日中hit</span><b>53.6%</b><p>207/386 / 中央値 +1,293</p><small>下向きからの反転候補</small></article>
-<article class="metric weak"><span>周期- × hitなし</span><b>33.5%</b><p>451/1345 / 中央値 -2,204</p><small>反転材料なし</small></article>
-<article class="metric hit"><span>日中hit後プラス</span><b>58.5%</b><p>478/817 / 最終中央値 +1,555</p><small>+30分 643/817 / +60分 601/817</small></article></div>
+    <h2>全期間 20260613〜20260804</h2>
+    <div class="summary"><article class="metric base"><span>全体陽線率</span><b>38.9%</b><p>1357/3489 / 中央値 -1,778</p><small>3489件 / 方向一致 1788/3489 (51.2%)</small></article>
+<article class="metric plus"><span>周期プラス</span><b>40.0%</b><p>690/1724 / 中央値 -1,689</p><small>朝時点の上向き候補</small></article>
+<article class="metric minus"><span>周期マイナス</span><b>37.8%</b><p>667/1765 / 中央値 -1,894</p><small>朝時点の下向き候補</small></article>
+<article class="metric hit"><span>周期+ × 日中hit</span><b>54.5%</b><p>240/440 / 中央値 +1,499</p><small>上向き候補の当日確認</small></article>
+<article class="metric hit"><span>周期- × 日中hit</span><b>53.4%</b><p>210/393 / 中央値 +1,293</p><small>下向きからの反転候補</small></article>
+<article class="metric weak"><span>周期- × hitなし</span><b>33.3%</b><p>457/1372 / 中央値 -2,204</p><small>反転材料なし</small></article>
+<article class="metric hit"><span>日中hit後プラス</span><b>58.7%</b><p>489/833 / 最終中央値 +1,610</p><small>+30分 655/833 / +60分 612/833</small></article></div>
   </section>
   <section class="panel">
     <h2>条件別リスト</h2>
     <table><thead><tr><th>日区分</th><th>周期</th><th>日中周期</th><th>陽線</th><th>陽線率</th><th>中央値</th><th>平均</th></tr></thead><tbody>
-      <tr><td>通常日</td><td>周期-</td><td>日中hitなし</td><td>333/993</td><td>33.5%</td><td>-2,267</td><td>-1,310</td></tr><tr><td>通常日</td><td>周期-</td><td>日中hitあり</td><td>147/280</td><td>52.5%</td><td>+1,164</td><td>+3,284</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitなし</td><td>309/940</td><td>32.9%</td><td>-2,400</td><td>-1,439</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitあり</td><td>178/330</td><td>53.9%</td><td>+1,638</td><td>+2,325</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitなし</td><td>118/352</td><td>33.5%</td><td>-2,079</td><td>-1,153</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitあり</td><td>60/106</td><td>56.6%</td><td>+1,438</td><td>+4,820</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitなし</td><td>131/321</td><td>40.8%</td><td>-1,511</td><td>-409</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitあり</td><td>58/101</td><td>57.4%</td><td>+1,532</td><td>+3,586</td></tr>
+      <tr><td>通常日</td><td>周期-</td><td>日中hitなし</td><td>339/1020</td><td>33.2%</td><td>-2,289</td><td>-1,348</td></tr><tr><td>通常日</td><td>周期-</td><td>日中hitあり</td><td>150/287</td><td>52.3%</td><td>+1,034</td><td>+3,260</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitなし</td><td>319/963</td><td>33.1%</td><td>-2,311</td><td>-1,380</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitあり</td><td>182/339</td><td>53.7%</td><td>+1,466</td><td>+2,358</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitなし</td><td>118/352</td><td>33.5%</td><td>-2,079</td><td>-1,153</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitあり</td><td>60/106</td><td>56.6%</td><td>+1,438</td><td>+4,820</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitなし</td><td>131/321</td><td>40.8%</td><td>-1,511</td><td>-409</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitあり</td><td>58/101</td><td>57.4%</td><td>+1,532</td><td>+3,586</td></tr>
     </tbody></table>
   </section>
   <section class="panel">
     <h2>日中hit後の差玉推移</h2>
     <table><thead><tr><th>周期</th><th>チャート</th><th>件数</th><th>+30分</th><th>+60分</th><th>最終</th><th>最終中央値</th><th>最大上昇中央値</th></tr></thead><tbody>
-      <tr><td>周期-</td><td>good</td><td>1</td><td>1/1 (100.0%)</td><td>1/1 (100.0%)</td><td>1/1 (100.0%)</td><td>+356</td><td>+6,982</td></tr><tr><td>周期-</td><td>neutral</td><td>19</td><td>12/19 (63.2%)</td><td>12/19 (63.2%)</td><td>6/19 (31.6%)</td><td>-1,380</td><td>+1,000</td></tr><tr><td>周期-</td><td>weak</td><td>366</td><td>288/366 (78.7%)</td><td>276/366 (75.4%)</td><td>220/366 (60.1%)</td><td>+1,926</td><td>+5,330</td></tr><tr><td>周期+</td><td>good</td><td>3</td><td>3/3 (100.0%)</td><td>2/3 (66.7%)</td><td>2/3 (66.7%)</td><td>+5,517</td><td>+9,483</td></tr><tr><td>周期+</td><td>neutral</td><td>7</td><td>4/7 (57.1%)</td><td>2/7 (28.6%)</td><td>2/7 (28.6%)</td><td>-2,630</td><td>+977</td></tr><tr><td>周期+</td><td>weak</td><td>421</td><td>335/421 (79.6%)</td><td>308/421 (73.2%)</td><td>247/421 (58.7%)</td><td>+1,465</td><td>+5,054</td></tr>
+      <tr><td>周期-</td><td>good</td><td>1</td><td>1/1 (100.0%)</td><td>1/1 (100.0%)</td><td>1/1 (100.0%)</td><td>+356</td><td>+6,982</td></tr><tr><td>周期-</td><td>neutral</td><td>19</td><td>12/19 (63.2%)</td><td>12/19 (63.2%)</td><td>6/19 (31.6%)</td><td>-1,380</td><td>+1,000</td></tr><tr><td>周期-</td><td>weak</td><td>373</td><td>294/373 (78.8%)</td><td>282/373 (75.6%)</td><td>225/373 (60.3%)</td><td>+1,896</td><td>+5,327</td></tr><tr><td>周期+</td><td>good</td><td>3</td><td>3/3 (100.0%)</td><td>2/3 (66.7%)</td><td>2/3 (66.7%)</td><td>+5,517</td><td>+9,483</td></tr><tr><td>周期+</td><td>neutral</td><td>7</td><td>4/7 (57.1%)</td><td>2/7 (28.6%)</td><td>2/7 (28.6%)</td><td>-2,630</td><td>+977</td></tr><tr><td>周期+</td><td>weak</td><td>430</td><td>341/430 (79.3%)</td><td>313/430 (72.8%)</td><td>253/430 (58.8%)</td><td>+1,522</td><td>+5,060</td></tr>
     </tbody></table>
   </section>
   <section>
     <h2>日別リスト</h2>
     <div class="day-list">
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260804</h3><span class="badge ">通常日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>43.8%</b><small>14/32</small></div>
+    <div><span>周期-</span><b>26.5%</b><small>9/34</small></div>
+    <div><span>差</span><b class="pos">+17.3pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>34.8%</b><small>23/66</small></div>
+    <div><span>日中hit全体</span><b>43.8%</b><small>7/16</small></div>
+    <div><span>周期-陽線</span><b>9台</b><small>うちhit 3台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>4/9 (44.4%)</b></p>
+    <p>周期-×hit: <b>3/7 (42.9%)</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>48</b><span>+22,314</span><em>90分 / weak</em></li><li><b>62</b><span>+20,579</span><em>hitなし / weak</em></li><li><b>70</b><span>+20,083</span><em>hitなし / weak</em></li><li><b>60</b><span>+11,379</span><em>60分 / weak</em></li><li><b>65</b><span>+6,638</span><em>hitなし / weak</em></li></ul>
+</section>
 <section class="day-card">
   <div class="day-head">
     <h3>20260803</h3><span class="badge special">特日</span>
