@@ -33,6 +33,10 @@ from .export_web import export_web
 from .reflection import generate_reflection_for_date
 
 
+class ReportAlignmentError(ValueError):
+    """当日production報告のprediction/result対応が壊れている。"""
+
+
 def _add_days(value: str, days: int) -> str:
     parsed = Date.fromisoformat(f"{value[:4]}-{value[4:6]}-{value[6:]}")
     return (parsed + timedelta(days=days)).strftime("%Y%m%d")
@@ -121,6 +125,7 @@ def _prediction_summary(prediction: dict[str, Any] | None) -> dict[str, Any]:
     agents = prediction.get("agents", {})
     god = agents.get("pachikamisama", {})
     return {
+        "prediction_date": prediction.get("prediction_date"),
         "status": prediction.get("status"),
         "pachio_primary": agents.get("pachio", {}).get("primary_machine"),
         "pachiko_primary": agents.get("pachiko", {}).get("primary_machine"),
@@ -128,6 +133,22 @@ def _prediction_summary(prediction: dict[str, Any] | None) -> dict[str, Any]:
         "pachikamisama_taikou": god.get("taikou"),
         "pachikamisama_ana": god.get("ana"),
     }
+
+
+def _validate_report_alignment(
+    prediction: dict[str, Any],
+    result: dict[str, Any],
+    base_date: str,
+) -> None:
+    """当日報告に翌日prediction/resultが混ざらないことを保証する。"""
+    expected = normalize_date(base_date)
+    prediction_date = normalize_date(prediction.get("prediction_date"))
+    result_date = normalize_date(result.get("prediction_date"))
+    if prediction_date != expected or result_date != expected or prediction_date != result_date:
+        raise ReportAlignmentError(
+            "production報告のprediction/result日付が一致しません: "
+            f"expected={expected}, prediction={prediction_date}, result={result_date}"
+        )
 
 
 def run_daily(
@@ -176,20 +197,42 @@ def run_daily(
         current_prediction = None
 
     if current_prediction is not None:
+        report["evaluation"]["prediction"] = _prediction_summary(current_prediction)
+        report["evaluation"]["prediction_file"] = str(prediction_store.path_for(base))
         try:
             current_result = result_store.load(base)
-            report["evaluation"] = {"prediction_date": base, "status": current_result.get("status"), "action": "skip_existing_result"}
+            _validate_report_alignment(current_prediction, current_result, base)
+            report["evaluation"].update({
+                "status": current_result.get("status"),
+                "action": "skip_existing_result",
+                "result_prediction_date": current_result.get("prediction_date"),
+                "result_file": str(result_store.path_for(base)),
+            })
         except ResultNotFound:
             status = _preview_result_status(current_prediction, ohlc_root, base)
-            report["evaluation"] = {"prediction_date": base, "status": status, "action": "evaluate" if status != "pending" else "wait"}
+            report["evaluation"].update({
+                "prediction_date": base,
+                "status": status,
+                "action": "evaluate" if status != "pending" else "wait",
+            })
             if not dry_run and status != "pending":
                 try:
                     evaluate_prediction(prediction_store, result_store, prediction_date=base, ohlc_root=ohlc_root)
-                    report["evaluation"]["status"] = result_store.load(base).get("status")
+                    current_result = result_store.load(base)
+                    _validate_report_alignment(current_prediction, current_result, base)
+                    report["evaluation"].update({
+                        "status": current_result.get("status"),
+                        "result_prediction_date": current_result.get("prediction_date"),
+                        "result_file": str(result_store.path_for(base)),
+                    })
                 except ResultAlreadyExists:
                     report["evaluation"]["action"] = "skip_race_existing_result"
         except ResultError as exc:
-            report["evaluation"] = {"prediction_date": base, "status": "result_error", "error": type(exc).__name__}
+            report["evaluation"].update({
+                "prediction_date": base,
+                "status": "result_error",
+                "error": type(exc).__name__,
+            })
 
     builder = _load_production_memory(prediction_store, result_store, base, minimum_sample)
     report["experience"]["evaluated_result_dates_before_next_prediction"] = list(builder.memory["evaluated_result_dates"])

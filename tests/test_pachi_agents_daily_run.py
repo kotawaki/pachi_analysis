@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from pachi_agents.daily_run import run_daily
+from pachi_agents.daily_run import ReportAlignmentError, run_daily
 from pachi_agents.predictions import PredictionStore
 from pachi_agents.results import ResultStore
 
@@ -97,6 +97,9 @@ class DailyRunTest(unittest.TestCase):
             result_path = self.root / "pachi_agents" / "data" / "results" / "result_20260716.json"
             prediction_path = self.root / "pachi_agents" / "data" / "predictions" / "prediction_20260717.json"
             self.assertEqual(first["evaluation"]["status"], "evaluated")
+            self.assertEqual(first["evaluation"]["prediction"]["prediction_date"], "20260716")
+            self.assertEqual(first["evaluation"]["prediction"]["pachikamisama_honmei"], "039")
+            self.assertEqual(first["evaluation"]["result_prediction_date"], "20260716")
             self.assertTrue(result_path.exists())
             self.assertTrue(prediction_path.exists())
             self.assertEqual(first["experience"]["mode"], "production")
@@ -110,6 +113,22 @@ class DailyRunTest(unittest.TestCase):
         self.assertEqual(result_before, result_path.read_bytes())
         self.assertEqual(prediction_before, prediction_path.read_bytes())
         self.assertFalse((self.root / "pachi_agents" / "data" / "backtest").exists())
+
+    def test_report_rejects_prediction_file_with_mismatched_payload_date(self):
+        path = self.root / "pachi_agents" / "data" / "predictions" / "prediction_20260716.json"
+        payload = _prediction("20260717")
+        payload["status"] = "locked"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        ResultStore(self.root / "pachi_agents" / "data" / "results").save({
+            "prediction_date": "20260716",
+            "evaluated_at": "2026-07-17T00:00:00+09:00",
+            "result_version": "test",
+            "source_manifest": [],
+            "agents": {},
+            "status": "evaluated",
+        })
+        with self.assertRaises(ReportAlignmentError):
+            run_daily(self.root, base_date="20260716", dry_run=True)
 
 
 if __name__ == "__main__":
