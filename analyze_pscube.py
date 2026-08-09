@@ -418,7 +418,14 @@ def build_axes_and_points_from_image(
     return axes, points
 
 
-def build_axes_and_points(chart_path: Path, html_path: Path, date_str: str, adjust: dict) -> tuple[dict, list[tuple[int, int]]]:
+def build_axes_and_points(
+    chart_path: Path,
+    html_path: Path,
+    date_str: str,
+    adjust: dict,
+    image_y2_value: int | None = None,
+    image_y1_value: int | None = None,
+) -> tuple[dict, list[tuple[int, int]]]:
     svg_axes = None
     try:
         return build_axes_and_points_from_svg(html_path, date_str)
@@ -428,8 +435,8 @@ def build_axes_and_points(chart_path: Path, html_path: Path, date_str: str, adju
         return build_axes_and_points_from_image(
             chart_path,
             adjust,
-            svg_axes.get("y2_value") if svg_axes else None,
-            svg_axes.get("y1_value") if svg_axes else None,
+            image_y2_value or (svg_axes.get("y2_value") if svg_axes else None),
+            image_y1_value or (svg_axes.get("y1_value") if svg_axes else None),
         )
     except Exception:
         if svg_axes is None:
@@ -1109,7 +1116,14 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
 
     rows = parse_history_rows(html_path) if html_path.exists() else []
     events = events_from_history(rows, machine, args.pachinko_mode)
-    axes, points = build_axes_and_points(chart_path, html_path, date_str, adjust)
+    axes, points = build_axes_and_points(
+        chart_path,
+        html_path,
+        date_str,
+        adjust,
+        args.image_y2_value,
+        args.image_y1_value,
+    )
     if events:
         segments = segments_from_events(events, points, axes, args.min_gain, args.big_gain)
         status = "ok"
@@ -1158,6 +1172,8 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Treat missing HTML as no-history and analyze the chart image only.",
     )
+    parser.add_argument("--image-y2-value", type=int, help="Positive upper Y-axis value for image-only charts.")
+    parser.add_argument("--image-y1-value", type=int, help="Negative lower Y-axis value for image-only charts.")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
