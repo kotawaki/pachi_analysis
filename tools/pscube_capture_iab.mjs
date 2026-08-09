@@ -37,6 +37,9 @@ async function fileExists(filePath) {
 }
 
 function imageSize(bytes) {
+  // 旧Browser系はBuffer、組み込みブラウザはUint8Array等を返すため、
+  // 判定前にBufferへ正規化して共通処理にする。
+  bytes = Buffer.from(bytes);
   if (
     bytes.length >= 24 &&
     bytes.toString("ascii", 1, 4) === "PNG" &&
@@ -90,7 +93,8 @@ export async function validateCaptureSet(options) {
   const date = String(options.date);
   const outRoot = options.outRoot;
   const requireChart = options.requireChart !== false;
-  const requireSvg = options.requireSvg !== false;
+  const requireHtml = options.requireHtml !== false && options.captureHtml !== false;
+  const requireSvg = requireHtml && options.requireSvg !== false;
   const chartWidth = options.chartWidth ?? 575;
   const chartHeight = options.chartHeight ?? 975;
   const missingHtml = [];
@@ -101,7 +105,9 @@ export async function validateCaptureSet(options) {
   for (const machine of machines) {
     const htmlPath = path.join(outRoot, "html", `${date}_${machine}.html`);
     const chartPath = path.join(outRoot, "chart", `${date}_${machine}_chart.png`);
-    if (!(await fileExists(htmlPath))) {
+    if (!requireHtml) {
+      // HTML is intentionally omitted for late-morning screenshot-only runs.
+    } else if (!(await fileExists(htmlPath))) {
       missingHtml.push(machine);
     } else if (requireSvg) {
       const html = await fs.readFile(htmlPath, "utf8");
@@ -147,6 +153,7 @@ export async function capturePendingBatch(tab, browser, options) {
     ...options,
     machines,
     requireChart: options.captureChart !== false,
+    requireHtml: options.captureHtml !== false,
     requireSvg: options.requireChartSvg !== false,
   });
   const batch = before.pending.slice(0, options.batchSize ?? 20);
@@ -157,11 +164,12 @@ export async function capturePendingBatch(tab, browser, options) {
     ...options,
     machines,
     requireChart: options.captureChart !== false,
+    requireHtml: options.captureHtml !== false,
     requireSvg: options.requireChartSvg !== false,
   });
   return {
     attempted: batch,
-    captured: results.length,
+    captured: results.filter((result) => result.ok !== false).length,
     expected: after.expected,
     complete: after.complete,
     remaining: after.pending,
@@ -192,6 +200,17 @@ async function scrollChartIntoView(tab) {
     undefined,
     { timeoutMs: 10000 }
   );
+}
+
+async function selectDayTab(tab, ymd) {
+  const targetYmd = String(ymd);
+  const locator = tab.playwright.locator(`#YMD-ul li[data-ymd="${targetYmd}"]`);
+  const count = await locator.count();
+  if (count !== 1) {
+    throw new Error(`day tab selection failed: expected 1 tab, found ${count} for ${targetYmd}`);
+  }
+  await locator.click({});
+  return { ok: true, targetYmd };
 }
 
 export async function inspectChartSvg(tab, ymd) {
@@ -372,12 +391,26 @@ export async function captureMachine(tab, browser, options) {
   }
   await tab.playwright.waitForTimeout(openWaitMs);
 
+  if (options.previousDayTab) {
+    const selectedYmd = options.previousDayYmd;
+    if (!selectedYmd) throw new Error("previousDayYmd is required when previousDayTab is enabled");
+    await selectDayTab(tab, selectedYmd);
+    await tab.playwright.waitForTimeout(options.dayTabWaitMs ?? 1500);
+  }
+
   const expansion = await expandHistory(tab, {
     waitMs: options.moreWaitMs ?? 3500,
     maxClicks: options.maxMoreClicks ?? 8,
     stableRounds: options.stableRounds ?? 1,
   });
   const info = await inspectMachinePage(tab);
+  const currentUrl = (await tab.url()) || "";
+  const expectedQuery = `cd_dai=${machine}`;
+  if (!currentUrl.includes(expectedQuery) || info.machine !== machine) {
+    throw new Error(
+      `machine page validation failed: expected ${machine}, url=${currentUrl}, pageMachine=${info.machine}`
+    );
+  }
   const ymd = options.date || info.ymd;
   const chartSvg = options.requireChartSvg === false
     ? { ymd, ready: true, skipped: true }
@@ -386,13 +419,17 @@ export async function captureMachine(tab, browser, options) {
         pollMs: options.chartSvgPollMs ?? 1000,
       });
 
-  const htmlPath = path.join(outRoot, "html", `${ymd}_${machine}.html`);
-  const dom = await tab.playwright.evaluate(
-    () => "<!doctype html>\n" + document.documentElement.outerHTML,
-    undefined,
-    { timeoutMs: 10000 }
-  );
-  await saveText(htmlPath, dom);
+  const htmlPath = options.captureHtml === false
+    ? null
+    : path.join(outRoot, "html", `${ymd}_${machine}.html`);
+  if (options.captureHtml !== false) {
+    const dom = await tab.playwright.evaluate(
+      () => "<!doctype html>\n" + document.documentElement.outerHTML,
+      undefined,
+      { timeoutMs: 10000 }
+    );
+    await saveText(htmlPath, dom);
+  }
 
   let chartPath = null;
   if (options.captureChart !== false) {
@@ -464,7 +501,7 @@ export async function captureMachine(tab, browser, options) {
         { timeoutMs: 10000 }
       );
       if (!aligned) {
-        await tab.playwright.waitForTimeout(300);
+        throw new Error(`chart element not found or not aligned: ${machine}`);
       }
     }
     await tab.playwright.waitForTimeout(options.chartWaitMs ?? 1000);
@@ -472,10 +509,22 @@ export async function captureMachine(tab, browser, options) {
     const png = clip
       ? await tab.screenshot({ fullPage: false, clip })
       : await tab.screenshot({ fullPage: false });
+    const size = imageSize(png);
+    const expectedSize = {
+      width: options.chartWidth ?? 575,
+      height: options.chartHeight ?? 975,
+    };
+    if (!size || size.width !== expectedSize.width || size.height !== expectedSize.height) {
+      throw new Error(
+        `chart screenshot size validation failed: expected ${expectedSize.width}x${expectedSize.height}, ` +
+        `actual ${size ? `${size.width}x${size.height}` : "unknown"}`
+      );
+    }
     await saveBytes(chartPath, png);
   }
 
   return {
+    ok: true,
     machine,
     ymd,
     url,
@@ -500,10 +549,21 @@ export async function captureMachines(tab, browser, options) {
     : retryDeadlineToday(retryUntilHour, retryUntilMinute);
 
   for (let i = 0; i < machines.length; i++) {
-    let result = await captureMachine(tab, browser, {
-      ...options,
-      machine: machines[i],
-    });
+    let result;
+    try {
+      result = await captureMachine(tab, browser, {
+        ...options,
+        machine: machines[i],
+      });
+    } catch (error) {
+      console.warn(`[capture-failed] ${machines[i]}`, error);
+      results.push({
+        ok: false,
+        machine: zfillMachine(machines[i]),
+        error: String(error?.message || error),
+      });
+      continue;
+    }
     let retry = 0;
     while (
       result.chartSvg &&
@@ -517,10 +577,21 @@ export async function captureMachines(tab, browser, options) {
         result.chartSvg
       );
       await sleep(retryDelayMs);
-      result = await captureMachine(tab, browser, {
-        ...options,
-        machine: machines[i],
-      });
+      try {
+        result = await captureMachine(tab, browser, {
+          ...options,
+          machine: machines[i],
+        });
+      } catch (error) {
+        console.warn(`[capture-failed] ${machines[i]} retry ${retry}`, error);
+        result = {
+          ok: false,
+          machine: zfillMachine(machines[i]),
+          error: String(error?.message || error),
+          chartSvg: { ready: false },
+        };
+        break;
+      }
     }
     result.svgRetryCount = retry;
     result.svgRetryDeadline = retryDeadline.toISOString();

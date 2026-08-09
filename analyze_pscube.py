@@ -1104,10 +1104,10 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
 
     if not history_allowed(machine, notes):
         return {"machine": machine, "status": "history_skipped_by_note", "events": 0, "segments": 0}
-    if not html_path.exists():
+    if not html_path.exists() and not args.allow_missing_html:
         return {"machine": machine, "status": "missing_html", "events": 0, "segments": 0}
 
-    rows = parse_history_rows(html_path)
+    rows = parse_history_rows(html_path) if html_path.exists() else []
     events = events_from_history(rows, machine, args.pachinko_mode)
     axes, points = build_axes_and_points(chart_path, html_path, date_str, adjust)
     if events:
@@ -1153,6 +1153,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-gain", type=int, default=300)
     parser.add_argument("--big-gain", type=int, default=1500)
     parser.add_argument("--overlay", action="store_true", help="Save visual check images with detected segments.")
+    parser.add_argument(
+        "--allow-missing-html",
+        action="store_true",
+        help="Treat missing HTML as no-history and analyze the chart image only.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 

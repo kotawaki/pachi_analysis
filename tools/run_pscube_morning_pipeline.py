@@ -114,6 +114,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Plan the Pachi Agents step without writing Pachi Agents data.",
     )
+    parser.add_argument(
+        "--allow-missing-html",
+        action="store_true",
+        help="Run chart-only analysis for captures where HTML was intentionally omitted.",
+    )
     return parser.parse_args()
 
 
@@ -128,7 +133,10 @@ def main() -> int:
         raise SystemExit(f"capture root not found: {capture_root}")
 
     try:
-        run_step("analyze", ["analyze_pscube.py", str(capture_root), "--overlay"])
+        analyze_args = ["analyze_pscube.py", str(capture_root), "--overlay"]
+        if args.allow_missing_html:
+            analyze_args.append("--allow-missing-html")
+        run_step("analyze", analyze_args)
 
         analyze_dir = ROOT / "csv" / "pscube_analyze" / target_date
         event_source = analyze_dir / f"{target_date}_analyze.csv"
