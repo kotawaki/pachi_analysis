@@ -1,0 +1,84 @@
+{
+  "prediction_date": "20260812",
+  "evaluated_at": "2026-08-13T08:17:42.579930+09:00",
+  "result_version": "pachi_agents_result_v1",
+  "status": "evaluated",
+  "source_manifest": [
+    {
+      "kind": "daily_ohlc",
+      "path": "csv\\daily_ohlc\\20260812\\20260812_daily_ohlc.csv",
+      "sha256": "a8b767ef258b8ee838ccd33787f533cefd0ac2e34f9042e3d6c32a6886928461"
+    }
+  ],
+  "agents": {
+    "pachio": {
+      "primary_machine": "071",
+      "result": {
+        "machine": "071",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -8889.0,
+        "close": -8889.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -8889.0,
+        "outcome": "failure"
+      }
+    },
+    "pachiko": {
+      "primary_machine": "056",
+      "result": {
+        "machine": "056",
+        "status": "available",
+        "open": 0.0,
+        "high": 16207.0,
+        "low": -2489.0,
+        "close": -2489.0,
+        "direction": "non_positive",
+        "max_up": 16207.0,
+        "max_down": -2489.0,
+        "outcome": "failure"
+      }
+    },
+    "pachikamisama": {
+      "honmei": {
+        "machine": "061",
+        "status": "available",
+        "open": 0.0,
+        "high": 15000.0,
+        "low": -4978.0,
+        "close": 14655.0,
+        "direction": "positive",
+        "max_up": 15000.0,
+        "max_down": -4978.0,
+        "outcome": "success"
+      },
+      "taikou": {
+        "machine": "071",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -8889.0,
+        "close": -8889.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -8889.0,
+        "outcome": "failure"
+      },
+      "ana": {
+        "machine": "056",
+        "status": "available",
+        "open": 0.0,
+        "high": 16207.0,
+        "low": -2489.0,
+        "close": -2489.0,
+        "direction": "non_positive",
+        "max_up": 16207.0,
+        "max_down": -2489.0,
+        "outcome": "failure"
+      },
+      "honmei_outcome": "success"
+    }
+  }
+}
