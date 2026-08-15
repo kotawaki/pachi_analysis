@@ -43195,6 +43195,1639 @@
         }
       }
     },
+    "result": {
+      "prediction_date": "20260815",
+      "evaluated_at": "2026-08-16T08:00:44.614560+09:00",
+      "result_version": "pachi_agents_result_v1",
+      "status": "evaluated",
+      "source_manifest": [
+        {
+          "kind": "daily_ohlc",
+          "path": "csv\\daily_ohlc\\20260815\\20260815_daily_ohlc.csv",
+          "sha256": "eb6c485e51d6e49ed4465f4ed007e484a1254c2edcee8eedc55d0d95ed83ac47"
+        }
+      ],
+      "agents": {
+        "pachio": {
+          "primary_machine": "053",
+          "result": {
+            "machine": "053",
+            "status": "available",
+            "open": 0.0,
+            "high": 0.0,
+            "low": -24511.0,
+            "close": -24511.0,
+            "direction": "non_positive",
+            "max_up": 0.0,
+            "max_down": -24511.0,
+            "outcome": "failure"
+          }
+        },
+        "pachiko": {
+          "primary_machine": "052",
+          "result": {
+            "machine": "052",
+            "status": "available",
+            "open": 0.0,
+            "high": 259.0,
+            "low": -9778.0,
+            "close": -3111.0,
+            "direction": "non_positive",
+            "max_up": 259.0,
+            "max_down": -9778.0,
+            "outcome": "failure"
+          }
+        },
+        "pachikamisama": {
+          "honmei": {
+            "machine": "061",
+            "status": "available",
+            "open": 0.0,
+            "high": 7845.0,
+            "low": -5244.0,
+            "close": 2328.0,
+            "direction": "positive",
+            "max_up": 7845.0,
+            "max_down": -5244.0,
+            "outcome": "success"
+          },
+          "taikou": {
+            "machine": "053",
+            "status": "available",
+            "open": 0.0,
+            "high": 0.0,
+            "low": -24511.0,
+            "close": -24511.0,
+            "direction": "non_positive",
+            "max_up": 0.0,
+            "max_down": -24511.0,
+            "outcome": "failure"
+          },
+          "ana": {
+            "machine": "052",
+            "status": "available",
+            "open": 0.0,
+            "high": 259.0,
+            "low": -9778.0,
+            "close": -3111.0,
+            "direction": "non_positive",
+            "max_up": 259.0,
+            "max_down": -9778.0,
+            "outcome": "failure"
+          },
+          "honmei_outcome": "success"
+        }
+      }
+    },
+    "reflection": {
+      "reflection_version": "pachi_agents_reflection_v1",
+      "prediction_date": "20260815",
+      "cutoff_date": "20260814",
+      "generated_at": "2026-08-16T08:00:55.222411+09:00",
+      "result_status": "evaluated",
+      "pachio": {
+        "reason": "053番はMA5の傾き、MA20の傾き、サイクル予測、強気構造を評価しました。短期移動平均線が上向き、中期移動平均線が上向き、上向きの周期傾向、強気のチャート構造、Fibonacciの支持水準を根拠に、confidence 0.950を踏まえて本命候補としました。",
+        "evaluation": "パチおの本命は下方向への動きが優勢で、安値-24511.0を付け、期待した上昇には至りませんでした。",
+        "learning": "短期移動平均線が上向きは過去29件中6件成功（20.7%）、confidence帯は過去29件中6件成功（20.7%）でした。今回の条件だけでは十分でない可能性があるため、他条件との組み合わせを継続して評価します。"
+      },
+      "pachiko": {
+        "reason": "052番は伝播が繰り返し発生、グループ全体の勢いが強い、最近の日中の当たり傾向、上向きの周期傾向を評価しました。伝播が繰り返し発生、グループ全体の勢いが強い、最近の日中の当たり傾向、上向きの周期傾向を根拠に、confidence 0.900を踏まえて本命候補としました。",
+        "evaluation": "パチこの本命は途中で259.0まで上昇する場面がありましたが、勢いを維持できず、最終的には陰線となりました。",
+        "learning": "伝播が繰り返し発生は過去31件中17件成功（54.8%）、confidence帯は過去31件中17件成功（54.8%）でした。今回の条件だけでは十分でない可能性があるため、他条件との組み合わせを継続して評価します。"
+      },
+      "pachikamisama": {
+        "reason": "パチおとパチこの候補を統合し、パチこをやや高く重視（パチお0.470、パチこ0.530）を踏まえて本命061、対抗053、穴052を選択しました（本命はBOTH由来、対抗はPACHIO_ONLY由来、穴はPACHIKO_ONLY由来）。",
+        "evaluation": "本命は高値7845.0まで上昇する場面を経て、終値2328.0となり、最終的に陽線でした。予測方向への動きが確認できました。／対抗は下方向への動きが優勢で、安値-24511.0を付け、期待した上昇には至りませんでした。／穴は途中で259.0まで上昇する場面がありましたが、勢いを維持できず、最終的には陰線となりました。",
+        "learning": "本命・対抗の結果とagent weightの組み合わせを蓄積し、十分なサンプルが集まるまで大きな判断変更は行いません。"
+      }
+    }
+  },
+  {
+    "prediction_date": "20260816",
+    "prediction": {
+      "prediction_date": "20260816",
+      "cutoff_date": "20260815",
+      "created_at": "2026-08-16T08:00:54.505754+09:00",
+      "status": "locked",
+      "logic_version": "pachi_agents_v1",
+      "input_manifest": [
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260627\\20260627_daily_ohlc.csv",
+          "date": "20260627",
+          "sha256": "85407b1dedb891c763473ccfb923ec34efc4a4fee0dbd24f23ace9cad4075822"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260628\\20260628_daily_ohlc.csv",
+          "date": "20260628",
+          "sha256": "a64a34ec00e70b1e8881eb8ddd934787aa13ee4dae5747c3011424bf5674e7b7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260629\\20260629_daily_ohlc.csv",
+          "date": "20260629",
+          "sha256": "16ab51b3c7ebb0790c8495bd2a27a0b30c0556f880ffaf7064e6b0c0fab8eb16"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260630\\20260630_daily_ohlc.csv",
+          "date": "20260630",
+          "sha256": "b1817e25879bd2a53841b0e39e420068ed8671c9a417c6bc45cfb032ce1879f0"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260701\\20260701_daily_ohlc.csv",
+          "date": "20260701",
+          "sha256": "212fcf4e7acbdd414c571d7c0c8c6bbe42dea79c0255b1262f238a6622f1b35e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260702\\20260702_daily_ohlc.csv",
+          "date": "20260702",
+          "sha256": "ef05abd45fa58ac9477609c78327b33c949d48be37a8edfe2dfd73a59cae45ac"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260703\\20260703_daily_ohlc.csv",
+          "date": "20260703",
+          "sha256": "99723b171d0497e34e720351f96191daef2554c4678a80a2ee240c21c6350508"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260704\\20260704_daily_ohlc.csv",
+          "date": "20260704",
+          "sha256": "503bc5dbe81f3b1f17047bd4944a0f3ad0d585f88659acfcb647107061b96539"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260705\\20260705_daily_ohlc.csv",
+          "date": "20260705",
+          "sha256": "ffe18984b8c52c55f9a6ade0cbecf712a71c39da3dd992ed087f43a5224cb2ed"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260706\\20260706_daily_ohlc.csv",
+          "date": "20260706",
+          "sha256": "fa7d027421d3cb3d823408feee73746b4b7339cab974f35925ee477218bc62fd"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260707\\20260707_daily_ohlc.csv",
+          "date": "20260707",
+          "sha256": "a77bb3fa2aa8b7fe941c3887cb774c9c9039cd0e7ef6720b72a7b2ba4575a5f7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260708\\20260708_daily_ohlc.csv",
+          "date": "20260708",
+          "sha256": "77f127ff28ec0f822c692d60e2bfb0d842663eeeb6dfc8af9d80bd9b966cda82"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260709\\20260709_daily_ohlc.csv",
+          "date": "20260709",
+          "sha256": "f94d0a275548d91bfacf67144a848036dc2c2215d44659e30e0cb2d76f28ea9a"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260710\\20260710_daily_ohlc.csv",
+          "date": "20260710",
+          "sha256": "084636dc09ac85bc665f31dfbc043552f87fb747d0cd7b1a9b61ea9714b59277"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260711\\20260711_daily_ohlc.csv",
+          "date": "20260711",
+          "sha256": "cae5b2a65267aa70f7aa5f95a61737a877c73d27bed851492f0ac84a60f2e888"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260712\\20260712_daily_ohlc.csv",
+          "date": "20260712",
+          "sha256": "41e9bcf36f768ad32a2efc2857f1ee5588e8acdfca697bff6d928cf707a00150"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260713\\20260713_daily_ohlc.csv",
+          "date": "20260713",
+          "sha256": "b09196992de33465aa976755db80957f34a8544f35f7fc3215867a2b903d6685"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260714\\20260714_daily_ohlc.csv",
+          "date": "20260714",
+          "sha256": "f9e08be547b24d25138aee2081722ad8e678c11e39b885a307f9500a6ff3d42f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260715\\20260715_daily_ohlc.csv",
+          "date": "20260715",
+          "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
+          "date": "20260716",
+          "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260717\\20260717_daily_ohlc.csv",
+          "date": "20260717",
+          "sha256": "c41f9f4a072db225c869f40e264ec8a0d2a7c68b6c37c98f4085c08939c58e91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260718\\20260718_daily_ohlc.csv",
+          "date": "20260718",
+          "sha256": "3607fdf2a16c0ec77dcbc697782702def8396384d0a2b2ab61b7442f6cc1cc89"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260719\\20260719_daily_ohlc.csv",
+          "date": "20260719",
+          "sha256": "08ccb320ddfb0d66203b33f356cbf7e92e22e0eea952abc6f592c6bdb3967da6"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260720\\20260720_daily_ohlc.csv",
+          "date": "20260720",
+          "sha256": "39bbb4ec65663de9562306ee9103834a195fae6792f9c671374ece49ed5ca87d"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260721\\20260721_daily_ohlc.csv",
+          "date": "20260721",
+          "sha256": "70e0a916ddd79b55cc4109d697c580601c1dac8d8e5a965bac539299b30344c9"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260722\\20260722_daily_ohlc.csv",
+          "date": "20260722",
+          "sha256": "8ae672b5315af9be8e8806f681d2dddcaba9141fbbb48c22c353b8596ad0147c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260723\\20260723_daily_ohlc.csv",
+          "date": "20260723",
+          "sha256": "f5558861e7318c665f13cc626010f13eb8fdbd10792b7cc83bee007b6d56ee0b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260724\\20260724_daily_ohlc.csv",
+          "date": "20260724",
+          "sha256": "2de332c7c8fd2ddb835e40cd6d2706e161181a233da223d7512a7d50b65e6329"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260725\\20260725_daily_ohlc.csv",
+          "date": "20260725",
+          "sha256": "99d63b0a7a729a352264dab1794544ee990ce4a40cca2050c2a04c37baade92c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260726\\20260726_daily_ohlc.csv",
+          "date": "20260726",
+          "sha256": "ca337c50edf77e900511d4f8a9e6877fc684ae6fcb7bea914b0d1675d36cfa1c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260727\\20260727_daily_ohlc.csv",
+          "date": "20260727",
+          "sha256": "caff0c91eed5ec89d60dccdaeb6c5e35808f62e670e6eab7c77f31dead7b7b6f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260728\\20260728_daily_ohlc.csv",
+          "date": "20260728",
+          "sha256": "89660efbc84f955e8a6496578fa9ea0982a8561b4c36a22eb2f3dd6376c1fd5f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260729\\20260729_daily_ohlc.csv",
+          "date": "20260729",
+          "sha256": "0ee5dcf4c568aa6ee72a78dd56e2f6b800f2eed895a572471083db7bf4d6a1a7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260730\\20260730_daily_ohlc.csv",
+          "date": "20260730",
+          "sha256": "e6a8378ad0fb89b45ada1e77f982004601f904b1b119f50a4612c5d59cebbe23"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260731\\20260731_daily_ohlc.csv",
+          "date": "20260731",
+          "sha256": "35200ca10248e05aadb925783db684d93c2d94a4efc019c5e9ccb25d1765dc6e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260801\\20260801_daily_ohlc.csv",
+          "date": "20260801",
+          "sha256": "4f0f20b2a72b3249fafb7a38c30c2897841e8d12eedee32c4c1477cbddbc99f3"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260802\\20260802_daily_ohlc.csv",
+          "date": "20260802",
+          "sha256": "99ce5e68fd06a9b528ca15568cb944a216185f4812d0622f18e66ab4ae5e2d57"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260803\\20260803_daily_ohlc.csv",
+          "date": "20260803",
+          "sha256": "1edec32f3e97459366403e38bc8ed457785270eb9064609ddcc7517f1135066b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260804\\20260804_daily_ohlc.csv",
+          "date": "20260804",
+          "sha256": "1ed53e33a89f494ec9caaa9b1a344c9f365be3348fe5f3e0006b1e1a5c88a377"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260805\\20260805_daily_ohlc.csv",
+          "date": "20260805",
+          "sha256": "eda120e3ccd45800385befd5c246567e1bac2296d53db47e2ecf5db129328638"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260806\\20260806_daily_ohlc.csv",
+          "date": "20260806",
+          "sha256": "f3c6c4fea1d2ddb66868655800d83dc3861663383352c656aa524131640ad992"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260807\\20260807_daily_ohlc.csv",
+          "date": "20260807",
+          "sha256": "23144b194118d52c9010f00d61c3321fa40ed0fd205191e5a3a5d6127d2ebfae"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260808\\20260808_daily_ohlc.csv",
+          "date": "20260808",
+          "sha256": "dca66f3b44f23c54a396fdc4a6cce3853396d281facd71da311cb954a6be2447"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260809\\20260809_daily_ohlc.csv",
+          "date": "20260809",
+          "sha256": "4a4d273dcbbe60250249af5cd8b74417911e0727dceaba3918532b62dce4fbc3"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260810\\20260810_daily_ohlc.csv",
+          "date": "20260810",
+          "sha256": "47f97ed709d21c1291a3f0bde17c591e65c20154f6413798d89a3765b5701787"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260811\\20260811_daily_ohlc.csv",
+          "date": "20260811",
+          "sha256": "bf8b075a9130c7289b4e33b4cc0b688be54f0d50ed9bb9a5deaab1b20978cde9"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260812\\20260812_daily_ohlc.csv",
+          "date": "20260812",
+          "sha256": "a8b767ef258b8ee838ccd33787f533cefd0ac2e34f9042e3d6c32a6886928461"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260813\\20260813_daily_ohlc.csv",
+          "date": "20260813",
+          "sha256": "164c28f3b77cd33c2c5982b4314497f7df16ff6bef5dd40d99fe22d4b4d26750"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260814\\20260814_daily_ohlc.csv",
+          "date": "20260814",
+          "sha256": "7c7e2ad238563d6a9fcb658b5682421980ee7cab344be161db940677d6f2e27b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260815\\20260815_daily_ohlc.csv",
+          "date": "20260815",
+          "sha256": "eb6c485e51d6e49ed4465f4ed007e484a1254c2edcee8eedc55d0d95ed83ac47"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260808_snapshot.json",
+          "date": "20260808",
+          "sha256": "61894f5651544133643611f215d2786aac022284772648a34d555c687927faba"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260809_snapshot.json",
+          "date": "20260809",
+          "sha256": "930988a6d87d6105226867b1bc364488f626209d809e1a51debfe556a734de96"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260810_snapshot.json",
+          "date": "20260810",
+          "sha256": "d2f30deb3edf2e690123b28cb067cea7a60a8eed6f6dcdd958d94317b674da20"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260811_snapshot.json",
+          "date": "20260811",
+          "sha256": "0b081bfb0c7788c67b7f7a7ebb8daec38997879f85d014f91980f4ee20dc02e7"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260812_snapshot.json",
+          "date": "20260812",
+          "sha256": "be6444fe99ffbb451d7854fbcfd43cfb03340c9f104539b1816202a36aedfb02"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260813_snapshot.json",
+          "date": "20260813",
+          "sha256": "8b4741d6c2979c3d289a6b93847541545c71743cea677f617883b259dfffe382"
+        },
+        {
+          "kind": "snapshot",
+          "path": "csv\\replay\\20260814_snapshot.json",
+          "date": "20260814",
+          "sha256": "d32fdf1ef1f9d1aa44a640c5b93212924c20b69e962f40d8b9e60a121ad6fb0a"
+        },
+        {
+          "kind": "propagation_history",
+          "path": "pair_history.json",
+          "date": "20260815",
+          "sha256": "a7fe156d86e1e5da02198f52df1a062bafe1852f8d057e848722ab4bba21c090"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260628.json",
+          "date": "20260628",
+          "sha256": "3b252a20bc2f40856319df1c5738c3186813f922845141015b6a65e025b617ca"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260629.json",
+          "date": "20260629",
+          "sha256": "c92c78fdc588123adb0affe23768b80c6e0e19ca9b46d00ef454279115c47488"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260709.json",
+          "date": "20260709",
+          "sha256": "de2f5b44b53a95c5f991a177733973f830c579f40d5bba55cba3fd2c8141279e"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260712.json",
+          "date": "20260712",
+          "sha256": "c73ef2c15c4e987747d028f89ec5c62364e72e46ac4cd255c06afb2eed481bde"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260718.json",
+          "date": "20260718",
+          "sha256": "35b793f46a51c37fc3066ea0c0bcf082e304a8397023547850b5140a4f4f6fa6"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260719.json",
+          "date": "20260719",
+          "sha256": "7d87d7304278ba116759e196ca3028412425e0d9a418ae55d0f88b366dd326ff"
+        },
+        {
+          "kind": "daytime_hits",
+          "path": "data\\daytime_hits_20260730.json",
+          "date": "20260730",
+          "sha256": "ff74853c8c6017cb8544c90a0eb2934921ae1b3b31f85de79f9b2aa8d2126a68"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260627\\20260627_daily_ohlc.csv",
+          "date": "20260627",
+          "sha256": "85407b1dedb891c763473ccfb923ec34efc4a4fee0dbd24f23ace9cad4075822"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260628\\20260628_daily_ohlc.csv",
+          "date": "20260628",
+          "sha256": "a64a34ec00e70b1e8881eb8ddd934787aa13ee4dae5747c3011424bf5674e7b7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260629\\20260629_daily_ohlc.csv",
+          "date": "20260629",
+          "sha256": "16ab51b3c7ebb0790c8495bd2a27a0b30c0556f880ffaf7064e6b0c0fab8eb16"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260630\\20260630_daily_ohlc.csv",
+          "date": "20260630",
+          "sha256": "b1817e25879bd2a53841b0e39e420068ed8671c9a417c6bc45cfb032ce1879f0"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260701\\20260701_daily_ohlc.csv",
+          "date": "20260701",
+          "sha256": "212fcf4e7acbdd414c571d7c0c8c6bbe42dea79c0255b1262f238a6622f1b35e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260702\\20260702_daily_ohlc.csv",
+          "date": "20260702",
+          "sha256": "ef05abd45fa58ac9477609c78327b33c949d48be37a8edfe2dfd73a59cae45ac"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260703\\20260703_daily_ohlc.csv",
+          "date": "20260703",
+          "sha256": "99723b171d0497e34e720351f96191daef2554c4678a80a2ee240c21c6350508"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260704\\20260704_daily_ohlc.csv",
+          "date": "20260704",
+          "sha256": "503bc5dbe81f3b1f17047bd4944a0f3ad0d585f88659acfcb647107061b96539"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260705\\20260705_daily_ohlc.csv",
+          "date": "20260705",
+          "sha256": "ffe18984b8c52c55f9a6ade0cbecf712a71c39da3dd992ed087f43a5224cb2ed"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260706\\20260706_daily_ohlc.csv",
+          "date": "20260706",
+          "sha256": "fa7d027421d3cb3d823408feee73746b4b7339cab974f35925ee477218bc62fd"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260707\\20260707_daily_ohlc.csv",
+          "date": "20260707",
+          "sha256": "a77bb3fa2aa8b7fe941c3887cb774c9c9039cd0e7ef6720b72a7b2ba4575a5f7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260708\\20260708_daily_ohlc.csv",
+          "date": "20260708",
+          "sha256": "77f127ff28ec0f822c692d60e2bfb0d842663eeeb6dfc8af9d80bd9b966cda82"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260709\\20260709_daily_ohlc.csv",
+          "date": "20260709",
+          "sha256": "f94d0a275548d91bfacf67144a848036dc2c2215d44659e30e0cb2d76f28ea9a"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260710\\20260710_daily_ohlc.csv",
+          "date": "20260710",
+          "sha256": "084636dc09ac85bc665f31dfbc043552f87fb747d0cd7b1a9b61ea9714b59277"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260711\\20260711_daily_ohlc.csv",
+          "date": "20260711",
+          "sha256": "cae5b2a65267aa70f7aa5f95a61737a877c73d27bed851492f0ac84a60f2e888"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260712\\20260712_daily_ohlc.csv",
+          "date": "20260712",
+          "sha256": "41e9bcf36f768ad32a2efc2857f1ee5588e8acdfca697bff6d928cf707a00150"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260713\\20260713_daily_ohlc.csv",
+          "date": "20260713",
+          "sha256": "b09196992de33465aa976755db80957f34a8544f35f7fc3215867a2b903d6685"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260714\\20260714_daily_ohlc.csv",
+          "date": "20260714",
+          "sha256": "f9e08be547b24d25138aee2081722ad8e678c11e39b885a307f9500a6ff3d42f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260715\\20260715_daily_ohlc.csv",
+          "date": "20260715",
+          "sha256": "05a094baf91ab190e100a83a7f6c38d0a889c047f0792c45cd716a186d315b91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260716\\20260716_daily_ohlc.csv",
+          "date": "20260716",
+          "sha256": "74d0ef0f6aaa82647aaaa97df11f01e4e6090a0be61534a5defe0161d3475956"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260717\\20260717_daily_ohlc.csv",
+          "date": "20260717",
+          "sha256": "c41f9f4a072db225c869f40e264ec8a0d2a7c68b6c37c98f4085c08939c58e91"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260718\\20260718_daily_ohlc.csv",
+          "date": "20260718",
+          "sha256": "3607fdf2a16c0ec77dcbc697782702def8396384d0a2b2ab61b7442f6cc1cc89"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260719\\20260719_daily_ohlc.csv",
+          "date": "20260719",
+          "sha256": "08ccb320ddfb0d66203b33f356cbf7e92e22e0eea952abc6f592c6bdb3967da6"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260720\\20260720_daily_ohlc.csv",
+          "date": "20260720",
+          "sha256": "39bbb4ec65663de9562306ee9103834a195fae6792f9c671374ece49ed5ca87d"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260721\\20260721_daily_ohlc.csv",
+          "date": "20260721",
+          "sha256": "70e0a916ddd79b55cc4109d697c580601c1dac8d8e5a965bac539299b30344c9"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260722\\20260722_daily_ohlc.csv",
+          "date": "20260722",
+          "sha256": "8ae672b5315af9be8e8806f681d2dddcaba9141fbbb48c22c353b8596ad0147c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260723\\20260723_daily_ohlc.csv",
+          "date": "20260723",
+          "sha256": "f5558861e7318c665f13cc626010f13eb8fdbd10792b7cc83bee007b6d56ee0b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260724\\20260724_daily_ohlc.csv",
+          "date": "20260724",
+          "sha256": "2de332c7c8fd2ddb835e40cd6d2706e161181a233da223d7512a7d50b65e6329"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260725\\20260725_daily_ohlc.csv",
+          "date": "20260725",
+          "sha256": "99d63b0a7a729a352264dab1794544ee990ce4a40cca2050c2a04c37baade92c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260726\\20260726_daily_ohlc.csv",
+          "date": "20260726",
+          "sha256": "ca337c50edf77e900511d4f8a9e6877fc684ae6fcb7bea914b0d1675d36cfa1c"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260727\\20260727_daily_ohlc.csv",
+          "date": "20260727",
+          "sha256": "caff0c91eed5ec89d60dccdaeb6c5e35808f62e670e6eab7c77f31dead7b7b6f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260728\\20260728_daily_ohlc.csv",
+          "date": "20260728",
+          "sha256": "89660efbc84f955e8a6496578fa9ea0982a8561b4c36a22eb2f3dd6376c1fd5f"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260729\\20260729_daily_ohlc.csv",
+          "date": "20260729",
+          "sha256": "0ee5dcf4c568aa6ee72a78dd56e2f6b800f2eed895a572471083db7bf4d6a1a7"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260730\\20260730_daily_ohlc.csv",
+          "date": "20260730",
+          "sha256": "e6a8378ad0fb89b45ada1e77f982004601f904b1b119f50a4612c5d59cebbe23"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260731\\20260731_daily_ohlc.csv",
+          "date": "20260731",
+          "sha256": "35200ca10248e05aadb925783db684d93c2d94a4efc019c5e9ccb25d1765dc6e"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260801\\20260801_daily_ohlc.csv",
+          "date": "20260801",
+          "sha256": "4f0f20b2a72b3249fafb7a38c30c2897841e8d12eedee32c4c1477cbddbc99f3"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260802\\20260802_daily_ohlc.csv",
+          "date": "20260802",
+          "sha256": "99ce5e68fd06a9b528ca15568cb944a216185f4812d0622f18e66ab4ae5e2d57"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260803\\20260803_daily_ohlc.csv",
+          "date": "20260803",
+          "sha256": "1edec32f3e97459366403e38bc8ed457785270eb9064609ddcc7517f1135066b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260804\\20260804_daily_ohlc.csv",
+          "date": "20260804",
+          "sha256": "1ed53e33a89f494ec9caaa9b1a344c9f365be3348fe5f3e0006b1e1a5c88a377"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260805\\20260805_daily_ohlc.csv",
+          "date": "20260805",
+          "sha256": "eda120e3ccd45800385befd5c246567e1bac2296d53db47e2ecf5db129328638"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260806\\20260806_daily_ohlc.csv",
+          "date": "20260806",
+          "sha256": "f3c6c4fea1d2ddb66868655800d83dc3861663383352c656aa524131640ad992"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260807\\20260807_daily_ohlc.csv",
+          "date": "20260807",
+          "sha256": "23144b194118d52c9010f00d61c3321fa40ed0fd205191e5a3a5d6127d2ebfae"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260808\\20260808_daily_ohlc.csv",
+          "date": "20260808",
+          "sha256": "dca66f3b44f23c54a396fdc4a6cce3853396d281facd71da311cb954a6be2447"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260809\\20260809_daily_ohlc.csv",
+          "date": "20260809",
+          "sha256": "4a4d273dcbbe60250249af5cd8b74417911e0727dceaba3918532b62dce4fbc3"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260810\\20260810_daily_ohlc.csv",
+          "date": "20260810",
+          "sha256": "47f97ed709d21c1291a3f0bde17c591e65c20154f6413798d89a3765b5701787"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260811\\20260811_daily_ohlc.csv",
+          "date": "20260811",
+          "sha256": "bf8b075a9130c7289b4e33b4cc0b688be54f0d50ed9bb9a5deaab1b20978cde9"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260812\\20260812_daily_ohlc.csv",
+          "date": "20260812",
+          "sha256": "a8b767ef258b8ee838ccd33787f533cefd0ac2e34f9042e3d6c32a6886928461"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260813\\20260813_daily_ohlc.csv",
+          "date": "20260813",
+          "sha256": "164c28f3b77cd33c2c5982b4314497f7df16ff6bef5dd40d99fe22d4b4d26750"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260814\\20260814_daily_ohlc.csv",
+          "date": "20260814",
+          "sha256": "7c7e2ad238563d6a9fcb658b5682421980ee7cab344be161db940677d6f2e27b"
+        },
+        {
+          "kind": "ohlc",
+          "path": "csv\\daily_ohlc\\20260815\\20260815_daily_ohlc.csv",
+          "date": "20260815",
+          "sha256": "eb6c485e51d6e49ed4465f4ed007e484a1254c2edcee8eedc55d0d95ed83ac47"
+        }
+      ],
+      "agents": {
+        "pachio": {
+          "logic_version": "pachi_agents_pachio_v1",
+          "primary_machine": "158",
+          "candidates": [
+            {
+              "machine": "158",
+              "score": 3.7979,
+              "confidence": 0.875,
+              "signals": {
+                "history_days": 50,
+                "last_date": "20260815",
+                "ma5_slope": 4511.6,
+                "ma20_slope": 297.25,
+                "cycle_forecast": 1401,
+                "bullish_structure": false,
+                "fibonacci_class": "none",
+                "golden_cross_recent": false
+              },
+              "reason_codes": [
+                "MA5_UP",
+                "MA20_UP",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 4.5,
+                "reason_adjustment": -0.4031,
+                "combo_adjustment": -0.2463,
+                "confidence_adjustment": -0.0528,
+                "adjustment_cap": 0.9,
+                "final_score": 3.7979,
+                "experience_sample_count": 79,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "MA20_UP",
+                  "MA5_UP",
+                  "CYCLE_POSITIVE+MA20_UP",
+                  "CYCLE_POSITIVE+MA5_UP",
+                  "MA20_UP+MA5_UP",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "157",
+              "score": 3.7979,
+              "confidence": 0.875,
+              "signals": {
+                "history_days": 50,
+                "last_date": "20260815",
+                "ma5_slope": 8662.0,
+                "ma20_slope": 1210.0,
+                "cycle_forecast": 21300,
+                "bullish_structure": false,
+                "fibonacci_class": "none",
+                "golden_cross_recent": false
+              },
+              "reason_codes": [
+                "MA5_UP",
+                "MA20_UP",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 4.5,
+                "reason_adjustment": -0.4031,
+                "combo_adjustment": -0.2463,
+                "confidence_adjustment": -0.0528,
+                "adjustment_cap": 0.9,
+                "final_score": 3.7979,
+                "experience_sample_count": 79,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "MA20_UP",
+                  "MA5_UP",
+                  "CYCLE_POSITIVE+MA20_UP",
+                  "CYCLE_POSITIVE+MA5_UP",
+                  "MA20_UP+MA5_UP",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "148",
+              "score": 3.7979,
+              "confidence": 0.875,
+              "signals": {
+                "history_days": 50,
+                "last_date": "20260815",
+                "ma5_slope": 2202.2,
+                "ma20_slope": 166.9,
+                "cycle_forecast": 13388,
+                "bullish_structure": false,
+                "fibonacci_class": "none",
+                "golden_cross_recent": false
+              },
+              "reason_codes": [
+                "MA5_UP",
+                "MA20_UP",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 4.5,
+                "reason_adjustment": -0.4031,
+                "combo_adjustment": -0.2463,
+                "confidence_adjustment": -0.0528,
+                "adjustment_cap": 0.9,
+                "final_score": 3.7979,
+                "experience_sample_count": 79,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "MA20_UP",
+                  "MA5_UP",
+                  "CYCLE_POSITIVE+MA20_UP",
+                  "CYCLE_POSITIVE+MA5_UP",
+                  "MA20_UP+MA5_UP",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "1180",
+              "score": 3.7979,
+              "confidence": 0.875,
+              "signals": {
+                "history_days": 49,
+                "last_date": "20260815",
+                "ma5_slope": 81.8,
+                "ma20_slope": 120.0,
+                "cycle_forecast": 1164,
+                "bullish_structure": false,
+                "fibonacci_class": "none",
+                "golden_cross_recent": false
+              },
+              "reason_codes": [
+                "MA5_UP",
+                "MA20_UP",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 4.5,
+                "reason_adjustment": -0.4031,
+                "combo_adjustment": -0.2463,
+                "confidence_adjustment": -0.0528,
+                "adjustment_cap": 0.9,
+                "final_score": 3.7979,
+                "experience_sample_count": 79,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "MA20_UP",
+                  "MA5_UP",
+                  "CYCLE_POSITIVE+MA20_UP",
+                  "CYCLE_POSITIVE+MA5_UP",
+                  "MA20_UP+MA5_UP",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "118",
+              "score": 3.7979,
+              "confidence": 0.875,
+              "signals": {
+                "history_days": 50,
+                "last_date": "20260815",
+                "ma5_slope": 3866.0,
+                "ma20_slope": 655.4,
+                "cycle_forecast": 22795,
+                "bullish_structure": false,
+                "fibonacci_class": "none",
+                "golden_cross_recent": false
+              },
+              "reason_codes": [
+                "MA5_UP",
+                "MA20_UP",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 4.5,
+                "reason_adjustment": -0.4031,
+                "combo_adjustment": -0.2463,
+                "confidence_adjustment": -0.0528,
+                "adjustment_cap": 0.9,
+                "final_score": 3.7979,
+                "experience_sample_count": 79,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "MA20_UP",
+                  "MA5_UP",
+                  "CYCLE_POSITIVE+MA20_UP",
+                  "CYCLE_POSITIVE+MA5_UP",
+                  "MA20_UP+MA5_UP",
+                  "confidence:gte_0_85"
+                ]
+              }
+            }
+          ],
+          "confidence": 0.875,
+          "comment": "158番を、MA・周期・チャート構造の合算スコアで本命指名しました。",
+          "signals": {
+            "history_days": 50,
+            "last_date": "20260815",
+            "ma5_slope": 4511.6,
+            "ma20_slope": 297.25,
+            "cycle_forecast": 1401,
+            "bullish_structure": false,
+            "fibonacci_class": "none",
+            "golden_cross_recent": false
+          },
+          "reason_codes": [
+            "MA5_UP",
+            "MA20_UP",
+            "CYCLE_POSITIVE"
+          ],
+          "experience_adjustment": {
+            "base_score": 4.5,
+            "reason_adjustment": -0.4031,
+            "combo_adjustment": -0.2463,
+            "confidence_adjustment": -0.0528,
+            "adjustment_cap": 0.9,
+            "final_score": 3.7979,
+            "experience_sample_count": 79,
+            "used_stats": [
+              "CYCLE_POSITIVE",
+              "MA20_UP",
+              "MA5_UP",
+              "CYCLE_POSITIVE+MA20_UP",
+              "CYCLE_POSITIVE+MA5_UP",
+              "MA20_UP+MA5_UP",
+              "confidence:gte_0_85"
+            ]
+          }
+        },
+        "pachiko": {
+          "logic_version": "pachi_agents_pachiko_v1",
+          "primary_machine": "056",
+          "candidates": [
+            {
+              "machine": "056",
+              "score": 7.0828,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 5.7,
+                "propagation_repeat_days": 40,
+                "group": "2",
+                "group_strength": 1.0,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": 3617,
+                "cycle_history_days": 50,
+                "same_condition_records": 40
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.75,
+                "reason_adjustment": 0.1562,
+                "combo_adjustment": 0.1635,
+                "confidence_adjustment": 0.0131,
+                "adjustment_cap": 1.35,
+                "final_score": 7.0828,
+                "experience_sample_count": 122,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "DAYTIME_HIT_RECENT",
+                  "GROUP_STRENGTH_HIGH",
+                  "PROPAGATION_REPEATED",
+                  "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+                  "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+                  "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+                  "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+                  "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+                  "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "052",
+              "score": 7.0078,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 5.54,
+                "propagation_repeat_days": 40,
+                "group": "7",
+                "group_strength": 0.952,
+                "daytime_hit_days_7": 3,
+                "cycle_forecast": 3011,
+                "cycle_history_days": 50,
+                "same_condition_records": 40
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.6786,
+                "reason_adjustment": 0.1545,
+                "combo_adjustment": 0.1618,
+                "confidence_adjustment": 0.0129,
+                "adjustment_cap": 1.3357,
+                "final_score": 7.0078,
+                "experience_sample_count": 122,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "DAYTIME_HIT_RECENT",
+                  "GROUP_STRENGTH_HIGH",
+                  "PROPAGATION_REPEATED",
+                  "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+                  "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+                  "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+                  "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+                  "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+                  "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "061",
+              "score": 6.4832,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 8.71,
+                "propagation_repeat_days": 44,
+                "group": "7",
+                "group_strength": 0.952,
+                "daytime_hit_days_7": 2,
+                "cycle_forecast": 8199,
+                "cycle_history_days": 50,
+                "same_condition_records": 44
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.1786,
+                "reason_adjustment": 0.143,
+                "combo_adjustment": 0.1497,
+                "confidence_adjustment": 0.012,
+                "adjustment_cap": 1.2357,
+                "final_score": 6.4832,
+                "experience_sample_count": 122,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "DAYTIME_HIT_RECENT",
+                  "GROUP_STRENGTH_HIGH",
+                  "PROPAGATION_REPEATED",
+                  "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+                  "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+                  "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+                  "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+                  "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+                  "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "062",
+              "score": 6.4597,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 6.65,
+                "propagation_repeat_days": 43,
+                "group": "8",
+                "group_strength": 0.938,
+                "daytime_hit_days_7": 2,
+                "cycle_forecast": 3635,
+                "cycle_history_days": 50,
+                "same_condition_records": 43
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.1562,
+                "reason_adjustment": 0.1424,
+                "combo_adjustment": 0.1491,
+                "confidence_adjustment": 0.0119,
+                "adjustment_cap": 1.2312,
+                "final_score": 6.4597,
+                "experience_sample_count": 122,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "DAYTIME_HIT_RECENT",
+                  "GROUP_STRENGTH_HIGH",
+                  "PROPAGATION_REPEATED",
+                  "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+                  "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+                  "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+                  "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+                  "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+                  "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+                  "confidence:gte_0_85"
+                ]
+              }
+            },
+            {
+              "machine": "148",
+              "score": 6.4414,
+              "confidence": 0.9,
+              "signals": {
+                "propagation_best_mean_lift": 5.54,
+                "propagation_repeat_days": 18,
+                "group": "4",
+                "group_strength": 0.926,
+                "daytime_hit_days_7": 2,
+                "cycle_forecast": 13388,
+                "cycle_history_days": 50,
+                "same_condition_records": 18
+              },
+              "reason_codes": [
+                "PROPAGATION_REPEATED",
+                "GROUP_STRENGTH_HIGH",
+                "DAYTIME_HIT_RECENT",
+                "CYCLE_POSITIVE"
+              ],
+              "experience_adjustment": {
+                "base_score": 6.1388,
+                "reason_adjustment": 0.142,
+                "combo_adjustment": 0.1487,
+                "confidence_adjustment": 0.0119,
+                "adjustment_cap": 1.2278,
+                "final_score": 6.4414,
+                "experience_sample_count": 122,
+                "used_stats": [
+                  "CYCLE_POSITIVE",
+                  "DAYTIME_HIT_RECENT",
+                  "GROUP_STRENGTH_HIGH",
+                  "PROPAGATION_REPEATED",
+                  "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+                  "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+                  "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+                  "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+                  "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+                  "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+                  "confidence:gte_0_85"
+                ]
+              }
+            }
+          ],
+          "confidence": 0.9,
+          "comment": "056番を、伝播・グループ強度・日中hit・周期の統計証拠で本命指名しました。",
+          "signals": {
+            "propagation_best_mean_lift": 5.7,
+            "propagation_repeat_days": 40,
+            "group": "2",
+            "group_strength": 1.0,
+            "daytime_hit_days_7": 3,
+            "cycle_forecast": 3617,
+            "cycle_history_days": 50,
+            "same_condition_records": 40
+          },
+          "reason_codes": [
+            "PROPAGATION_REPEATED",
+            "GROUP_STRENGTH_HIGH",
+            "DAYTIME_HIT_RECENT",
+            "CYCLE_POSITIVE"
+          ],
+          "experience_adjustment": {
+            "base_score": 6.75,
+            "reason_adjustment": 0.1562,
+            "combo_adjustment": 0.1635,
+            "confidence_adjustment": 0.0131,
+            "adjustment_cap": 1.35,
+            "final_score": 7.0828,
+            "experience_sample_count": 122,
+            "used_stats": [
+              "CYCLE_POSITIVE",
+              "DAYTIME_HIT_RECENT",
+              "GROUP_STRENGTH_HIGH",
+              "PROPAGATION_REPEATED",
+              "CYCLE_POSITIVE+DAYTIME_HIT_RECENT",
+              "CYCLE_POSITIVE+GROUP_STRENGTH_HIGH",
+              "CYCLE_POSITIVE+PROPAGATION_REPEATED",
+              "DAYTIME_HIT_RECENT+GROUP_STRENGTH_HIGH",
+              "DAYTIME_HIT_RECENT+PROPAGATION_REPEATED",
+              "GROUP_STRENGTH_HIGH+PROPAGATION_REPEATED",
+              "confidence:gte_0_85"
+            ]
+          }
+        },
+        "pachikamisama": {
+          "logic_version": "pachi_agents_pachikamisama_v1",
+          "honmei": "148",
+          "taikou": "056",
+          "ana": "158",
+          "confidence": 0.418,
+          "candidates": [
+            {
+              "machine": "148",
+              "score": 0.8353,
+              "confidence": 0.418,
+              "signals": {
+                "pachio_rank": 3,
+                "pachiko_rank": 5,
+                "pachio_score": 3.7979,
+                "pachiko_score": 6.4414,
+                "pachio_confidence": 0.875,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.145,
+                "pachiko_contribution": 0.0904,
+                "primary_agreement": false,
+                "candidate_overlap": true,
+                "both_top3": false,
+                "cross_agent_top5": true,
+                "diverse_signal_support": true
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "CANDIDATE_OVERLAP",
+                "CROSS_AGENT_TOP5",
+                "HIGH_COMBINED_CONFIDENCE",
+                "PACHIO_WEIGHTED",
+                "DIVERSE_SIGNAL_SUPPORT"
+              ],
+              "candidate_origin": {
+                "agents": [
+                  "pachio",
+                  "pachiko"
+                ],
+                "pachio": {
+                  "selected": true,
+                  "rank": 3,
+                  "is_primary": false
+                },
+                "pachiko": {
+                  "selected": true,
+                  "rank": 5,
+                  "is_primary": false
+                },
+                "origin_type": "BOTH"
+              }
+            },
+            {
+              "machine": "056",
+              "score": 0.4518,
+              "confidence": 0.226,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 1,
+                "pachio_score": null,
+                "pachiko_score": 7.0828,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.4518,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "PACHIKO_WEIGHTED"
+              ],
+              "candidate_origin": {
+                "agents": [
+                  "pachiko"
+                ],
+                "pachio": {
+                  "selected": false,
+                  "rank": null,
+                  "is_primary": false
+                },
+                "pachiko": {
+                  "selected": true,
+                  "rank": 1,
+                  "is_primary": true
+                },
+                "origin_type": "PACHIKO_ONLY"
+              }
+            },
+            {
+              "machine": "158",
+              "score": 0.4349,
+              "confidence": 0.217,
+              "signals": {
+                "pachio_rank": 1,
+                "pachiko_rank": null,
+                "pachio_score": 3.7979,
+                "pachiko_score": null,
+                "pachio_confidence": 0.875,
+                "pachiko_confidence": null,
+                "pachio_contribution": 0.4349,
+                "pachiko_contribution": 0.0,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "PACHIO_WEIGHTED"
+              ],
+              "candidate_origin": {
+                "agents": [
+                  "pachio"
+                ],
+                "pachio": {
+                  "selected": true,
+                  "rank": 1,
+                  "is_primary": true
+                },
+                "pachiko": {
+                  "selected": false,
+                  "rank": null,
+                  "is_primary": false
+                },
+                "origin_type": "PACHIO_ONLY"
+              }
+            },
+            {
+              "machine": "052",
+              "score": 0.2259,
+              "confidence": 0.113,
+              "signals": {
+                "pachio_rank": null,
+                "pachiko_rank": 2,
+                "pachio_score": null,
+                "pachiko_score": 7.0078,
+                "pachio_confidence": null,
+                "pachiko_confidence": 0.9,
+                "pachio_contribution": 0.0,
+                "pachiko_contribution": 0.2259,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "PACHIKO_WEIGHTED"
+              ],
+              "candidate_origin": {
+                "agents": [
+                  "pachiko"
+                ],
+                "pachio": {
+                  "selected": false,
+                  "rank": null,
+                  "is_primary": false
+                },
+                "pachiko": {
+                  "selected": true,
+                  "rank": 2,
+                  "is_primary": false
+                },
+                "origin_type": "PACHIKO_ONLY"
+              }
+            },
+            {
+              "machine": "157",
+              "score": 0.2174,
+              "confidence": 0.109,
+              "signals": {
+                "pachio_rank": 2,
+                "pachiko_rank": null,
+                "pachio_score": 3.7979,
+                "pachiko_score": null,
+                "pachio_confidence": 0.875,
+                "pachiko_confidence": null,
+                "pachio_contribution": 0.2174,
+                "pachiko_contribution": 0.0,
+                "primary_agreement": false,
+                "candidate_overlap": false,
+                "both_top3": false,
+                "cross_agent_top5": false,
+                "diverse_signal_support": false
+              },
+              "reason_codes": [
+                "AGENT_DISAGREEMENT",
+                "PACHIO_WEIGHTED"
+              ],
+              "candidate_origin": {
+                "agents": [
+                  "pachio"
+                ],
+                "pachio": {
+                  "selected": true,
+                  "rank": 2,
+                  "is_primary": false
+                },
+                "pachiko": {
+                  "selected": false,
+                  "rank": null,
+                  "is_primary": false
+                },
+                "origin_type": "PACHIO_ONLY"
+              }
+            }
+          ],
+          "agent_weights": {
+            "pachio": 0.4639,
+            "pachiko": 0.5361
+          },
+          "signals": {
+            "pachio_rank": 3,
+            "pachiko_rank": 5,
+            "pachio_score": 3.7979,
+            "pachiko_score": 6.4414,
+            "pachio_confidence": 0.875,
+            "pachiko_confidence": 0.9,
+            "pachio_contribution": 0.145,
+            "pachiko_contribution": 0.0904,
+            "primary_agreement": false,
+            "candidate_overlap": true,
+            "both_top3": false,
+            "cross_agent_top5": true,
+            "diverse_signal_support": true
+          },
+          "reason_codes": [
+            "AGENT_DISAGREEMENT",
+            "CANDIDATE_OVERLAP",
+            "CROSS_AGENT_TOP5",
+            "HIGH_COMBINED_CONFIDENCE",
+            "PACHIO_WEIGHTED",
+            "DIVERSE_SIGNAL_SUPPORT"
+          ],
+          "comment": "148番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
+          "role_origins": {
+            "honmei": {
+              "agents": [
+                "pachio",
+                "pachiko"
+              ],
+              "pachio": {
+                "selected": true,
+                "rank": 3,
+                "is_primary": false
+              },
+              "pachiko": {
+                "selected": true,
+                "rank": 5,
+                "is_primary": false
+              },
+              "origin_type": "BOTH"
+            },
+            "taikou": {
+              "agents": [
+                "pachiko"
+              ],
+              "pachio": {
+                "selected": false,
+                "rank": null,
+                "is_primary": false
+              },
+              "pachiko": {
+                "selected": true,
+                "rank": 1,
+                "is_primary": true
+              },
+              "origin_type": "PACHIKO_ONLY"
+            },
+            "ana": {
+              "agents": [
+                "pachio"
+              ],
+              "pachio": {
+                "selected": true,
+                "rank": 1,
+                "is_primary": true
+              },
+              "pachiko": {
+                "selected": false,
+                "rank": null,
+                "is_primary": false
+              },
+              "origin_type": "PACHIO_ONLY"
+            }
+          },
+          "base_agent_weights": {
+            "pachio": 0.497,
+            "pachiko": 0.502
+          },
+          "experience_adjusted_weights": {
+            "pachio": 0.4639,
+            "pachiko": 0.5361
+          },
+          "experience_adjustment": {
+            "base_agent_weights": {
+              "pachio": 0.497,
+              "pachiko": 0.502
+            },
+            "experience_adjusted_weights": {
+              "pachio": 0.4639,
+              "pachiko": 0.5361
+            },
+            "weight_delta": 0.0341,
+            "experience_sample_count": 31,
+            "used_stats": [
+              "pachio_summary",
+              "pachiko_summary",
+              "condition:DIVERSE_SIGNAL_SUPPORT",
+              "condition:CANDIDATE_OVERLAP",
+              "condition:CROSS_AGENT_TOP5",
+              "condition:AGENT_DISAGREEMENT",
+              "weight_pattern:balanced"
+            ],
+            "condition_rates": {
+              "DIVERSE_SIGNAL_SUPPORT": 0.5294,
+              "CANDIDATE_OVERLAP": 0.5294,
+              "CROSS_AGENT_TOP5": 0.5294,
+              "AGENT_DISAGREEMENT": 0.4333
+            },
+            "weight_pattern": "balanced",
+            "weight_pattern_rate": 0.4482758620689655,
+            "max_weight_delta": 0.05
+          }
+        }
+      }
+    },
     "result": null,
     "reflection": null
   }
