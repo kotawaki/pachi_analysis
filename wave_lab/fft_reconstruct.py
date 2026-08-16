@@ -15,6 +15,7 @@ from daily_ohlc import load_chart_daily_ohlc
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_ROOT = ROOT / "wave_lab" / "output"
 PAGES_OUTPUT_ROOT = ROOT / "docs" / "wave_lab"
+PAGES_MACHINES = ("075", "077", "049", "056")
 
 # Analysis settings are intentionally explicit and easy to change for later experiments.
 TOP_COMPONENTS = 3
@@ -308,6 +309,77 @@ def write_csv(path: Path, rows: Iterable[dict], fields: list[str]) -> None:
         writer.writerows({field: row.get(field, "") for field in fields} for row in rows)
 
 
+def add_pages_navigation(document: str) -> str:
+    """Add a small relative link from an individual Pages page to the selector."""
+    navigation = (
+        '<nav class="wave-lab-pages-nav"><a href="../">← Wave Lab</a></nav>'
+        '<style>.wave-lab-pages-nav{max-width:1400px;margin:8px auto;padding:0 18px;'
+        'font:600 13px system-ui,sans-serif}.wave-lab-pages-nav a{color:#9fd8ff;'
+        'text-decoration:none}.wave-lab-pages-nav a:hover{text-decoration:underline}</style>'
+    )
+    return document.replace("<body>", "<body>" + navigation, 1)
+
+
+def _pages_summary(machine: str) -> dict:
+    output_dir = OUTPUT_ROOT / machine
+    components = list(csv.DictReader((output_dir / "fft_components.csv").open(encoding="utf-8", newline="")))
+    components = [row for row in components if row.get("preprocessing") == "linear_trend_and_mean_removed"]
+    by_role = {row.get("role"): row for row in components}
+    regimes = list(csv.DictReader((output_dir / "period_regime_daily.csv").open(encoding="utf-8", newline="")))
+    latest = regimes[-1] if regimes else {}
+    return {
+        "machine": machine,
+        "long_period": float(by_role["LONG"]["period_days"]),
+        "mid_period": float(by_role["MID"]["period_days"]),
+        "short_period": float(by_role["SHORT"]["period_days"]),
+        "regime": latest.get("regime", ""),
+    }
+
+
+def write_pages_index() -> Path:
+    """Write the self-contained four-machine selector for GitHub Pages."""
+    cards = []
+    for machine in PAGES_MACHINES:
+        try:
+            summary = _pages_summary(machine)
+        except (FileNotFoundError, KeyError, ValueError):
+            continue
+        cards.append(
+            f'''<article class="card"><div class="machine">{summary["machine"]}</div>
+<div class="experimental">Experimental research</div>
+<dl><dt>LONG</dt><dd>{summary["long_period"]:.3f} observations</dd>
+<dt>MID</dt><dd>{summary["mid_period"]:.3f} observations</dd>
+<dt>SHORT</dt><dd>{summary["short_period"]:.3f} observations</dd>
+<dt>2026-08-15 regime</dt><dd>{html.escape(summary["regime"])}</dd></dl>
+<a class="open" href="./{summary["machine"]}/">Open Wave Lab →</a></article>'''
+        )
+    document = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave Lab</title><style>
+:root{{color-scheme:dark;background:#07111c;color:#eaf3fb;font-family:system-ui,sans-serif}}
+body{{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,#17314a,#07111c 55%)}}
+main{{max-width:1100px;margin:0 auto;padding:56px 22px 80px}}
+h1{{font-size:clamp(34px,6vw,64px);margin:0 0 8px;letter-spacing:-.04em}}
+.lead{{color:#a9bfd0;margin:0 0 34px;max-width:720px;line-height:1.6}}
+.notice{{border:1px solid #2a536d;background:#0c2030;padding:14px 16px;border-radius:12px;color:#b9d8e9;margin-bottom:24px}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}}
+.card{{background:rgba(14,31,47,.92);border:1px solid #29465c;border-radius:18px;padding:22px;box-shadow:0 14px 34px #0004}}
+.machine{{font-size:38px;font-weight:800;letter-spacing:.04em}}
+.experimental{{color:#72d0ff;font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:3px 0 18px}}
+dl{{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;margin:0 0 22px;font-size:14px}}
+dt{{color:#86a9bf}}dd{{margin:0;text-align:right}}
+.open{{display:block;text-align:center;background:#50b8ed;color:#03111b;font-weight:800;padding:11px;border-radius:10px;text-decoration:none}}
+.open:hover{{background:#8bd8ff}}
+</style></head><body><main><h1>Wave Lab</h1>
+<p class="lead">FFT / 周期 / 位相を使った波形解析の研究ページ。台番号を選択して、Full-period / As-of Phase Space、Period Regime、Alignment / Convergenceを確認できます。</p>
+<div class="notice">全期間FFTを用いたretrospective / exploratory analysisです。表示される関連性は予測性能を意味しません。</div>
+<section class="grid">{"".join(cards)}</section></main></body></html>'''
+    PAGES_OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    path = PAGES_OUTPUT_ROOT / "index.html"
+    path.write_text(document, encoding="utf-8")
+    return path
+
+
 def phase_stats(daily: list[dict]) -> list[dict]:
     result = []
     for wave in (1, 2, 3):
@@ -473,6 +545,301 @@ def phase_convergence_region_stats(rows: list[dict]) -> list[dict]:
                 "next_day_samples": len(next_samples), "next_day_bullish_count": next_bullish,
                 "next_day_bullish_rate": next_bullish / len(next_samples) * 100.0 if next_samples else "",
             })
+    return result
+
+
+def phase_position_rows(rows: list[dict], convergence_rows: list[dict]) -> list[dict]:
+    """Export the exact Phase Space coordinates plus simple vertical-position labels."""
+    result = []
+    for row, convergence in zip(rows, convergence_rows):
+        points = {
+            "LONG": (float(convergence["long_x"]), float(convergence["long_y"]), convergence["centroid_region"]),
+            "MID": (float(convergence["mid_x"]), float(convergence["mid_y"]), convergence["centroid_region"]),
+            "SHORT": (float(convergence["short_x"]), float(convergence["short_y"]), convergence["centroid_region"]),
+        }
+        regions = {}
+        top_roles = []
+        for role, (x, y, _unused) in points.items():
+            dx = x - PHASE_SPACE_CENTER_X
+            dy = y - PHASE_SPACE_CENTER_Y
+            # The four-region centroid/point classifier is axis-dominant; it is distinct from
+            # per-wave TOP/BOTTOM, which uses only y < center_y (TOP) or y >= center_y (BOTTOM).
+            if abs(dx) >= abs(dy):
+                region = "RIGHT" if dx >= 0.0 else "LEFT"
+            else:
+                region = "BOTTOM" if dy >= 0.0 else "TOP"
+            regions[role] = region
+            if y < PHASE_SPACE_CENTER_Y:
+                top_roles.append(role)
+        pattern = "+".join(top_roles) if top_roles else "NONE"
+        result.append({
+            "date": row["date"], "machine": row["machine"],
+            "long_x": points["LONG"][0], "long_y": points["LONG"][1], "long_region": regions["LONG"],
+            "long_top_side": points["LONG"][1] < PHASE_SPACE_CENTER_Y,
+            "mid_x": points["MID"][0], "mid_y": points["MID"][1], "mid_region": regions["MID"],
+            "mid_top_side": points["MID"][1] < PHASE_SPACE_CENTER_Y,
+            "short_x": points["SHORT"][0], "short_y": points["SHORT"][1], "short_region": regions["SHORT"],
+            "short_top_side": points["SHORT"][1] < PHASE_SPACE_CENTER_Y,
+            "top_wave_count": len(top_roles), "top_wave_pattern": pattern,
+            "centroid_x": convergence["centroid_x"], "centroid_y": convergence["centroid_y"],
+            "centroid_y_offset": float(convergence["centroid_y"]) - PHASE_SPACE_CENTER_Y,
+            "centroid_region": convergence["centroid_region"],
+            "bullish": row["bullish"], "next_day_bullish": row["next_day_bullish"],
+        })
+    return result
+
+
+def _position_rate_row(category: str, value: str, samples: list[dict]) -> dict:
+    next_samples = [row for row in samples if row["next_day_bullish"] is not None]
+    bullish = sum(row["bullish"] for row in samples)
+    next_bullish = sum(row["next_day_bullish"] for row in next_samples)
+    return {
+        "category": category, "value": value, "samples": len(samples),
+        "bullish_count": bullish, "bullish_rate": bullish / len(samples) * 100.0 if samples else "",
+        "next_day_samples": len(next_samples), "next_day_bullish_count": next_bullish,
+        "next_day_bullish_rate": next_bullish / len(next_samples) * 100.0 if next_samples else "",
+    }
+
+
+def phase_position_stats(rows: list[dict]) -> list[dict]:
+    result = []
+    for role in ("LONG", "MID", "SHORT"):
+        field = role.lower() + "_region"
+        for region in ("TOP", "RIGHT", "BOTTOM", "LEFT"):
+            result.append(_position_rate_row(role + "_REGION", region, [row for row in rows if row[field] == region]))
+        side_field = role.lower() + "_top_side"
+        for side, is_top in (("TOP", True), ("BOTTOM", False)):
+            result.append(_position_rate_row(role + "_SIDE", side, [row for row in rows if row[side_field] is is_top]))
+    for region in ("TOP", "RIGHT", "BOTTOM", "LEFT"):
+        result.append(_position_rate_row("CENTROID_REGION", region, [row for row in rows if row["centroid_region"] == region]))
+    for count in range(4):
+        result.append(_position_rate_row("TOP_WAVE_COUNT", str(count), [row for row in rows if row["top_wave_count"] == count]))
+    result.append(_position_rate_row("TOP_WAVE_COUNT", "2+", [row for row in rows if row["top_wave_count"] >= 2]))
+    return result
+
+
+def phase_position_pattern_stats(rows: list[dict]) -> list[dict]:
+    patterns = ("NONE", "LONG", "MID", "SHORT", "LONG+MID", "LONG+SHORT", "MID+SHORT", "LONG+MID+SHORT")
+    return [_position_rate_row("TOP_WAVE_PATTERN", pattern, [row for row in rows if row["top_wave_pattern"] == pattern]) for pattern in patterns]
+
+
+def validate_phase_position_rows(rows: list[dict], convergence_rows: list[dict]) -> None:
+    assert len(rows) == len(convergence_rows)
+    for row, convergence in zip(rows, convergence_rows):
+        assert 0 <= row["top_wave_count"] <= 3
+        assert row["top_wave_pattern"] in {"NONE", "LONG", "MID", "SHORT", "LONG+MID", "LONG+SHORT", "MID+SHORT", "LONG+MID+SHORT"}
+        assert math.isclose(row["centroid_x"], convergence["centroid_x"])
+        assert math.isclose(row["centroid_y"], convergence["centroid_y"])
+        for key in ("long_x", "long_y", "mid_x", "mid_y", "short_x", "short_y", "centroid_x", "centroid_y"):
+            assert math.isfinite(float(row[key]))
+
+
+ASOF_THRESHOLD_MIN_SAMPLES = 5
+
+
+def _asof_region(x: float, y: float) -> str:
+    return centroid_region(x, y)
+
+
+def _asof_top_pattern(top_roles: list[str]) -> str:
+    return "+".join(top_roles) if top_roles else "NONE"
+
+
+def _asof_metric_fields() -> list[str]:
+    return [
+        "long_k", "long_frequency", "long_period", "long_rank", "long_relative_power",
+        "mid_k", "mid_frequency", "mid_period", "mid_rank", "mid_relative_power",
+        "short_k", "short_frequency", "short_period", "short_rank", "short_relative_power",
+        "long_phase", "long_wave_value", "long_amplitude", "long_x", "long_y", "long_region", "long_top_side",
+        "mid_phase", "mid_wave_value", "mid_amplitude", "mid_x", "mid_y", "mid_region", "mid_top_side",
+        "short_phase", "short_wave_value", "short_amplitude", "short_x", "short_y", "short_region", "short_top_side",
+        "top_wave_count", "top_wave_pattern", "centroid_x", "centroid_y", "centroid_y_offset", "centroid_region",
+        "phase_alignment_score", "alignment_threshold_asof", "high_alignment_asof",
+        "max_pair_distance", "convergence_score", "convergence_threshold_asof", "phase_convergence_asof",
+    ]
+
+
+def asof_phase_space_history(rows: list[dict], regime_rows: list[dict]) -> list[dict]:
+    """Build a point-in-time Phase Space using only each date's expanding FFT prefix."""
+    regime_by_date = {row["date"]: row for row in regime_rows}
+    history = []
+    alignment_scores: list[float] = []
+    convergence_scores: list[float] = []
+    metric_fields = _asof_metric_fields()
+    for index, row in enumerate(rows):
+        as_of = row["date"]
+        regime = regime_by_date.get(as_of, {})
+        base = {
+            "date": as_of, "machine": row["machine"], "status": "INSUFFICIENT_HISTORY",
+            "n_observations": index + 1, "n_fft": "", "regime": regime.get("regime", "INSUFFICIENT_HISTORY"),
+            "bullish": row["bullish"], "next_day_bullish": row["next_day_bullish"],
+        }
+        base.update({field: "" for field in metric_fields})
+        if index + 1 < MIN_REGIME_OBSERVATIONS:
+            history.append(base)
+            continue
+
+        prefix_rows = rows[: index + 1]
+        assert prefix_rows[-1]["date"] == as_of
+        assert max(prefix_row["date"] for prefix_row in prefix_rows) <= as_of
+        prefix_components, prefix_daily, _centered, _comparison = analyze(prefix_rows)
+        prefix_convergence, _unused_threshold = phase_convergence_analysis(prefix_daily, prefix_components)
+        current_daily = prefix_daily[-1]
+        current_convergence = prefix_convergence[-1]
+        role_components = {component["role"]: component for component in prefix_components}
+        role_order = ("LONG", "MID", "SHORT")
+        role_wave = {"LONG": 1, "MID": 2, "SHORT": 3}
+        current = {
+            **base, "status": "VALID", "n_fft": int(prefix_components[0]["n_fft"]),
+        }
+        for role in role_order:
+            component = role_components[role]
+            wave = role_wave[role]
+            current.update({
+                role.lower() + "_k": round(float(component["frequency"]) * int(component["n_fft"])),
+                role.lower() + "_frequency": component["frequency"],
+                role.lower() + "_period": component["period_days"],
+                role.lower() + "_rank": component["rank"],
+                role.lower() + "_relative_power": component["relative_power"],
+                role.lower() + "_phase": current_convergence[role.lower() + "_phase"],
+                role.lower() + "_wave_value": current_daily[f"wave{wave}_value"],
+                role.lower() + "_amplitude": component["amplitude"],
+                role.lower() + "_x": current_convergence[role.lower() + "_x"],
+                role.lower() + "_y": current_convergence[role.lower() + "_y"],
+                role.lower() + "_region": current_convergence[role.lower() + "_x"] is not None and _asof_region(float(current_convergence[role.lower() + "_x"]), float(current_convergence[role.lower() + "_y"])),
+                role.lower() + "_top_side": float(current_convergence[role.lower() + "_y"]) < PHASE_SPACE_CENTER_Y,
+            })
+        top_roles = [role for role in role_order if current[role.lower() + "_top_side"]]
+        current.update({
+            "top_wave_count": len(top_roles), "top_wave_pattern": _asof_top_pattern(top_roles),
+            "centroid_x": current_convergence["centroid_x"], "centroid_y": current_convergence["centroid_y"],
+            "centroid_y_offset": float(current_convergence["centroid_y"]) - PHASE_SPACE_CENTER_Y,
+            "centroid_region": current_convergence["centroid_region"],
+            "phase_alignment_score": phase_alignment_score({
+                "wave1_phase": current_convergence["long_phase"],
+                "wave2_phase": current_convergence["mid_phase"],
+                "wave3_phase": current_convergence["short_phase"],
+            }),
+            "max_pair_distance": current_convergence["max_pair_distance"],
+            "convergence_score": current_convergence["convergence_score"],
+        })
+        alignment_scores.append(float(current["phase_alignment_score"]))
+        convergence_scores.append(float(current["convergence_score"]))
+        if len(alignment_scores) >= ASOF_THRESHOLD_MIN_SAMPLES:
+            current["alignment_threshold_asof"] = quantile(alignment_scores, PHASE_CONVERGENCE_QUANTILE)
+            current["high_alignment_asof"] = current["phase_alignment_score"] >= current["alignment_threshold_asof"]
+        if len(convergence_scores) >= ASOF_THRESHOLD_MIN_SAMPLES:
+            current["convergence_threshold_asof"] = quantile(convergence_scores, PHASE_CONVERGENCE_QUANTILE)
+            current["phase_convergence_asof"] = current["convergence_score"] >= current["convergence_threshold_asof"]
+        history.append(current)
+    return history
+
+
+def validate_asof_phase_space(history: list[dict], cutoff_date: str) -> None:
+    assert len(history) > 0
+    for index, row in enumerate(history):
+        assert row["date"] <= cutoff_date
+        assert row["n_observations"] == index + 1
+        if index + 1 < MIN_REGIME_OBSERVATIONS:
+            assert row["status"] == "INSUFFICIENT_HISTORY"
+            assert row["long_phase"] == ""
+        else:
+            assert row["status"] == "VALID"
+            assert row["regime"] != "INSUFFICIENT_HISTORY"
+            for role in ("long", "mid", "short"):
+                assert 0.0 <= float(row[role + "_phase"]) < 360.0
+                assert math.isfinite(float(row[role + "_x"]))
+                assert math.isfinite(float(row[role + "_y"]))
+            assert 0 <= int(row["top_wave_count"]) <= 3
+            assert 0.0 <= float(row["phase_alignment_score"]) <= 1.0
+            assert 0.0 <= float(row["convergence_score"]) <= 1.0
+
+
+def asof_phase_regime_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID"]
+    result = []
+    for regime in ("STABLE", "TRANSITION", "UNSTABLE"):
+        for count in (0, 1, 2, 3):
+            samples = [row for row in valid if row["regime"] == regime and row["top_wave_count"] == count]
+            result.append(_position_rate_row(regime, str(count), samples))
+        samples = [row for row in valid if row["regime"] == regime and row["top_wave_count"] >= 2]
+        result.append(_position_rate_row(regime, "2+", samples))
+    return result
+
+
+def asof_phase_region_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID"]
+    result = []
+    for region in ("TOP", "BOTTOM"):
+        for metric, flag in (("HIGH_ALIGNMENT", "high_alignment_asof"), ("CONVERGENCE", "phase_convergence_asof")):
+            samples = [row for row in valid if row["centroid_region"] == region and row[flag] is True]
+            result.append(_position_rate_row(region + "_" + metric, "TRUE", samples))
+    return result
+
+
+def asof_nfft_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID"]
+    result = []
+    for n_fft in (32, 64):
+        group = [row for row in valid if int(row["n_fft"]) == n_fft]
+        for count in (0, 1, 2, 3):
+            samples = [row for row in group if row["top_wave_count"] == count]
+            rate = _position_rate_row("N_FFT", str(count), samples)
+            result.append({"n_fft": n_fft, "top_wave_count": count, **{key: rate[key] for key in rate if key not in {"category", "value"}}})
+        samples = [row for row in group if row["top_wave_count"] >= 2]
+        rate = _position_rate_row("N_FFT", "2+", samples)
+        result.append({"n_fft": n_fft, "top_wave_count": "2+", **{key: rate[key] for key in rate if key not in {"category", "value"}}})
+    return result
+
+
+def asof_nfft_pattern_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID"]
+    result = []
+    patterns = ("NONE", "LONG", "MID", "SHORT", "LONG+MID", "LONG+SHORT", "MID+SHORT", "LONG+MID+SHORT")
+    for n_fft in (32, 64):
+        group = [row for row in valid if int(row["n_fft"]) == n_fft]
+        for pattern in patterns:
+            rate = _position_rate_row("N_FFT", pattern, [row for row in group if row["top_wave_pattern"] == pattern])
+            result.append({"n_fft": n_fft, "top_wave_pattern": pattern, **{key: rate[key] for key in rate if key not in {"category", "value", "bullish_count", "next_day_bullish_count"}}})
+    return result
+
+
+def asof_nfft_regime_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID"]
+    result = []
+    for n_fft in (32, 64):
+        for regime in ("STABLE", "TRANSITION", "UNSTABLE"):
+            samples = [row for row in valid if int(row["n_fft"]) == n_fft and row["regime"] == regime and row["top_wave_count"] >= 2]
+            rate = _position_rate_row("N_FFT_REGIME", regime, samples)
+            result.append({"n_fft": n_fft, "regime": regime, "top_wave_count": "2+", **{key: rate[key] for key in rate if key not in {"category", "value"}}})
+    return result
+
+
+def asof_nfft_transition_detail(asof_rows: list[dict], regime_rows: list[dict]) -> list[dict]:
+    valid = [row for row in regime_rows if row.get("n_fft") not in ("", None)]
+    if not valid:
+        return []
+    boundary = next((index for index, row in enumerate(valid) if int(row["n_fft"]) == 64 and (index == 0 or int(valid[index - 1]["n_fft"]) != 64)), None)
+    if boundary is None:
+        return []
+    by_date = {row["date"]: row for row in asof_rows}
+    result = []
+    for regime_row in valid[max(0, boundary - 3): boundary + 4]:
+        asof = by_date[regime_row["date"]]
+        result.append({
+            "date": regime_row["date"], "n_observations": regime_row["n_observations"], "n_fft": regime_row["n_fft"],
+            "long_k": regime_row.get("long_k", ""), "mid_k": regime_row.get("mid_k", ""), "short_k": regime_row.get("short_k", ""),
+            "long_frequency": regime_row.get("long_frequency", ""), "mid_frequency": regime_row.get("mid_frequency", ""), "short_frequency": regime_row.get("short_frequency", ""),
+            "long_period": regime_row.get("long_period", ""), "mid_period": regime_row.get("mid_period", ""), "short_period": regime_row.get("short_period", ""),
+            "dominant_rank_signature": regime_row.get("dominant_rank_signature", ""), "regime": regime_row.get("regime", ""),
+            "period_stability_score": regime_row.get("period_stability_score", ""), "joint_repeat_period": regime_row.get("joint_repeat_period", ""),
+            "long_phase": asof.get("long_phase", ""), "mid_phase": asof.get("mid_phase", ""), "short_phase": asof.get("short_phase", ""),
+            "top_wave_count": asof.get("top_wave_count", ""), "top_wave_pattern": asof.get("top_wave_pattern", ""),
+            "centroid_region": asof.get("centroid_region", ""), "centroid_y_offset": asof.get("centroid_y_offset", ""),
+            "alignment_score": asof.get("phase_alignment_score", ""), "convergence_score": asof.get("convergence_score", ""),
+            "bullish": asof.get("bullish", ""), "next_day_bullish": asof.get("next_day_bullish", ""),
+            "n_fft_changed": regime_row.get("n_fft_changed", False),
+        })
     return result
 
 
@@ -953,11 +1320,13 @@ function uiDrawMain(){const svg=document.getElementById('mainChart'),display=uiD
 function uiPhasePoint(role,i){const component=components.find(c=>c.role===role),wave=roleIndex[role],amplitude=Number(component.amplitude)||1,base=78,scale=32,radius=base+scale*Number(rows[i][`wave${wave}_value`])/amplitude,a=Number(rows[i][`wave${wave}_phase`])*Math.PI/180;return [300+radius*Math.sin(a),190+radius*Math.cos(a)];}
 function uiPhasePath(role,end){const points=[];for(let i=0;i<=end;i++){const p=uiPhasePoint(role,i);points.push(`${p[0].toFixed(2)},${p[1].toFixed(2)}`);}return points.length?'M '+points.join(' L '):'';}
 function uiDrawPhase(){const svg=document.getElementById('phaseSpace'),cx=300,cy=190,r=116;let out=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line)"/><circle cx="${cx}" cy="${cy}" r="78" fill="none" stroke="var(--line)" opacity=".5"/><line class="svg-axis" x1="${cx-r-20}" y1="${cy}" x2="${cx+r+20}" y2="${cy}"/><line class="svg-axis" x1="${cx}" y1="${cy-r-20}" x2="${cx}" y2="${cy+r+20}"/><text class="svg-label" x="${cx-22}" y="${cy-r-28}">180 crest</text><text class="svg-label" x="${cx-22}" y="${cy+r+35}">0 trough</text><text class="svg-label" x="${cx+r+25}" y="${cy+4}">90 rising</text><text class="svg-label" x="${cx-r-85}" y="${cy+4}">270 falling</text>`;for(const role of roles){const col=colors[role],full=uiPhasePath(role,rows.length-1),past=uiPhasePath(role,uiIndex);out+=`<path d="${full}" fill="none" stroke="${col}" stroke-width="2" opacity=".18"/><path d="${past}" fill="none" stroke="${col}" stroke-width="3" opacity=".9"/>`;const current=uiPhasePoint(role,uiIndex);out+=`<circle cx="${current[0]}" cy="${current[1]}" r="8" fill="${col}" stroke="var(--cursor)" stroke-width="2"/><text class="svg-label" x="${current[0]+8}" y="${current[1]-8}">${role}</text>`;}svg.innerHTML=out;}
+function drawAsOfPhase(){const svg=document.getElementById('asofPhaseSpace');if(!svg)return;const row=asofRows[uiIndex],cx=300,cy=190,r=116;let out='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';if(!row||row.status!=='VALID'){out+='<text class="svg-label" x="190" y="190">INSUFFICIENT_HISTORY</text>';svg.innerHTML=out;const summary=document.getElementById('asofPhaseSummary');if(summary)summary.textContent=row?row.date+' / '+row.status:'-';return;}const points=roles.map(role=>[Number(row[role.toLowerCase()+'_x']),Number(row[role.toLowerCase()+'_y'])]);out+='<polygon points="'+points.map(p=>p[0]+','+p[1]).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="1.5" opacity=".85"/>';roles.forEach((role,i)=>{const p=points[i];out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="'+colors[role]+'" stroke="var(--cursor)" stroke-width="2"/><text class="svg-label" x="'+(p[0]+8)+'" y="'+(p[1]-8)+'">'+role+'</text>';});out+='<circle cx="'+Number(row.centroid_x)+'" cy="'+Number(row.centroid_y)+'" r="4" fill="var(--cursor)" stroke="var(--text)" stroke-width="1"/><text class="svg-label" x="18" y="24">AS-OF '+esc(row.date)+' / regime '+esc(row.regime)+' / TOP waves '+row.top_wave_count+' / '+esc(row.top_wave_pattern)+'</text>';svg.innerHTML=out;const summary=document.getElementById('asofPhaseSummary');if(summary)summary.textContent='score alignment='+(row.phase_alignment_score===''?'-':Number(row.phase_alignment_score).toFixed(3))+' / convergence='+(row.convergence_score===''?'-':Number(row.convergence_score).toFixed(3))+' / centroid='+row.centroid_region+' / y offset='+Number(row.centroid_y_offset).toFixed(2);}
+function drawNfftComparison(){const box=document.getElementById('nfftComparison');if(!box)return;const stats=DATA.asof_nfft_stats||[],regime=DATA.asof_nfft_regime_stats||[],fmt=v=>v===''||v===undefined?'-':Number(v).toFixed(1);let html='<div class="table-wrap"><table><thead><tr><th>n_fft</th><th>TOP count</th><th>samples</th><th>bullish rate</th><th>next bullish rate</th></tr></thead><tbody>';for(const r of stats)html+='<tr><td>'+r.n_fft+'</td><td>'+r.top_wave_count+'</td><td>'+r.samples+'</td><td>'+fmt(r.bullish_rate)+'%</td><td>'+fmt(r.next_day_bullish_rate)+'%</td></tr>';html+='</tbody></table></div><h3>n_fft × regime × 2+ TOP</h3><div class="table-wrap"><table><thead><tr><th>n_fft</th><th>regime</th><th>samples</th><th>bullish rate</th><th>next bullish rate</th></tr></thead><tbody>';for(const r of regime)html+='<tr><td>'+r.n_fft+'</td><td>'+r.regime+'</td><td>'+r.samples+'</td><td>'+fmt(r.bullish_rate)+'%</td><td>'+fmt(r.next_day_bullish_rate)+'%</td></tr>';html+='</tbody></table></div><p class="tiny">The n_fft frame is a shared resolution setting. A boundary change can mix resolution change, component reselection, period/phase movement, and regime movement; it is not by itself a machine-period change.</p>';box.innerHTML=html;}
 function drawRegimeHistory(){const svg=document.getElementById('periodRegimeChart');if(!svg||!regimeRows.length)return;const left=70,width=1080,top=18,periodH=155,jointTop=188,jointH=62,bandTop=278,bandH=28,xAtRegime=i=>left+width*i/Math.max(1,regimeRows.length-1);const valid=regimeRows.filter(r=>Number.isFinite(Number(r.long_period)));const allPeriods=valid.flatMap(r=>[Number(r.long_period),Number(r.mid_period),Number(r.short_period)]),lo=Math.min(...allPeriods),hi=Math.max(...allPeriods),sy=v=>top+periodH*(hi-v)/(hi-lo||1);const path=key=>{const pts=regimeRows.map((r,i)=>Number.isFinite(Number(r[key]))?`${xAtRegime(i).toFixed(2)},${sy(Number(r[key])).toFixed(2)}`:null).filter(Boolean);return pts.length?'M '+pts.join(' L '):'';};let out='<line class="svg-axis" x1="'+left+'" y1="'+top+'" x2="'+(left+width)+'" y2="'+top+'"/><line class="svg-axis" x1="'+left+'" y1="'+(top+periodH)+'" x2="'+(left+width)+'" y2="'+(top+periodH)+'"/>';for(const [key,label,color] of [['long_period','LONG','var(--long)'],['mid_period','MID','var(--mid)'],['short_period','SHORT','var(--short)']]){const d=path(key);if(d)out+='<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+(label==='LONG'?3:2)+'"/>';out+='<text class="svg-label" x="8" y="'+(top+20+(['LONG','MID','SHORT'].indexOf(label)*18))+'">'+label+'</text>';}out+='<text class="svg-label" x="8" y="'+(jointTop+18)+'">joint repeat</text>';const jointValues=regimeRows.filter(r=>Number.isFinite(Number(r.joint_repeat_period))).map(r=>Number(r.joint_repeat_period)),jlo=Math.min(...jointValues),jhi=Math.max(...jointValues),jy=v=>jointTop+jointH*(jhi-v)/(jhi-jlo||1);const jointPts=regimeRows.map((r,i)=>Number.isFinite(Number(r.joint_repeat_period))?`${xAtRegime(i).toFixed(2)},${jy(Number(r.joint_repeat_period)).toFixed(2)}`:null).filter(Boolean);if(jointPts.length)out+='<path d="M '+jointPts.join(' L ')+'" fill="none" stroke="var(--cursor)" stroke-width="3"/>';for(const r of regimeRows){const i=regimeRows.indexOf(r),fill=r.regime==='STABLE'?'var(--mid)':r.regime==='TRANSITION'?'var(--cursor)':r.regime==='UNSTABLE'?'var(--bull)':'var(--line)';out+='<rect x="'+(xAtRegime(i)-width/regimeRows.length/2)+'" y="'+bandTop+'" width="'+(width/regimeRows.length+1)+'" height="'+bandH+'" fill="'+fill+'" opacity=".6"/><text class="svg-label" x="'+xAtRegime(i)+'" y="'+(bandTop+19)+'" text-anchor="middle" font-size="10">'+(i===0||i===Math.floor((regimeRows.length-1)/2)||i===regimeRows.length-1?r.regime:'')+'</text>';if(r.n_fft_changed)out+='<line class="svg-cursor" x1="'+xAtRegime(i)+'" y1="'+top+'" x2="'+xAtRegime(i)+'" y2="'+(bandTop+bandH)+'"/>';}const cursor=xAtRegime(uiIndex);out+='<line class="svg-cursor" x1="'+cursor+'" y1="'+top+'" x2="'+cursor+'" y2="'+(bandTop+bandH)+'"/>';for(const i of [0,Math.floor((regimeRows.length-1)/2),regimeRows.length-1])out+='<text class="svg-label" text-anchor="middle" x="'+xAtRegime(i)+'" y="'+(bandTop+bandH+22)+'">'+esc(regimeRows[i].date)+'</text>';svg.innerHTML=out;const selected=regimeRows[uiIndex];document.getElementById('periodRegimeSummary').textContent=selected?'selected '+selected.date+' / regime='+selected.regime+' / n_fft='+(selected.n_fft||'-')+' / joint_repeat='+(selected.joint_repeat_period||'-')+' observations':'-';}
 function uiRate(v){return v===''?'-':Number(v).toFixed(1)+'%';}
 function uiDetail(){const r=rows[uiIndex],same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH'),cell=(l,v,c='')=>`<div class="metric"><span class="label">${l}</span><span class="value ${c}">${esc(v)}</span></div>`;document.getElementById('summary').innerHTML=cell('date',r.date,'selected')+cell('Open',r.open)+cell('High',r.high)+cell('Low',r.low)+cell('Close',r.close)+cell('same-day',same,same==='BULLISH'?'bull':'')+cell('next observation',next,next==='BULLISH'?'next':'');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;const dirs=roles.map(role=>{const w=roleIndex[role];return `<tr><td class="role-${role.toLowerCase()}">${role}</td><td>${Number(r[`wave${w}_phase`]).toFixed(1)} deg</td><td>${esc(r[`wave${w}_direction`])}</td><td>${r[`wave${w}_up`]?'UP':'DOWN'}</td><td>${Number(r[`wave${w}_value`]).toFixed(1)}</td></tr>`}).join('');const comps=components.map(c=>`<tr><td class="role-${c.role.toLowerCase()}">${c.role}</td><td>${c.rank}</td><td>${Number(c.frequency).toFixed(5)}</td><td>${Number(c.period_days).toFixed(3)}</td><td>${Number(c.amplitude).toFixed(1)}</td><td>${(Number(c.relative_power)*100).toFixed(1)}%</td></tr>`).join('');document.getElementById('info').innerHTML=`<div class="info-grid"><section><h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>${dirs}</tbody></table><p><b>pattern:</b> ${esc(r.wave_direction_pattern)}</p><p><b>combined:</b> ${Number(r.combined_wave).toFixed(1)}</p></section><section><h3>Components</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>rank</th><th>freq</th><th>period</th><th>amp</th><th>power</th></tr></thead><tbody>${comps}</tbody></table></div></section></div>`;}
-function uiDetail(){const r=rows[uiIndex],regime=regimeRows[uiIndex]||{},same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;document.getElementById('summary').innerHTML='<div class="metric"><span class="label">date</span><span class="value selected">'+esc(r.date)+'</span></div><div class="metric"><span class="label">OHLC</span><span class="value">'+[r.open,r.high,r.low,r.close].map(esc).join(' / ')+'</span></div><div class="metric"><span class="label">same-day</span><span class="value">'+same+'</span></div><div class="metric"><span class="label">next observation</span><span class="value">'+next+'</span></div>';const dirs=roles.map(role=>{const w=roleIndex[role];return '<tr><td>'+role+'</td><td>'+Number(r['wave'+w+'_phase']).toFixed(1)+' deg</td><td>'+esc(r['wave'+w+'_direction'])+'</td><td>'+((r['wave'+w+'_up'])?'UP':'DOWN')+'</td><td>'+Number(r['wave'+w+'_value']).toFixed(1)+'</td></tr>';}).join('');document.getElementById('info').innerHTML='<h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>'+dirs+'</tbody></table><p><b>pattern:</b> '+esc(r.wave_direction_pattern)+'</p><p><b>combined:</b> '+Number(r.combined_wave).toFixed(1)+'</p><h3>PERIOD REGIME HISTORY</h3><p>regime='+esc(regime.regime||'-')+' / n_fft='+esc(regime.n_fft||'-')+' / stability='+(regime.period_stability_score===''?'-':Number(regime.period_stability_score).toFixed(3))+'</p><p>LONG='+(regime.long_period?Number(regime.long_period).toFixed(3):'-')+' / MID='+(regime.mid_period?Number(regime.mid_period).toFixed(3):'-')+' / SHORT='+(regime.short_period?Number(regime.short_period).toFixed(3):'-')+'</p><p>component reorder='+(regime.component_reorder?'YES':'NO')+' / joint repeat='+(regime.joint_repeat_period||'-')+' obs / stable count='+(regime.joint_repeat_stable_count||'-')+'</p><p class="tiny">MIN history='+DATA.min_regime_observations+'; shift threshold='+Number(DATA.regime_shift_pct*100).toFixed(0)+'%.</p>';}
-function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);uiDrawMain();uiDrawPhase();drawRegimeHistory();uiDetail();}
+function uiDetail(){const r=rows[uiIndex],regime=regimeRows[uiIndex]||{},asof=asofRows[uiIndex]||{},same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;document.getElementById('summary').innerHTML='<div class="metric"><span class="label">date</span><span class="value selected">'+esc(r.date)+'</span></div><div class="metric"><span class="label">OHLC</span><span class="value">'+[r.open,r.high,r.low,r.close].map(esc).join(' / ')+'</span></div><div class="metric"><span class="label">same-day</span><span class="value">'+same+'</span></div><div class="metric"><span class="label">next observation</span><span class="value">'+next+'</span></div>';const dirs=roles.map(role=>{const w=roleIndex[role];return '<tr><td>'+role+'</td><td>'+Number(r['wave'+w+'_phase']).toFixed(1)+' deg</td><td>'+esc(r['wave'+w+'_direction'])+'</td><td>'+((r['wave'+w+'_up'])?'UP':'DOWN')+'</td><td>'+Number(r['wave'+w+'_value']).toFixed(1)+'</td></tr>';}).join('');document.getElementById('info').innerHTML='<h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>'+dirs+'</tbody></table><p><b>pattern:</b> '+esc(r.wave_direction_pattern)+'</p><p><b>combined:</b> '+Number(r.combined_wave).toFixed(1)+'</p><h3>PERIOD REGIME HISTORY</h3><p>regime='+esc(regime.regime||'-')+' / n_fft='+esc(regime.n_fft||'-')+' / stability='+(regime.period_stability_score===''?'-':Number(regime.period_stability_score).toFixed(3))+'</p><p>LONG='+(regime.long_period?Number(regime.long_period).toFixed(3):'-')+' / MID='+(regime.mid_period?Number(regime.mid_period).toFixed(3):'-')+' / SHORT='+(regime.short_period?Number(regime.short_period).toFixed(3):'-')+'</p><p>component reorder='+(regime.component_reorder?'YES':'NO')+' / joint repeat='+(regime.joint_repeat_period||'-')+' obs / stable count='+(regime.joint_repeat_stable_count||'-')+'</p><p class="tiny">MIN history='+DATA.min_regime_observations+'; shift threshold='+Number(DATA.regime_shift_pct*100).toFixed(0)+'%.</p>'+(asof.status==='VALID'?'<h3>AS-OF PHASE SPACE</h3><p>regime='+esc(asof.regime)+' / n_fft='+esc(asof.n_fft)+' / TOP waves='+asof.top_wave_count+' / pattern='+esc(asof.top_wave_pattern)+'</p><p>alignment=' + Number(asof.phase_alignment_score).toFixed(3)+' / convergence='+Number(asof.convergence_score).toFixed(3)+' / centroid='+esc(asof.centroid_region)+' / y offset='+Number(asof.centroid_y_offset).toFixed(2)+'</p>':'<h3>AS-OF PHASE SPACE</h3><p>INSUFFICIENT_HISTORY</p>');}
+function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);uiDrawMain();uiDrawPhase();drawRegimeHistory();drawAsOfPhase();uiDetail();}
 function stopPlayback(){if(uiTimer!==null){clearInterval(uiTimer);uiTimer=null;}document.getElementById('uiPlay').textContent='Play';}
 function advance(){if(uiIndex<rows.length-1){updateView(uiIndex+1);return true;}if(uiLoop.checked){updateView(0);return true;}stopPlayback();return false;}
 function startPlayback(){if(uiTimer!==null)return;if(uiIndex>=rows.length-1&&!uiLoop.checked)return;document.getElementById('uiPlay').textContent='Playing';uiTimer=setInterval(advance,Number(uiSpeed.value));}
@@ -982,6 +1351,10 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
     alignment_rows = add_repeat_metadata(alignment_rows, joint_repeat_period)
     regime_rows, regime_events = period_regime_history(daily, convergence_rows, alignment_rows)
     validate_period_regime_history(regime_rows, REGIME_CUTOFF_DATE)
+    position_rows = phase_position_rows(daily, convergence_rows)
+    validate_phase_position_rows(position_rows, convergence_rows)
+    asof_rows = asof_phase_space_history(daily, regime_rows)
+    validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
     payload = {"machine": machine, "rows": daily, "components": public_components,
                "phase_stats": phase_nextday_stats(daily, components),
                "pattern_stats": pattern_nextday_stats(daily),
@@ -998,6 +1371,19 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
                "regime_rows": regime_rows,
                "regime_events": regime_events,
                "regime_stats": period_regime_stats(regime_rows),
+               "phase_position_rows": position_rows,
+               "phase_position_stats": phase_position_stats(position_rows),
+               "phase_position_pattern_stats": phase_position_pattern_stats(position_rows),
+               "asof_phase_rows": asof_rows,
+               "asof_phase_stats": phase_position_stats([row for row in asof_rows if row["status"] == "VALID"]),
+               "asof_phase_pattern_stats": phase_position_pattern_stats([row for row in asof_rows if row["status"] == "VALID"]),
+               "asof_phase_regime_stats": asof_phase_regime_stats(asof_rows),
+               "asof_phase_region_stats": asof_phase_region_stats(asof_rows),
+               "asof_nfft_stats": asof_nfft_stats(asof_rows),
+               "asof_nfft_pattern_stats": asof_nfft_pattern_stats(asof_rows),
+               "asof_nfft_regime_stats": asof_nfft_regime_stats(asof_rows),
+               "asof_nfft_transition_detail": asof_nfft_transition_detail(asof_rows, regime_rows),
+               "asof_threshold_min_samples": ASOF_THRESHOLD_MIN_SAMPLES,
                "regime_cutoff_date": REGIME_CUTOFF_DATE,
                "min_regime_observations": MIN_REGIME_OBSERVATIONS,
                "regime_reference_change": REGIME_REFERENCE_CHANGE,
@@ -1052,6 +1438,8 @@ def add_interactive_ui(html: str) -> str:
     const convergenceRows = Array.isArray(DATA.convergence_rows) ? DATA.convergence_rows : [];
     const alignmentRows = Array.isArray(DATA.alignment_rows) ? DATA.alignment_rows : [];
     const regimeRows = Array.isArray(DATA.regime_rows) ? DATA.regime_rows : [];
+    const asofRows = Array.isArray(DATA.asof_phase_rows) ? DATA.asof_phase_rows : [];
+    const positionRows = Array.isArray(DATA.phase_position_rows) ? DATA.phase_position_rows : [];
     controls.innerHTML = '<button id="uiPrev" type="button">Prev</button>' +
       '<button id="uiPlay" type="button">Play</button>' +
       '<button id="uiStop" type="button">Stop</button>' +
@@ -1065,7 +1453,7 @@ def add_interactive_ui(html: str) -> str:
       '<input id="uiSlider" type="range" min="0" max="' + (rows.length - 1) +
       '" value="' + (rows.length - 1) + '"><span id="uiSliderLabel" class="selected"></span>' +
       '<span id="uiDebug" class="tiny" aria-live="polite"></span>';
-    document.querySelector('main').insertAdjacentHTML('beforeend', '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><div class="tiny">Expanding/as-of FFT: each date uses only observations through that date. STABLE / TRANSITION / UNSTABLE and n_fft changes are shown on the same observation axis.</div><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section>');
+    document.querySelector('main').insertAdjacentHTML('beforeend', '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><div class="tiny">Expanding/as-of FFT: each date uses only observations through that date. STABLE / TRANSITION / UNSTABLE and n_fft changes are shown on the same observation axis.</div><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny"><b>FULL PERIOD PHASE SPACE:</b> uses all observations through the cutoff, so future observations can affect past positions. <b>AS-OF PHASE SPACE:</b> each selected date uses only observations through that date; future observations are not used for that day's FFT, phase, or position. This remains exploratory and does not guarantee prediction performance. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div class="tiny">n_fft=32/64 is a common FFT calculation frame, not a machine-specific period. At the 32→64 boundary, frequency-bin resolution, component selection, period, phase, and regime can change together.</div><div id="nfftComparison"></div></section>');
     const slider = document.getElementById("uiSlider");
     const label = document.getElementById("uiSliderLabel");
     const mode = document.getElementById("uiOhlcMode");
@@ -1191,6 +1579,12 @@ def add_interactive_ui(html: str) -> str:
             (convergence.centroid_y + 16) + '">' + label + '</text>';
         }
       }
+      const position = positionRows[selectedIndex];
+      if (position) {
+        out += '<text class="svg-label" x="18" y="24">regions: LONG ' + position.long_region +
+          ' / MID ' + position.mid_region + ' / SHORT ' + position.short_region +
+          ' | TOP waves: ' + position.top_wave_count + '</text>';
+      }
       out += '<text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text>';
       out += '<text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';
       phaseSpace.innerHTML = out;
@@ -1199,6 +1593,7 @@ def add_interactive_ui(html: str) -> str:
       const row = rows[selectedIndex];
       const convergence = convergenceRows[selectedIndex] || {};
       const alignment = alignmentRows[selectedIndex] || {};
+      const position = positionRows[selectedIndex] || {};
       label.textContent = row.date + " (" + (selectedIndex + 1) + "/" + rows.length + ")";
       const same = row.bullish ? "BULLISH" : "BEARISH";
       const next = row.next_day_bullish === null ? "N/A" : (row.next_day_bullish ? "BULLISH" : "BEARISH");
@@ -1227,6 +1622,16 @@ def add_interactive_ui(html: str) -> str:
         ' / <b>cycle:</b> ' + safe(alignment.repeat_cycle_index).toFixed(0) +
         '</p><p class="tiny">Convergence uses XY distance and wave radius. Alignment uses phase angles only. FFT bins k=6,16,24 with n_fft=64 return to the same joint phase configuration every ' +
         safe(DATA.joint_repeat_period).toFixed(0) + ' observations; this is a retrospective discrete-FFT property, not a calendar-day law.</p>';
+      if (position.date) {
+        document.getElementById("info").innerHTML += '<h3>PHASE POSITION / ACTIVITY REGION</h3><p><b>LONG:</b> ' +
+          esc(position.long_region) + ' / ' + (position.long_top_side ? 'TOP SIDE' : 'BOTTOM SIDE') +
+          ' &nbsp; <b>MID:</b> ' + esc(position.mid_region) + ' / ' + (position.mid_top_side ? 'TOP SIDE' : 'BOTTOM SIDE') +
+          ' &nbsp; <b>SHORT:</b> ' + esc(position.short_region) + ' / ' + (position.short_top_side ? 'TOP SIDE' : 'BOTTOM SIDE') +
+          '</p><p><b>top_wave_count:</b> ' + position.top_wave_count + ' / <b>top_wave_pattern:</b> ' +
+          esc(position.top_wave_pattern) + '</p><p><b>centroid:</b> ' + esc(position.centroid_region) +
+          ' / <b>y offset:</b> ' + safe(position.centroid_y_offset).toFixed(2) +
+          ' (negative=TOP, positive=BOTTOM)</p>';
+      }
       debug.textContent = 'debug index=' + selectedIndex + ' date=' + row.date + ' timer=' + (timerId !== null) +
         ' mode=' + mode.value + ' phase paths=' + document.querySelectorAll('#phaseSpace path').length;
     };
@@ -1248,6 +1653,7 @@ def add_interactive_ui(html: str) -> str:
     slider.addEventListener('input', () => { stop(); updateView(slider.value); });
     mode.addEventListener('change', () => updateView(selectedIndex));
     speed.addEventListener('change', () => { if (timerId !== null) { stop(); play(); } });
+    drawNfftComparison();
     updateView(selectedIndex);
     console.info('Wave Lab UI ready', {rows: rows.length, phasePoints: document.querySelectorAll('#phaseSpace path').length});
   };
@@ -1270,6 +1676,10 @@ def run(machine: str) -> Path:
     alignment_rows = add_repeat_metadata(alignment_rows, joint_repeat_period)
     regime_rows, regime_events = period_regime_history(daily, convergence_rows, alignment_rows)
     validate_period_regime_history(regime_rows, REGIME_CUTOFF_DATE)
+    position_rows = phase_position_rows(daily, convergence_rows)
+    validate_phase_position_rows(position_rows, convergence_rows)
+    asof_rows = asof_phase_space_history(daily, regime_rows)
+    validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
     out_dir = OUTPUT_ROOT / machine
     out_dir.mkdir(parents=True, exist_ok=True)
     component_fields = ["preprocessing", "rank", "role", "frequency", "period_days", "amplitude", "phase", "relative_power", "phase_definition", "n_observations", "n_fft", "sampling_interval", "frequency_unit", "period_basis"]
@@ -1283,6 +1693,28 @@ def run(machine: str) -> Path:
     alignment_fields = convergence_fields + ["phase_alignment_score", "high_alignment", "repeat_position", "repeat_cycle_index"]
     alignment_stat_fields = convergence_stat_fields
     alignment_region_fields = ["centroid_region", "high_alignment", "samples", "bullish_count", "bullish_rate", "next_day_samples", "next_day_bullish_count", "next_day_bullish_rate"]
+    position_fields = [
+        "date", "machine", "long_x", "long_y", "long_region", "long_top_side",
+        "mid_x", "mid_y", "mid_region", "mid_top_side", "short_x", "short_y", "short_region", "short_top_side",
+        "top_wave_count", "top_wave_pattern", "centroid_x", "centroid_y", "centroid_y_offset", "centroid_region",
+        "bullish", "next_day_bullish",
+    ]
+    position_stat_fields = ["category", "value", "samples", "bullish_count", "bullish_rate", "next_day_samples", "next_day_bullish_count", "next_day_bullish_rate"]
+    position_pattern_fields = position_stat_fields
+    asof_fields = ["date", "machine", "status", "n_observations", "n_fft", "regime"] + _asof_metric_fields() + ["bullish", "next_day_bullish"]
+    asof_stat_fields = position_stat_fields
+    asof_regime_stat_fields = ["category", "value", "samples", "bullish_count", "bullish_rate", "next_day_samples", "next_day_bullish_count", "next_day_bullish_rate"]
+    asof_region_stat_fields = asof_regime_stat_fields
+    asof_nfft_fields = ["n_fft", "top_wave_count", "samples", "bullish_count", "bullish_rate", "next_day_samples", "next_day_bullish_count", "next_day_bullish_rate"]
+    asof_nfft_pattern_fields = ["n_fft", "top_wave_pattern", "samples", "bullish_rate", "next_day_samples", "next_day_bullish_rate"]
+    asof_nfft_regime_fields = ["n_fft", "regime", "top_wave_count", "samples", "bullish_count", "bullish_rate", "next_day_samples", "next_day_bullish_count", "next_day_bullish_rate"]
+    asof_transition_fields = [
+        "date", "n_observations", "n_fft", "n_fft_changed", "long_k", "mid_k", "short_k",
+        "long_frequency", "mid_frequency", "short_frequency", "long_period", "mid_period", "short_period",
+        "dominant_rank_signature", "regime", "period_stability_score", "joint_repeat_period",
+        "long_phase", "mid_phase", "short_phase", "top_wave_count", "top_wave_pattern", "centroid_region", "centroid_y_offset",
+        "alignment_score", "convergence_score", "bullish", "next_day_bullish",
+    ]
     regime_fields = [
         "date", "machine", "n_observations", "n_fft", "status", "open", "high", "low", "close", "bullish", "next_day_bullish",
         "long_k", "long_frequency", "long_period", "long_amplitude", "long_power", "long_rank",
@@ -1307,17 +1739,32 @@ def run(machine: str) -> Path:
     write_csv(out_dir / "phase_alignment_daily.csv", alignment_rows, alignment_fields)
     write_csv(out_dir / "phase_alignment_stats.csv", phase_alignment_stats(alignment_rows), alignment_stat_fields)
     write_csv(out_dir / "phase_alignment_region_stats.csv", phase_alignment_region_stats(alignment_rows), alignment_region_fields)
+    write_csv(out_dir / "phase_position_daily.csv", position_rows, position_fields)
+    write_csv(out_dir / "phase_position_stats.csv", phase_position_stats(position_rows), position_stat_fields)
+    write_csv(out_dir / "phase_position_pattern_stats.csv", phase_position_pattern_stats(position_rows), position_pattern_fields)
+    write_csv(out_dir / "asof_phase_position_daily.csv", asof_rows, asof_fields)
+    write_csv(out_dir / "asof_phase_position_stats.csv", phase_position_stats([row for row in asof_rows if row["status"] == "VALID"]), asof_stat_fields)
+    write_csv(out_dir / "asof_phase_position_pattern_stats.csv", phase_position_pattern_stats([row for row in asof_rows if row["status"] == "VALID"]), asof_stat_fields)
+    write_csv(out_dir / "asof_phase_regime_stats.csv", asof_phase_regime_stats(asof_rows), asof_regime_stat_fields)
+    write_csv(out_dir / "asof_phase_region_stats.csv", asof_phase_region_stats(asof_rows), asof_region_stat_fields)
+    write_csv(out_dir / "asof_phase_nfft_stats.csv", asof_nfft_stats(asof_rows), asof_nfft_fields)
+    write_csv(out_dir / "asof_phase_nfft_pattern_stats.csv", asof_nfft_pattern_stats(asof_rows), asof_nfft_pattern_fields)
+    write_csv(out_dir / "asof_phase_nfft_regime_stats.csv", asof_nfft_regime_stats(asof_rows), asof_nfft_regime_fields)
+    write_csv(out_dir / "asof_nfft_transition_detail.csv", asof_nfft_transition_detail(asof_rows, regime_rows), asof_transition_fields)
     write_csv(out_dir / "period_regime_daily.csv", regime_rows, regime_fields)
     write_csv(out_dir / "period_regime_events.csv", regime_events, event_fields)
     write_csv(out_dir / "period_regime_stats.csv", period_regime_stats(regime_rows), regime_stat_fields)
     validate_reconstruction()
     validate_daily_reconstruction(daily, components)
-    html = add_interactive_ui(build_html_v4(machine, rows, components, daily))
+    html = add_pages_navigation(add_interactive_ui(build_html_v4(machine, rows, components, daily)))
     (out_dir / "fft_reconstruction.html").write_text(html, encoding="utf-8")
-    if machine == "075":
-        PAGES_OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-        (PAGES_OUTPUT_ROOT / "index.html").write_text(html, encoding="utf-8")
-        print(f"pages_output={PAGES_OUTPUT_ROOT / 'index.html'}")
+    pages_machine_dir = PAGES_OUTPUT_ROOT / machine
+    pages_machine_dir.mkdir(parents=True, exist_ok=True)
+    pages_machine_path = pages_machine_dir / "index.html"
+    pages_machine_path.write_text(html, encoding="utf-8")
+    pages_index_path = write_pages_index()
+    print(f"pages_output={pages_machine_path}")
+    print(f"pages_index={pages_index_path}")
     print(f"machine={machine} rows={len(rows)} period={rows[0]['date']}..{rows[-1]['date']}")
     for component in components:
         print(f"rank={component['rank']} period_days={component['period_days']:.3f} amplitude={component['amplitude']:.3f} relative_power={component['relative_power']:.4f}")
