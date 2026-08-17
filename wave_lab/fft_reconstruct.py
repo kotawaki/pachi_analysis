@@ -1645,6 +1645,23 @@ document.getElementById('uiPlay').addEventListener('click',startPlayback);docume
     return page.replace("__MACHINE__", machine).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":"))).replace("</script></body>", "</script>" + extra_script + "</body>")
 
 
+def forward_validation_script() -> str:
+    return """function drawForwardValidation(){
+  const box=document.getElementById('forwardValidationSummary');
+  if(!box)return;
+  const row=(Array.isArray(DATA.forward_validation)?DATA.forward_validation:[]).find(item=>item.source_date===rows[uiIndex].date);
+  if(!row){box.innerHTML='<span>選択日が8/15以外のため、固定forward答え合わせ対象外です。</span>';return;}
+  const format=value=>value===''||value===undefined||value===null?'—':Number(value).toFixed(1);
+  const yesNo=value=>value?'YES':'NO';
+  const roleRows=roles.map(role=>{
+    const key=role.toLowerCase();
+    return '<tr><td>'+role+'</td><td>'+format(row['predicted_'+key+'_phase'])+'°</td><td>'+format(row['actual_'+key+'_phase'])+'°</td><td>'+format(row[key+'_angular_error'])+'°</td><td>'+format(row[key+'_xy_distance'])+'</td><td>'+row['predicted_'+key+'_k']+' → '+row['actual_'+key+'_k']+' / '+yesNo(row[key+'_component_same_k'])+'</td></tr>';
+  }).join('');
+  box.innerHTML='<p><b>Source:</b> '+esc(row.source_date)+' → <b>Target:</b> '+esc(row.target_date)+' / <b>Prediction commit:</b> '+esc(row.prediction_commit)+' / <b>Status:</b> '+esc(row.prediction_status)+'</p><table><thead><tr><th>role</th><th>predicted phase</th><th>actual As-of phase</th><th>angular error</th><th>XY error</th><th>component k</th></tr></thead><tbody>'+roleRows+'</tbody></table><p><b>Geometry:</b> TOP count '+row.predicted_top_wave_count+' → '+row.actual_top_wave_count+' / MATCH='+yesNo(row.top_count_match)+'; pattern '+esc(row.predicted_top_wave_pattern)+' → '+esc(row.actual_top_wave_pattern)+' / MATCH='+yesNo(row.pattern_match)+'; centroid '+esc(row.predicted_centroid_region)+' → '+esc(row.actual_centroid_region)+' / MATCH='+yesNo(row.centroid_region_match)+'; distance='+format(row.centroid_distance)+'</p><p><b>Target OHLC (実測答え合わせラベル):</b> Open '+format(row.actual_open)+', High '+format(row.actual_high)+', Low '+format(row.actual_low)+', Close '+format(row.actual_close)+' / '+(row.actual_bullish?'BULLISH':'BEARISH')+'</p>';
+}
+"""
+
+
 def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None) -> str:
     """ASCII-safe interactive dashboard; data labels remain unambiguous in any locale."""
     public_components = [
@@ -1755,10 +1772,8 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     controls_end = legacy_extra.find(";", controls_start)
     if controls_start >= 0 and controls_end >= controls_start:
         legacy_extra = legacy_extra[:controls_start] + "/* static controls retained */" + legacy_extra[controls_end + 1:]
-    forward_script = r'''\nconst forwardValidationRows=Array.isArray(DATA.forward_validation)?DATA.forward_validation:[];\nfunction drawForwardValidation(){const box=document.getElementById('forwardValidationSummary');if(!box)return;const source=rows[uiIndex]?.date;const row=forwardValidationRows.find(item=>item.source_date===source);if(!row){box.innerHTML='<span>選択日が8/15以外のため、固定forward答え合わせ対象外です。</span>';return;}const f=v=>v===''||v===undefined||v===null?'—':Number(v).toFixed(1);const b=v=>v?'YES':'NO';box.innerHTML='<p><b>Source:</b> '+esc(row.source_date)+' → <b>Target:</b> '+esc(row.target_date)+' / <b>Prediction:</b> FROZEN / <b>Commit:</b> '+esc(row.prediction_commit)+'</p><div class="table-wrap"><table><thead><tr><th>role</th><th>pred phase</th><th>actual phase</th><th>angle error</th><th>XY error</th><th>k same</th></tr></thead><tbody>'+roles.map(role=>{const p=role.toLowerCase();return '<tr><td>'+role+'</td><td>'+f(row['predicted_'+p+'_phase'])+'°</td><td>'+f(row['actual_'+p+'_phase'])+'°</td><td>'+f(row[p+'_angular_error'])+'°</td><td>'+f(row[p+'_xy_distance'])+'</td><td>'+b(row[p+'_component_same_k'])+'</td></tr>';}).join('')+'</tbody></table></div><p><b>Geometry:</b> predicted TOP '+row.predicted_top_wave_count+' / '+esc(row.predicted_top_wave_pattern)+' / '+esc(row.predicted_centroid_region)+' → actual TOP '+row.actual_top_wave_count+' / '+esc(row.actual_top_wave_pattern)+' / '+esc(row.actual_centroid_region)+'; count='+b(row.top_count_match)+', pattern='+b(row.pattern_match)+', region='+b(row.centroid_region_match)+', centroid distance='+f(row.centroid_distance)+'</p><p><b>Actual OHLC:</b> Open '+f(row.actual_open)+', High '+f(row.actual_high)+', Low '+f(row.actual_low)+', Close '+f(row.actual_close)+' / '+(row.actual_bullish?'BULLISH':'BEARISH')+'</p>'; }\n'''
-    forward_script = forward_script.replace("\\n", "\n")
-    page = page.replace("const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];", "const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];" + forward_script)
-    page = page.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation)")
+    legacy_extra = legacy_extra.replace("function updateView(index){", forward_validation_script() + "function updateView(index){")
+    legacy_extra = legacy_extra.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation)")
     return page.replace('</script></body>', '</script>' + legacy_extra + '</body>')
 
 
