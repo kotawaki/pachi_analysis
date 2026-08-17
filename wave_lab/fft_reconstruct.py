@@ -883,6 +883,136 @@ def asof_next_phase_predictions(rows: list[dict], asof_rows: list[dict], regime_
     return predictions
 
 
+FORWARD_VALIDATION_COMMIT = "9f948df"
+FORWARD_SOURCE_DATE = "2026-08-15"
+FORWARD_TARGET_DATE = "2026-08-16"
+
+
+def read_csv_rows(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _csv_float(row: dict, key: str) -> float:
+    return float(row[key])
+
+
+def _csv_bool(row: dict, key: str) -> bool:
+    return str(row.get(key, "")).strip().lower() == "true"
+
+
+def _frozen_prediction_row(path: Path, source_date: str) -> dict:
+    rows = [row for row in read_csv_rows(path) if row.get("source_date") == source_date]
+    if not rows:
+        raise FileNotFoundError(f"凍結予測が見つかりません: {path} / {source_date}")
+    return rows[0]
+
+
+def forward_validation_row(
+    frozen: dict,
+    target: dict,
+    target_asof: dict,
+) -> dict:
+    """Compare the already-frozen D prediction with the D+1 as-of observation."""
+    result = {
+        "source_date": frozen["source_date"], "target_date": target["date"],
+        "machine": frozen.get("machine", target["machine"]),
+        "prediction_commit": FORWARD_VALIDATION_COMMIT,
+        "prediction_status": "FROZEN_BEFORE_ACTUAL",
+        "source_regime": frozen.get("source_regime", ""),
+        "source_n_fft": frozen.get("source_n_fft", ""),
+        "target_n_observations": target_asof.get("n_observations", ""),
+        "target_n_fft": target_asof.get("n_fft", ""),
+        "target_regime": target_asof.get("regime", ""),
+        "n_fft_changed": frozen.get("target_n_fft", "") not in ("", None) and frozen.get("source_n_fft", "") != frozen.get("target_n_fft", ""),
+        "actual_open": target["open"], "actual_high": target["high"], "actual_low": target["low"], "actual_close": target["close"],
+        "actual_bullish": target["bullish"],
+    }
+    for role in ("long", "mid", "short"):
+        predicted_phase = _csv_float(frozen, role + "_predicted_phase")
+        actual_phase = float(target_asof[role + "_phase"])
+        predicted_x = _csv_float(frozen, role + "_predicted_x")
+        predicted_y = _csv_float(frozen, role + "_predicted_y")
+        actual_x = float(target_asof[role + "_x"])
+        actual_y = float(target_asof[role + "_y"])
+        result.update({
+            "predicted_" + role + "_phase": predicted_phase,
+            "actual_" + role + "_phase": actual_phase,
+            role + "_angular_error": _angular_error(predicted_phase, actual_phase),
+            "predicted_" + role + "_x": predicted_x, "predicted_" + role + "_y": predicted_y,
+            "actual_" + role + "_x": actual_x, "actual_" + role + "_y": actual_y,
+            role + "_xy_distance": math.dist((predicted_x, predicted_y), (actual_x, actual_y)),
+            "predicted_" + role + "_top_side": _csv_bool(frozen, role + "_predicted_top_side"),
+            "actual_" + role + "_top_side": bool(target_asof[role + "_top_side"]),
+            role + "_top_side_match": _csv_bool(frozen, role + "_predicted_top_side") == bool(target_asof[role + "_top_side"]),
+            "predicted_" + role + "_k": frozen.get(role + "_source_k", ""),
+            "predicted_" + role + "_frequency": frozen.get(role + "_source_frequency", ""),
+            "predicted_" + role + "_period": frozen.get(role + "_source_period", ""),
+            "predicted_" + role + "_rank": frozen.get(role + "_source_rank", ""),
+            "actual_" + role + "_k": target_asof.get(role + "_k", ""),
+            "actual_" + role + "_frequency": target_asof.get(role + "_frequency", ""),
+            "actual_" + role + "_period": target_asof.get(role + "_period", ""),
+            "actual_" + role + "_rank": target_asof.get(role + "_rank", ""),
+            role + "_component_same_k": str(frozen.get(role + "_source_k", "")) == str(target_asof.get(role + "_k", "")),
+        })
+    predicted_points = [(result["predicted_" + role + "_x"], result["predicted_" + role + "_y"]) for role in ("long", "mid", "short")]
+    actual_points = [(result["actual_" + role + "_x"], result["actual_" + role + "_y"]) for role in ("long", "mid", "short")]
+    predicted_geometry = {
+        "top_wave_count": int(frozen["predicted_top_wave_count"]),
+        "top_wave_pattern": frozen["predicted_top_wave_pattern"],
+        "centroid_x": _csv_float(frozen, "predicted_centroid_x"),
+        "centroid_y": _csv_float(frozen, "predicted_centroid_y"),
+        "centroid_region": frozen["predicted_centroid_region"],
+    }
+    actual_geometry = _prediction_geometry(actual_points)
+    result.update({
+        "predicted_top_wave_count": predicted_geometry["top_wave_count"], "actual_top_wave_count": actual_geometry["top_wave_count"],
+        "top_count_match": predicted_geometry["top_wave_count"] == actual_geometry["top_wave_count"],
+        "predicted_top_wave_pattern": predicted_geometry["top_wave_pattern"], "actual_top_wave_pattern": actual_geometry["top_wave_pattern"],
+        "pattern_match": predicted_geometry["top_wave_pattern"] == actual_geometry["top_wave_pattern"],
+        "predicted_centroid_x": predicted_geometry["centroid_x"], "predicted_centroid_y": predicted_geometry["centroid_y"],
+        "actual_centroid_x": actual_geometry["centroid_x"], "actual_centroid_y": actual_geometry["centroid_y"],
+        "centroid_distance": math.dist((predicted_geometry["centroid_x"], predicted_geometry["centroid_y"]), (actual_geometry["centroid_x"], actual_geometry["centroid_y"])),
+        "predicted_centroid_region": predicted_geometry["centroid_region"], "actual_centroid_region": actual_geometry["centroid_region"],
+        "centroid_region_match": predicted_geometry["centroid_region"] == actual_geometry["centroid_region"],
+        "actual_phase_alignment_score": target_asof.get("phase_alignment_score", ""),
+        "actual_convergence_score": target_asof.get("convergence_score", ""),
+        "actual_wave_direction_pattern": target_asof.get("top_wave_pattern", ""),
+        "actual_dominant_rank_signature": target_asof.get("dominant_rank_signature", ""),
+        "actual_joint_repeat_period": target_asof.get("joint_repeat_period", ""),
+        "actual_period_stability_score": target_asof.get("period_stability_score", ""),
+    })
+    return result
+
+
+def build_forward_validation(
+    machine: str,
+    frozen_path: Path,
+    all_rows: list[dict],
+) -> dict:
+    """Use 8/16 only for the answer check; never recompute the frozen 8/15 prediction."""
+    frozen = _frozen_prediction_row(frozen_path, FORWARD_SOURCE_DATE)
+    target_rows = [row for row in all_rows if row["date"] <= FORWARD_TARGET_DATE]
+    target = next((row for row in target_rows if row["date"] == FORWARD_TARGET_DATE), None)
+    if target is None:
+        raise FileNotFoundError(f"台{machine}の{FORWARD_TARGET_DATE} OHLCが見つかりません")
+    target = {**target, "bullish": target["close"] > target["open"], "next_day_bullish": None}
+    target_rows = [target if row["date"] == FORWARD_TARGET_DATE else {**row, "bullish": row["close"] > row["open"], "next_day_bullish": None} for row in target_rows]
+    full_components, full_daily, _centered, _comparison = analyze(target_rows)
+    full_convergence, _ = phase_convergence_analysis(full_daily, full_components)
+    full_alignment, _ = phase_alignment_analysis(full_convergence)
+    extended_regime, _ = period_regime_history(target_rows, full_convergence, full_alignment)
+    extended_asof = asof_phase_space_history(target_rows, extended_regime)
+    target_asof = next(row for row in extended_asof if row["date"] == FORWARD_TARGET_DATE)
+    target_regime = next(row for row in extended_regime if row["date"] == FORWARD_TARGET_DATE)
+    target_asof = {**target_regime, **target_asof}
+    assert target_asof["status"] == "VALID"
+    result = forward_validation_row(frozen, target, target_asof)
+    return result
+
+
 def _prediction_comparison_rows(rows: list[dict]) -> list[dict]:
     return [row for row in rows if row["status"] == "PENDING_ACTUAL" or row["status"] == "VALID_PREDICTION" and row.get("target_n_observations", "") != ""]
 
@@ -1515,7 +1645,7 @@ document.getElementById('uiPlay').addEventListener('click',startPlayback);docume
     return page.replace("__MACHINE__", machine).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":"))).replace("</script></body>", "</script>" + extra_script + "</body>")
 
 
-def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict]) -> str:
+def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None) -> str:
     """ASCII-safe interactive dashboard; data labels remain unambiguous in any locale."""
     public_components = [
         {key: component[key] for key in (
@@ -1535,7 +1665,7 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
     validate_phase_position_rows(position_rows, convergence_rows)
     asof_rows = asof_phase_space_history(daily, regime_rows)
     validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
-    next_phase_rows = asof_next_phase_predictions(daily, asof_rows, regime_rows)
+    next_phase_rows = frozen_next_phase_rows if frozen_next_phase_rows is not None else asof_next_phase_predictions(daily, asof_rows, regime_rows)
     payload = {"machine": machine, "rows": daily, "components": public_components,
                "phase_stats": phase_nextday_stats(daily, components),
                "pattern_stats": pattern_nextday_stats(daily),
@@ -1565,6 +1695,7 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
                "asof_nfft_regime_stats": asof_nfft_regime_stats(asof_rows),
                "asof_nfft_transition_detail": asof_nfft_transition_detail(asof_rows, regime_rows),
                "next_phase_rows": next_phase_rows,
+               "forward_validation": [forward_validation] if forward_validation else [],
                "next_phase_stats": next_phase_prediction_stats(next_phase_rows),
                "next_phase_regime_stats": next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")),
                "next_phase_nfft_stats": next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)),
@@ -1610,6 +1741,7 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     page = page.replace("__MACHINE__", machine).replace("__CUTOFF__", REGIME_CUTOFF_DATE).replace("__ROW_MAX__", str(max(0, len(rows) - 1))).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     panels = '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny">Each selected date uses only observations through that date. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div id="nfftComparison"></div></section>'
     panels += '<section class="panel chart-panel" id="nextPredictionPanel"><h2>NEXT PHASE PREDICTION</h2><div class="tiny">Prediction uses only the source date D prefix FFT. Target D+1 As-of coordinates are answer-check data only; no bullish/bearish model is used.</div><svg id="nextPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Predicted and actual next Phase Space"></svg><div id="nextPredictionSummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="forwardValidationPanel"><h2>FROZEN FORWARD VALIDATION</h2><div class="tiny">This is a forward answer-check of the prediction frozen before the target observation. It is separate from the historical 29-row backtest and is not a bullish/bearish prediction model.</div><div id="forwardValidationSummary" class="tiny"></div></section>'
     page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
     legacy_page = build_html_v3(machine, rows, components, daily)
     first_end = legacy_page.find('</script>')
@@ -1623,6 +1755,10 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     controls_end = legacy_extra.find(";", controls_start)
     if controls_start >= 0 and controls_end >= controls_start:
         legacy_extra = legacy_extra[:controls_start] + "/* static controls retained */" + legacy_extra[controls_end + 1:]
+    forward_script = r'''\nconst forwardValidationRows=Array.isArray(DATA.forward_validation)?DATA.forward_validation:[];\nfunction drawForwardValidation(){const box=document.getElementById('forwardValidationSummary');if(!box)return;const source=rows[uiIndex]?.date;const row=forwardValidationRows.find(item=>item.source_date===source);if(!row){box.innerHTML='<span>選択日が8/15以外のため、固定forward答え合わせ対象外です。</span>';return;}const f=v=>v===''||v===undefined||v===null?'—':Number(v).toFixed(1);const b=v=>v?'YES':'NO';box.innerHTML='<p><b>Source:</b> '+esc(row.source_date)+' → <b>Target:</b> '+esc(row.target_date)+' / <b>Prediction:</b> FROZEN / <b>Commit:</b> '+esc(row.prediction_commit)+'</p><div class="table-wrap"><table><thead><tr><th>role</th><th>pred phase</th><th>actual phase</th><th>angle error</th><th>XY error</th><th>k same</th></tr></thead><tbody>'+roles.map(role=>{const p=role.toLowerCase();return '<tr><td>'+role+'</td><td>'+f(row['predicted_'+p+'_phase'])+'°</td><td>'+f(row['actual_'+p+'_phase'])+'°</td><td>'+f(row[p+'_angular_error'])+'°</td><td>'+f(row[p+'_xy_distance'])+'</td><td>'+b(row[p+'_component_same_k'])+'</td></tr>';}).join('')+'</tbody></table></div><p><b>Geometry:</b> predicted TOP '+row.predicted_top_wave_count+' / '+esc(row.predicted_top_wave_pattern)+' / '+esc(row.predicted_centroid_region)+' → actual TOP '+row.actual_top_wave_count+' / '+esc(row.actual_top_wave_pattern)+' / '+esc(row.actual_centroid_region)+'; count='+b(row.top_count_match)+', pattern='+b(row.pattern_match)+', region='+b(row.centroid_region_match)+', centroid distance='+f(row.centroid_distance)+'</p><p><b>Actual OHLC:</b> Open '+f(row.actual_open)+', High '+f(row.actual_high)+', Low '+f(row.actual_low)+', Close '+f(row.actual_close)+' / '+(row.actual_bullish?'BULLISH':'BEARISH')+'</p>'; }\n'''
+    forward_script = forward_script.replace("\\n", "\n")
+    page = page.replace("const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];", "const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];" + forward_script)
+    page = page.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation)")
     return page.replace('</script></body>', '</script>' + legacy_extra + '</body>')
 
 
@@ -1894,9 +2030,12 @@ def run(machine: str) -> Path:
     validate_phase_position_rows(position_rows, convergence_rows)
     asof_rows = asof_phase_space_history(daily, regime_rows)
     validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
-    next_phase_rows = asof_next_phase_predictions(daily, asof_rows, regime_rows)
     out_dir = OUTPUT_ROOT / machine
     out_dir.mkdir(parents=True, exist_ok=True)
+    frozen_prediction_path = out_dir / "next_phase_prediction_daily.csv"
+    frozen_next_phase_rows = read_csv_rows(frozen_prediction_path)
+    next_phase_rows = frozen_next_phase_rows or asof_next_phase_predictions(daily, asof_rows, regime_rows)
+    forward_validation = build_forward_validation(machine, frozen_prediction_path, all_rows)
     component_fields = ["preprocessing", "rank", "role", "frequency", "period_days", "amplitude", "phase", "relative_power", "phase_definition", "n_observations", "n_fft", "sampling_interval", "frequency_unit", "period_basis"]
     daily_fields = ["date", "machine", "open", "high", "low", "close", "bullish", "next_day_bullish", "wave1_phase", "wave2_phase", "wave3_phase", "wave1_value", "wave2_value", "wave3_value", "combined_wave", "wave1_direction", "wave2_direction", "wave3_direction", "wave1_up", "wave2_up", "wave3_up", "wave_direction_pattern"]
     stats_fields = ["wave", "phase_start", "phase_end", "samples", "bullish_count", "bullish_rate"]
@@ -1949,6 +2088,23 @@ def run(machine: str) -> Path:
     prediction_stat_fields = ["scope", "samples", "mean_angular_error_deg", "median_angular_error_deg", "mean_xy_error", "top_side_accuracy", "component_same_k_rate", "centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
     prediction_group_fields = ["source_regime", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
     prediction_nfft_fields = ["source_n_fft", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
+    forward_fields = [
+        "source_date", "target_date", "machine", "prediction_commit", "prediction_status", "source_regime", "source_n_fft", "target_n_observations", "target_n_fft", "target_regime", "n_fft_changed",
+    ]
+    for role in ("long", "mid", "short"):
+        forward_fields += [
+            "predicted_" + role + "_phase", "actual_" + role + "_phase", role + "_angular_error",
+            "predicted_" + role + "_x", "predicted_" + role + "_y", "actual_" + role + "_x", "actual_" + role + "_y", role + "_xy_distance",
+            "predicted_" + role + "_top_side", "actual_" + role + "_top_side", role + "_top_side_match",
+            "predicted_" + role + "_k", "predicted_" + role + "_frequency", "predicted_" + role + "_period", "predicted_" + role + "_rank",
+            "actual_" + role + "_k", "actual_" + role + "_frequency", "actual_" + role + "_period", "actual_" + role + "_rank", role + "_component_same_k",
+        ]
+    forward_fields += [
+        "predicted_top_wave_count", "actual_top_wave_count", "top_count_match", "predicted_top_wave_pattern", "actual_top_wave_pattern", "pattern_match",
+        "predicted_centroid_x", "predicted_centroid_y", "actual_centroid_x", "actual_centroid_y", "centroid_distance",
+        "predicted_centroid_region", "actual_centroid_region", "centroid_region_match", "actual_phase_alignment_score", "actual_convergence_score", "actual_wave_direction_pattern", "actual_dominant_rank_signature", "actual_joint_repeat_period", "actual_period_stability_score",
+        "actual_open", "actual_high", "actual_low", "actual_close", "actual_bullish",
+    ]
     regime_fields = [
         "date", "machine", "n_observations", "n_fft", "status", "open", "high", "low", "close", "bullish", "next_day_bullish",
         "long_k", "long_frequency", "long_period", "long_amplitude", "long_power", "long_rank",
@@ -1988,16 +2144,18 @@ def run(machine: str) -> Path:
     write_csv(out_dir / "period_regime_daily.csv", regime_rows, regime_fields)
     write_csv(out_dir / "period_regime_events.csv", regime_events, event_fields)
     write_csv(out_dir / "period_regime_stats.csv", period_regime_stats(regime_rows), regime_stat_fields)
-    write_csv(out_dir / "next_phase_prediction_daily.csv", next_phase_rows, prediction_fields)
-    write_csv(out_dir / "next_phase_prediction_stats.csv", next_phase_prediction_stats(next_phase_rows), prediction_stat_fields)
-    write_csv(out_dir / "next_phase_prediction_regime_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")), prediction_group_fields)
-    write_csv(out_dir / "next_phase_prediction_nfft_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)), prediction_nfft_fields)
+    if not frozen_next_phase_rows:
+        write_csv(out_dir / "next_phase_prediction_daily.csv", next_phase_rows, prediction_fields)
+        write_csv(out_dir / "next_phase_prediction_stats.csv", next_phase_prediction_stats(next_phase_rows), prediction_stat_fields)
+        write_csv(out_dir / "next_phase_prediction_regime_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")), prediction_group_fields)
+        write_csv(out_dir / "next_phase_prediction_nfft_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)), prediction_nfft_fields)
+    write_csv(out_dir / "next_phase_forward_validation.csv", [forward_validation], forward_fields)
     validate_reconstruction()
     validate_daily_reconstruction(daily, components)
     # build_html_v4 contains the complete single dashboard script, including the
     # as-of/regime panels and the playback controls. Keep the static controls in
     # the HTML and avoid stacking a second initializer on top of it.
-    html = add_pages_navigation(build_html_v4(machine, rows, components, daily))
+    html = add_pages_navigation(build_html_v4(machine, rows, components, daily, forward_validation, next_phase_rows))
     (out_dir / "fft_reconstruction.html").write_text(html, encoding="utf-8")
     pages_machine_dir = PAGES_OUTPUT_ROOT / machine
     pages_machine_dir.mkdir(parents=True, exist_ok=True)
