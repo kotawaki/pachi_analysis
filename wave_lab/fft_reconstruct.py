@@ -437,9 +437,16 @@ def pattern_nextday_stats(daily: list[dict]) -> list[dict]:
 
 def phase_space_point(row: dict, wave: int, component: dict) -> tuple[float, float]:
     """Return the same wrapped-wave coordinate used by the browser Phase Space."""
-    amplitude = abs(float(component["amplitude"]))
-    value = float(row[f"wave{wave}_value"])
-    phase_degrees = float(row[f"wave{wave}_phase"])
+    return phase_space_xy(
+        float(row[f"wave{wave}_phase"]),
+        float(row[f"wave{wave}_value"]),
+        float(component["amplitude"]),
+    )
+
+
+def phase_space_xy(phase_degrees: float, value: float, amplitude: float) -> tuple[float, float]:
+    """Return the shared Phase Space coordinate from phase/value/amplitude."""
+    amplitude = abs(float(amplitude))
     angle = math.radians(phase_degrees)
     radius = PHASE_SPACE_BASE_RADIUS
     if amplitude > 0.0:
@@ -753,6 +760,171 @@ def validate_asof_phase_space(history: list[dict], cutoff_date: str) -> None:
             assert 0 <= int(row["top_wave_count"]) <= 3
             assert 0.0 <= float(row["phase_alignment_score"]) <= 1.0
             assert 0.0 <= float(row["convergence_score"]) <= 1.0
+
+
+def _angular_error(predicted: float, actual: float) -> float:
+    difference = abs(float(predicted) - float(actual)) % 360.0
+    return min(difference, 360.0 - difference)
+
+
+def _prediction_geometry(points: list[tuple[float, float]]) -> dict:
+    centroid_x = sum(point[0] for point in points) / 3.0
+    centroid_y = sum(point[1] for point in points) / 3.0
+    top_roles = [role for role, point in zip(("LONG", "MID", "SHORT"), points) if point[1] < PHASE_SPACE_CENTER_Y]
+    return {
+        "centroid_x": centroid_x,
+        "centroid_y": centroid_y,
+        "centroid_y_offset": centroid_y - PHASE_SPACE_CENTER_Y,
+        "centroid_region": centroid_region(centroid_x, centroid_y),
+        "top_wave_count": len(top_roles),
+        "top_wave_pattern": _asof_top_pattern(top_roles),
+    }
+
+
+def _prediction_row_base(source: dict, target: dict | None, source_asof: dict, target_asof: dict | None) -> dict:
+    target_date = target["date"] if target else ""
+    status = "VALID_PREDICTION" if source_asof.get("status") == "VALID" else "INSUFFICIENT_HISTORY"
+    if status == "VALID_PREDICTION" and (target is None or target_asof is None or target_asof.get("status") != "VALID"):
+        status = "PENDING_ACTUAL"
+    source_regime = source_asof.get("regime", "INSUFFICIENT_HISTORY")
+    regime_row = source_asof
+    return {
+        "source_date": source["date"], "target_date": target_date, "machine": source["machine"], "status": status,
+        "source_n_observations": source_asof.get("n_observations", ""), "source_n_fft": source_asof.get("n_fft", ""),
+        "source_regime": source_regime, "source_period_stability_score": regime_row.get("period_stability_score", ""),
+        "source_dominant_rank_signature": regime_row.get("dominant_rank_signature", ""),
+        "source_component_reorder": regime_row.get("component_reorder", ""),
+        "target_n_observations": target_asof.get("n_observations", "") if target_asof else "",
+        "target_n_fft": target_asof.get("n_fft", "") if target_asof else "",
+        "n_fft_changed": bool(target_asof and source_asof.get("n_fft") != target_asof.get("n_fft")),
+        "target_regime": target_asof.get("regime", "") if target_asof else "",
+        "target_bullish": target["bullish"] if target else "",
+        "target_next_day_bullish": target["next_day_bullish"] if target else "",
+    }
+
+
+def asof_next_phase_predictions(rows: list[dict], asof_rows: list[dict], regime_rows: list[dict]) -> list[dict]:
+    """Predict the next observation from each point-in-time FFT prefix only."""
+    asof_by_date = {row["date"]: row for row in asof_rows}
+    regime_by_date = {row["date"]: row for row in regime_rows}
+    predictions = []
+    for index, source in enumerate(rows):
+        target = rows[index + 1] if index + 1 < len(rows) else None
+        source_asof = asof_by_date[source["date"]]
+        source_context = {**source_asof, **{key: value for key, value in regime_by_date.get(source["date"], {}).items() if key != "status"}}
+        target_asof = asof_by_date.get(target["date"]) if target else None
+        result = _prediction_row_base(source, target, source_context, target_asof)
+        if source_asof["status"] != "VALID":
+            predictions.append(result)
+            continue
+
+        prefix = rows[: index + 1]
+        prefix_components, _prefix_daily, _centered, _comparison = analyze(prefix)
+        role_components = {component["role"]: component for component in prefix_components}
+        role_wave = {"LONG": 1, "MID": 2, "SHORT": 3}
+        points = []
+        for role in ("LONG", "MID", "SHORT"):
+            component = role_components[role]
+            wave = role_wave[role]
+            coefficient = component["_coefficient"]
+            current_phase = phase_position(index, component["frequency"], coefficient, component["n_fft"])
+            predicted_phase = (current_phase + 360.0 * component["frequency"]) % 360.0
+            theta_next = 2.0 * math.pi * component["frequency"] * (index + 1) + math.atan2(coefficient.imag, coefficient.real)
+            predicted_value = component["amplitude"] * math.cos(theta_next)
+            predicted_radius = PHASE_SPACE_BASE_RADIUS
+            if abs(float(component["amplitude"])) > 0.0:
+                predicted_radius += PHASE_SPACE_WAVE_RADIUS * predicted_value / abs(float(component["amplitude"]))
+            predicted_x, predicted_y = phase_space_xy(predicted_phase, predicted_value, component["amplitude"])
+            prefix_name = role.lower()
+            actual = target_asof or {}
+            result.update({
+                prefix_name + "_source_k": round(float(component["frequency"]) * int(component["n_fft"])),
+                prefix_name + "_source_frequency": component["frequency"],
+                prefix_name + "_source_period": component["period_days"],
+                prefix_name + "_source_rank": component["rank"],
+                prefix_name + "_predicted_phase": predicted_phase,
+                prefix_name + "_predicted_wave_value": predicted_value,
+                prefix_name + "_predicted_amplitude": component["amplitude"],
+                prefix_name + "_predicted_radius": predicted_radius,
+                prefix_name + "_predicted_x": predicted_x,
+                prefix_name + "_predicted_y": predicted_y,
+                prefix_name + "_predicted_top_side": predicted_y < PHASE_SPACE_CENTER_Y,
+                prefix_name + "_actual_k": actual.get(prefix_name + "_k", ""),
+                prefix_name + "_actual_frequency": actual.get(prefix_name + "_frequency", ""),
+                prefix_name + "_actual_period": actual.get(prefix_name + "_period", ""),
+                prefix_name + "_actual_rank": actual.get(prefix_name + "_rank", ""),
+                prefix_name + "_component_same_k": (round(float(component["frequency"]) * int(component["n_fft"])) == int(actual[prefix_name + "_k"])) if target_asof and actual.get(prefix_name + "_k", "") != "" else "",
+            })
+            if target_asof and target_asof.get("status") == "VALID":
+                result.update({
+                    prefix_name + "_actual_phase": actual[prefix_name + "_phase"],
+                    prefix_name + "_actual_wave_value": actual[prefix_name + "_wave_value"],
+                    prefix_name + "_actual_amplitude": actual[prefix_name + "_amplitude"],
+                    prefix_name + "_actual_x": actual[prefix_name + "_x"],
+                    prefix_name + "_actual_y": actual[prefix_name + "_y"],
+                    prefix_name + "_angular_error_deg": _angular_error(predicted_phase, actual[prefix_name + "_phase"]),
+                    prefix_name + "_xy_error": math.dist((predicted_x, predicted_y), (float(actual[prefix_name + "_x"]), float(actual[prefix_name + "_y"]))),
+                    prefix_name + "_top_side_match": (predicted_y < PHASE_SPACE_CENTER_Y) == bool(actual[prefix_name + "_top_side"]),
+                })
+        predicted_points = [(result[role.lower() + "_predicted_x"], result[role.lower() + "_predicted_y"]) for role in ("LONG", "MID", "SHORT")]
+        result.update({"predicted_" + key: value for key, value in _prediction_geometry(predicted_points).items()})
+        if target_asof and target_asof.get("status") == "VALID":
+            actual_points = [(float(target_asof[role.lower() + "_x"]), float(target_asof[role.lower() + "_y"])) for role in ("LONG", "MID", "SHORT")]
+            actual_geometry = _prediction_geometry(actual_points)
+            result.update({"actual_" + key: value for key, value in actual_geometry.items()})
+            result.update({
+                "centroid_distance_error": math.dist(predicted_points and (result["predicted_centroid_x"], result["predicted_centroid_y"]), (actual_geometry["centroid_x"], actual_geometry["centroid_y"])),
+                "centroid_region_match": result["predicted_centroid_region"] == actual_geometry["centroid_region"],
+                "top_wave_count_error": abs(result["predicted_top_wave_count"] - actual_geometry["top_wave_count"]),
+                "top_wave_count_exact": result["predicted_top_wave_count"] == actual_geometry["top_wave_count"],
+                "top_wave_pattern_match": result["predicted_top_wave_pattern"] == actual_geometry["top_wave_pattern"],
+            })
+        predictions.append(result)
+    return predictions
+
+
+def _prediction_comparison_rows(rows: list[dict]) -> list[dict]:
+    return [row for row in rows if row["status"] == "PENDING_ACTUAL" or row["status"] == "VALID_PREDICTION" and row.get("target_n_observations", "") != ""]
+
+
+def _safe_mean(values: list[float]) -> float | str:
+    return sum(values) / len(values) if values else ""
+
+
+def _safe_median(values: list[float]) -> float | str:
+    return quantile(values, 0.5) if values else ""
+
+
+def next_phase_prediction_stats(rows: list[dict]) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID_PREDICTION" and row.get("long_angular_error_deg", "") != ""]
+    result = []
+    for role in ("long", "mid", "short"):
+        angular = [float(row[role + "_angular_error_deg"]) for row in valid]
+        xy = [float(row[role + "_xy_error"]) for row in valid]
+        top = [bool(row[role + "_top_side_match"]) for row in valid]
+        same = [bool(row[role + "_component_same_k"]) for row in valid]
+        result.append({"scope": role.upper(), "samples": len(valid), "mean_angular_error_deg": _safe_mean(angular), "median_angular_error_deg": _safe_median(angular), "mean_xy_error": _safe_mean(xy), "top_side_accuracy": sum(top) / len(top) * 100.0 if top else "", "component_same_k_rate": sum(same) / len(same) * 100.0 if same else ""})
+    centroid = [row for row in valid if row.get("centroid_distance_error", "") != ""]
+    result.append({"scope": "GEOMETRY", "samples": len(centroid), "centroid_mean_distance_error": _safe_mean([float(row["centroid_distance_error"]) for row in centroid]), "centroid_region_accuracy": sum(bool(row["centroid_region_match"]) for row in centroid) / len(centroid) * 100.0 if centroid else "", "top_wave_count_exact_accuracy": sum(bool(row["top_wave_count_exact"]) for row in centroid) / len(centroid) * 100.0 if centroid else "", "top_wave_pattern_accuracy": sum(bool(row["top_wave_pattern_match"]) for row in centroid) / len(centroid) * 100.0 if centroid else ""})
+    return result
+
+
+def next_phase_prediction_group_stats(rows: list[dict], key: str, values: tuple) -> list[dict]:
+    valid = [row for row in rows if row["status"] == "VALID_PREDICTION" and row.get("long_angular_error_deg", "") != ""]
+    result = []
+    for value in values:
+        samples = [row for row in valid if row.get(key) == value]
+        entry = {key: value, "samples": len(samples)}
+        for role in ("long", "mid", "short"):
+            entry[role + "_mean_angular_error_deg"] = _safe_mean([float(row[role + "_angular_error_deg"]) for row in samples])
+            entry[role + "_mean_xy_error"] = _safe_mean([float(row[role + "_xy_error"]) for row in samples])
+            entry[role + "_top_side_accuracy"] = sum(bool(row[role + "_top_side_match"]) for row in samples) / len(samples) * 100.0 if samples else ""
+        entry["centroid_mean_distance_error"] = _safe_mean([float(row["centroid_distance_error"]) for row in samples])
+        entry["centroid_region_accuracy"] = sum(bool(row["centroid_region_match"]) for row in samples) / len(samples) * 100.0 if samples else ""
+        entry["top_wave_count_exact_accuracy"] = sum(bool(row["top_wave_count_exact"]) for row in samples) / len(samples) * 100.0 if samples else ""
+        entry["top_wave_pattern_accuracy"] = sum(bool(row["top_wave_pattern_match"]) for row in samples) / len(samples) * 100.0 if samples else ""
+        result.append(entry)
+    return result
 
 
 def asof_phase_regime_stats(rows: list[dict]) -> list[dict]:
@@ -1326,13 +1498,14 @@ function drawRegimeHistory(){const svg=document.getElementById('periodRegimeChar
 function uiRate(v){return v===''?'-':Number(v).toFixed(1)+'%';}
 function uiDetail(){const r=rows[uiIndex],same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH'),cell=(l,v,c='')=>`<div class="metric"><span class="label">${l}</span><span class="value ${c}">${esc(v)}</span></div>`;document.getElementById('summary').innerHTML=cell('date',r.date,'selected')+cell('Open',r.open)+cell('High',r.high)+cell('Low',r.low)+cell('Close',r.close)+cell('same-day',same,same==='BULLISH'?'bull':'')+cell('next observation',next,next==='BULLISH'?'next':'');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;const dirs=roles.map(role=>{const w=roleIndex[role];return `<tr><td class="role-${role.toLowerCase()}">${role}</td><td>${Number(r[`wave${w}_phase`]).toFixed(1)} deg</td><td>${esc(r[`wave${w}_direction`])}</td><td>${r[`wave${w}_up`]?'UP':'DOWN'}</td><td>${Number(r[`wave${w}_value`]).toFixed(1)}</td></tr>`}).join('');const comps=components.map(c=>`<tr><td class="role-${c.role.toLowerCase()}">${c.role}</td><td>${c.rank}</td><td>${Number(c.frequency).toFixed(5)}</td><td>${Number(c.period_days).toFixed(3)}</td><td>${Number(c.amplitude).toFixed(1)}</td><td>${(Number(c.relative_power)*100).toFixed(1)}%</td></tr>`).join('');document.getElementById('info').innerHTML=`<div class="info-grid"><section><h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>${dirs}</tbody></table><p><b>pattern:</b> ${esc(r.wave_direction_pattern)}</p><p><b>combined:</b> ${Number(r.combined_wave).toFixed(1)}</p></section><section><h3>Components</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>rank</th><th>freq</th><th>period</th><th>amp</th><th>power</th></tr></thead><tbody>${comps}</tbody></table></div></section></div>`;}
 function uiDetail(){const r=rows[uiIndex],regime=regimeRows[uiIndex]||{},asof=asofRows[uiIndex]||{},same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;document.getElementById('summary').innerHTML='<div class="metric"><span class="label">date</span><span class="value selected">'+esc(r.date)+'</span></div><div class="metric"><span class="label">OHLC</span><span class="value">'+[r.open,r.high,r.low,r.close].map(esc).join(' / ')+'</span></div><div class="metric"><span class="label">same-day</span><span class="value">'+same+'</span></div><div class="metric"><span class="label">next observation</span><span class="value">'+next+'</span></div>';const dirs=roles.map(role=>{const w=roleIndex[role];return '<tr><td>'+role+'</td><td>'+Number(r['wave'+w+'_phase']).toFixed(1)+' deg</td><td>'+esc(r['wave'+w+'_direction'])+'</td><td>'+((r['wave'+w+'_up'])?'UP':'DOWN')+'</td><td>'+Number(r['wave'+w+'_value']).toFixed(1)+'</td></tr>';}).join('');document.getElementById('info').innerHTML='<h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>'+dirs+'</tbody></table><p><b>pattern:</b> '+esc(r.wave_direction_pattern)+'</p><p><b>combined:</b> '+Number(r.combined_wave).toFixed(1)+'</p><h3>PERIOD REGIME HISTORY</h3><p>regime='+esc(regime.regime||'-')+' / n_fft='+esc(regime.n_fft||'-')+' / stability='+(regime.period_stability_score===''?'-':Number(regime.period_stability_score).toFixed(3))+'</p><p>LONG='+(regime.long_period?Number(regime.long_period).toFixed(3):'-')+' / MID='+(regime.mid_period?Number(regime.mid_period).toFixed(3):'-')+' / SHORT='+(regime.short_period?Number(regime.short_period).toFixed(3):'-')+'</p><p>component reorder='+(regime.component_reorder?'YES':'NO')+' / joint repeat='+(regime.joint_repeat_period||'-')+' obs / stable count='+(regime.joint_repeat_stable_count||'-')+'</p><p class="tiny">MIN history='+DATA.min_regime_observations+'; shift threshold='+Number(DATA.regime_shift_pct*100).toFixed(0)+'%.</p>'+(asof.status==='VALID'?'<h3>AS-OF PHASE SPACE</h3><p>regime='+esc(asof.regime)+' / n_fft='+esc(asof.n_fft)+' / TOP waves='+asof.top_wave_count+' / pattern='+esc(asof.top_wave_pattern)+'</p><p>alignment=' + Number(asof.phase_alignment_score).toFixed(3)+' / convergence='+Number(asof.convergence_score).toFixed(3)+' / centroid='+esc(asof.centroid_region)+' / y offset='+Number(asof.centroid_y_offset).toFixed(2)+'</p>':'<h3>AS-OF PHASE SPACE</h3><p>INSUFFICIENT_HISTORY</p>');}
+function drawNextPrediction(){const svg=document.getElementById('nextPredictionSpace'),summary=document.getElementById('nextPredictionSummary');if(!svg)return;const row=nextPhaseRows[uiIndex],cx=300,cy=190,r=116;let out='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';if(!row||row.status==='INSUFFICIENT_HISTORY'){out+='<text class="svg-label" x="170" y="190">INSUFFICIENT_HISTORY</text>';svg.innerHTML=out;if(summary)summary.textContent=row?row.source_date+' / '+row.status:'-';return;}const points=roles.map(role=>{const p=role.toLowerCase();return [Number(row[p+'_predicted_x']),Number(row[p+'_predicted_y'])];});out+='<polygon points="'+points.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="2" stroke-dasharray="5 4"/>';roles.forEach((role,i)=>{const p=points[i];out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="8" fill="none" stroke="'+colors[role]+'" stroke-width="3" stroke-dasharray="4 3"/><text class="svg-label" x="'+(p[0]+8)+'" y="'+(p[1]-8)+'">P '+role+'</text>';});const hasActual=row.long_actual_x!==undefined&&row.long_actual_x!=='';if(hasActual){const actual=roles.map(role=>{const p=role.toLowerCase();return [Number(row[p+'_actual_x']),Number(row[p+'_actual_y'])];});out+='<polygon points="'+actual.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--text)" stroke-width="1.5"/>';roles.forEach((role,i)=>{const p=actual[i];out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="'+colors[role]+'" stroke="var(--text)" stroke-width="1"/><text class="svg-label" x="'+(p[0]+6)+'" y="'+(p[1]+14)+'">A '+role+'</text>';});}out+='<text class="svg-label" x="18" y="24">PREDICTED D+1 (dashed) / ACTUAL AS-OF D+1 (solid)</text>';svg.innerHTML=out;if(summary){const fmt=v=>v===''||v===undefined?'-':Number(v).toFixed(1);summary.innerHTML='source='+esc(row.source_date)+' → target='+esc(row.target_date||'next observation')+' / regime='+esc(row.source_regime)+' / n_fft='+esc(row.source_n_fft)+' → '+esc(row.target_n_fft||'PENDING')+'<br>predicted TOP='+row.predicted_top_wave_count+' / '+esc(row.predicted_top_wave_pattern)+' / centroid='+esc(row.predicted_centroid_region)+(hasActual?' | actual TOP='+row.actual_top_wave_count+' / '+esc(row.actual_top_wave_pattern)+' / centroid='+esc(row.actual_centroid_region)+' / centroid error='+fmt(row.centroid_distance_error):' | actual comparison=PENDING')+'<br>LONG angle error='+fmt(row.long_angular_error_deg)+'° / MID='+fmt(row.mid_angular_error_deg)+'° / SHORT='+fmt(row.short_angular_error_deg)+'°';}}
 const debugOutput=document.getElementById('debugOutput');
 const pathPoints=id=>{const node=document.getElementById(id);const d=node?node.getAttribute('d')||'':'';return d?d.split(' L ').length:0;};
 function assignPhaseIds(){const svg=document.getElementById('phaseSpace');if(!svg)return;const paths=Array.from(svg.querySelectorAll('path'));['long','mid','short'].forEach((role,i)=>{if(paths[i*2])paths[i*2].id=role+'-full-path';if(paths[i*2+1])paths[i*2+1].id=role+'-past-path';});const circles=Array.from(svg.querySelectorAll('circle')).slice(2,5);['long','mid','short'].forEach((role,i)=>{if(circles[i])circles[i].id=role+'-current';});const row=convergenceRows[uiIndex];if(row){const ns='http://www.w3.org/2000/svg';const triangle=document.createElementNS(ns,'polygon');triangle.id='full-phase-triangle';triangle.setAttribute('points',[[row.long_x,row.long_y],[row.mid_x,row.mid_y],[row.short_x,row.short_y]].map(p=>p.join(',')).join(' '));triangle.setAttribute('fill','none');triangle.setAttribute('stroke','var(--cursor)');triangle.setAttribute('stroke-width','1.5');svg.appendChild(triangle);const centroid=document.createElementNS(ns,'circle');centroid.id='full-phase-centroid';centroid.setAttribute('cx',row.centroid_x);centroid.setAttribute('cy',row.centroid_y);centroid.setAttribute('r','4');centroid.setAttribute('fill','var(--cursor)');svg.appendChild(centroid);}}
 function assignAsOfIds(){const svg=document.getElementById('asofPhaseSpace');if(!svg)return;const row=asofRows[uiIndex];if(!row||row.status!=='VALID')return;const circles=Array.from(svg.querySelectorAll('circle'));const current=circles.slice(1,4),ids=['asof-long-current','asof-mid-current','asof-short-current'];ids.forEach((id,i)=>{if(current[i])current[i].id=id;});const polygon=svg.querySelector('polygon');if(polygon)polygon.id='asof-triangle';if(circles[4])circles[4].id='asof-centroid';}
 function updateDebug(lastError){if(!debugOutput)return;const asof=asofRows[uiIndex]||{};const pass=rows.length>0&&pathPoints('long-full-path')>1&&pathPoints('mid-full-path')>1&&pathPoints('short-full-path')>1;debugOutput.textContent='JS initialized: YES | SELF TEST: '+(pass?'PASS':'FAIL')+' | rows='+rows.length+' | selectedIndex='+uiIndex+' | timer='+(uiTimer===null?'stopped':'running')+' | mode='+uiMode.value+' | LONG points='+pathPoints('long-full-path')+' | MID points='+pathPoints('mid-full-path')+' | SHORT points='+pathPoints('short-full-path')+' | As-of='+((asof.status)||'-')+' | last error='+(lastError||'none');}
 function panelSafe(name,fn){try{fn();return '';}catch(error){console.error('Wave Lab '+name+' failed',error);return name+': '+(error&&error.message?error.message:String(error));}}
-function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);const errors=[panelSafe('OHLC/Fourier',uiDrawMain),panelSafe('Full Phase Space',()=>{uiDrawPhase();assignPhaseIds()}),panelSafe('Period Regime',drawRegimeHistory),panelSafe('As-of Phase Space',()=>{drawAsOfPhase();assignAsOfIds()}),panelSafe('Info',uiDetail)].filter(Boolean);updateDebug(errors.join('; ')||'');}
+function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);const errors=[panelSafe('OHLC/Fourier',uiDrawMain),panelSafe('Full Phase Space',()=>{uiDrawPhase();assignPhaseIds()}),panelSafe('Period Regime',drawRegimeHistory),panelSafe('As-of Phase Space',()=>{drawAsOfPhase();assignAsOfIds()}),panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Info',uiDetail)].filter(Boolean);updateDebug(errors.join('; ')||'');}
 function stopPlayback(){if(uiTimer!==null){clearInterval(uiTimer);uiTimer=null;}document.getElementById('uiPlay').textContent='Play';}
 function advance(){if(uiIndex<rows.length-1){updateView(uiIndex+1);return true;}if(uiLoop.checked){updateView(0);return true;}stopPlayback();return false;}
 function startPlayback(){if(uiTimer!==null)return;if(uiIndex>=rows.length-1&&!uiLoop.checked)return;document.getElementById('uiPlay').textContent='Playing';uiTimer=setInterval(advance,Number(uiSpeed.value));}
@@ -1362,6 +1535,7 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
     validate_phase_position_rows(position_rows, convergence_rows)
     asof_rows = asof_phase_space_history(daily, regime_rows)
     validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
+    next_phase_rows = asof_next_phase_predictions(daily, asof_rows, regime_rows)
     payload = {"machine": machine, "rows": daily, "components": public_components,
                "phase_stats": phase_nextday_stats(daily, components),
                "pattern_stats": pattern_nextday_stats(daily),
@@ -1390,6 +1564,10 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
                "asof_nfft_pattern_stats": asof_nfft_pattern_stats(asof_rows),
                "asof_nfft_regime_stats": asof_nfft_regime_stats(asof_rows),
                "asof_nfft_transition_detail": asof_nfft_transition_detail(asof_rows, regime_rows),
+               "next_phase_rows": next_phase_rows,
+               "next_phase_stats": next_phase_prediction_stats(next_phase_rows),
+               "next_phase_regime_stats": next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")),
+               "next_phase_nfft_stats": next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)),
                "asof_threshold_min_samples": ASOF_THRESHOLD_MIN_SAMPLES,
                "regime_cutoff_date": REGIME_CUTOFF_DATE,
                "min_regime_observations": MIN_REGIME_OBSERVATIONS,
@@ -1412,6 +1590,7 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
 const DATA=__DATA__, rows=DATA.rows, components=DATA.components, roles=['LONG','MID','SHORT'];
 const convergenceRows=Array.isArray(DATA.convergence_rows)?DATA.convergence_rows:[], alignmentRows=Array.isArray(DATA.alignment_rows)?DATA.alignment_rows:[], positionRows=Array.isArray(DATA.phase_position_rows)?DATA.phase_position_rows:[];
 const asofRows=Array.isArray(DATA.asof_phase_rows)?DATA.asof_phase_rows:[], regimeRows=Array.isArray(DATA.regime_rows)?DATA.regime_rows:[];
+const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];
 const roleIndex={}; components.forEach((c,i)=>roleIndex[c.role]=i+1);
 const colors={LONG:'var(--long)',MID:'var(--mid)',SHORT:'var(--short)',COMBINED:'var(--combined)'};
 const slider=document.getElementById('uiSlider'), sliderLabel=document.getElementById('uiSliderLabel'); slider.max=String(rows.length-1); slider.value=String(rows.length-1);
@@ -1430,6 +1609,7 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
 </script></body></html>'''
     page = page.replace("__MACHINE__", machine).replace("__CUTOFF__", REGIME_CUTOFF_DATE).replace("__ROW_MAX__", str(max(0, len(rows) - 1))).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     panels = '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny">Each selected date uses only observations through that date. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div id="nfftComparison"></div></section>'
+    panels += '<section class="panel chart-panel" id="nextPredictionPanel"><h2>NEXT PHASE PREDICTION</h2><div class="tiny">Prediction uses only the source date D prefix FFT. Target D+1 As-of coordinates are answer-check data only; no bullish/bearish model is used.</div><svg id="nextPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Predicted and actual next Phase Space"></svg><div id="nextPredictionSummary" class="tiny"></div></section>'
     page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
     legacy_page = build_html_v3(machine, rows, components, daily)
     first_end = legacy_page.find('</script>')
@@ -1714,6 +1894,7 @@ def run(machine: str) -> Path:
     validate_phase_position_rows(position_rows, convergence_rows)
     asof_rows = asof_phase_space_history(daily, regime_rows)
     validate_asof_phase_space(asof_rows, REGIME_CUTOFF_DATE)
+    next_phase_rows = asof_next_phase_predictions(daily, asof_rows, regime_rows)
     out_dir = OUTPUT_ROOT / machine
     out_dir.mkdir(parents=True, exist_ok=True)
     component_fields = ["preprocessing", "rank", "role", "frequency", "period_days", "amplitude", "phase", "relative_power", "phase_definition", "n_observations", "n_fft", "sampling_interval", "frequency_unit", "period_basis"]
@@ -1749,6 +1930,25 @@ def run(machine: str) -> Path:
         "long_phase", "mid_phase", "short_phase", "top_wave_count", "top_wave_pattern", "centroid_region", "centroid_y_offset",
         "alignment_score", "convergence_score", "bullish", "next_day_bullish",
     ]
+    prediction_fields = [
+        "source_date", "target_date", "machine", "status", "source_n_observations", "source_n_fft", "source_regime",
+        "source_period_stability_score", "source_dominant_rank_signature", "source_component_reorder", "target_n_observations", "target_n_fft", "n_fft_changed", "target_regime", "target_bullish", "target_next_day_bullish",
+    ]
+    for role in ("long", "mid", "short"):
+        prediction_fields += [
+            role + "_source_k", role + "_source_frequency", role + "_source_period", role + "_source_rank",
+            role + "_predicted_phase", role + "_predicted_wave_value", role + "_predicted_amplitude", role + "_predicted_radius", role + "_predicted_x", role + "_predicted_y", role + "_predicted_top_side",
+            role + "_actual_k", role + "_actual_frequency", role + "_actual_period", role + "_actual_rank", role + "_component_same_k",
+            role + "_actual_phase", role + "_actual_wave_value", role + "_actual_amplitude", role + "_actual_x", role + "_actual_y", role + "_angular_error_deg", role + "_xy_error", role + "_top_side_match",
+        ]
+    prediction_fields += [
+        "predicted_centroid_x", "predicted_centroid_y", "predicted_centroid_y_offset", "predicted_centroid_region", "predicted_top_wave_count", "predicted_top_wave_pattern",
+        "actual_centroid_x", "actual_centroid_y", "actual_centroid_y_offset", "actual_centroid_region", "actual_top_wave_count", "actual_top_wave_pattern",
+        "centroid_distance_error", "centroid_region_match", "top_wave_count_error", "top_wave_count_exact", "top_wave_pattern_match",
+    ]
+    prediction_stat_fields = ["scope", "samples", "mean_angular_error_deg", "median_angular_error_deg", "mean_xy_error", "top_side_accuracy", "component_same_k_rate", "centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
+    prediction_group_fields = ["source_regime", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
+    prediction_nfft_fields = ["source_n_fft", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
     regime_fields = [
         "date", "machine", "n_observations", "n_fft", "status", "open", "high", "low", "close", "bullish", "next_day_bullish",
         "long_k", "long_frequency", "long_period", "long_amplitude", "long_power", "long_rank",
@@ -1788,6 +1988,10 @@ def run(machine: str) -> Path:
     write_csv(out_dir / "period_regime_daily.csv", regime_rows, regime_fields)
     write_csv(out_dir / "period_regime_events.csv", regime_events, event_fields)
     write_csv(out_dir / "period_regime_stats.csv", period_regime_stats(regime_rows), regime_stat_fields)
+    write_csv(out_dir / "next_phase_prediction_daily.csv", next_phase_rows, prediction_fields)
+    write_csv(out_dir / "next_phase_prediction_stats.csv", next_phase_prediction_stats(next_phase_rows), prediction_stat_fields)
+    write_csv(out_dir / "next_phase_prediction_regime_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")), prediction_group_fields)
+    write_csv(out_dir / "next_phase_prediction_nfft_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)), prediction_nfft_fields)
     validate_reconstruction()
     validate_daily_reconstruction(daily, components)
     # build_html_v4 contains the complete single dashboard script, including the
