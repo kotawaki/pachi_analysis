@@ -1648,11 +1648,21 @@ document.getElementById('uiPlay').addEventListener('click',startPlayback);docume
 def forward_validation_script() -> str:
     return """function drawForwardValidation(){
   const box=document.getElementById('forwardValidationSummary');
+  const svg=document.getElementById('forwardValidationSpace');
   if(!box)return;
   const row=(Array.isArray(DATA.forward_validation)?DATA.forward_validation:[]).find(item=>item.source_date===rows[uiIndex].date);
-  if(!row){box.innerHTML='<span>選択日が8/15以外のため、固定forward答え合わせ対象外です。</span>';return;}
+  const cx=300,cy=190,r=116;
+  const frame='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';
+  if(!row){if(svg)svg.innerHTML=frame+'<text class="svg-label" x="175" y="190">NO FROZEN FORWARD VALIDATION</text>';box.innerHTML='<span>選択日に登録されたFROZEN FORWARD VALIDATIONはありません。</span>';return;}
   const format=value=>value===''||value===undefined||value===null?'—':Number(value).toFixed(1);
   const yesNo=value=>value?'YES':'NO';
+  const predicted=roles.map(role=>{const key=role.toLowerCase();return [Number(row['predicted_'+key+'_x']),Number(row['predicted_'+key+'_y'])];});
+  const actual=roles.map(role=>{const key=role.toLowerCase();return [Number(row['actual_'+key+'_x']),Number(row['actual_'+key+'_y'])];});
+  if(svg){let graphic=frame;
+    graphic+='<polygon points="'+predicted.map(point=>point.join(',')).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="2" stroke-dasharray="6 4"/><polygon points="'+actual.map(point=>point.join(',')).join(' ')+'" fill="none" stroke="var(--text)" stroke-width="2"/>';
+    roles.forEach((role,i)=>{const color=colors[role],pp=predicted[i],ap=actual[i];graphic+='<circle cx="'+pp[0]+'" cy="'+pp[1]+'" r="8" fill="none" stroke="'+color+'" stroke-width="3" stroke-dasharray="4 3"/><text class="svg-label" x="'+(pp[0]+8)+'" y="'+(pp[1]-8)+'">P '+role+'</text><circle cx="'+ap[0]+'" cy="'+ap[1]+'" r="6" fill="'+color+'" stroke="var(--text)" stroke-width="1.5"/><text class="svg-label" x="'+(ap[0]+8)+'" y="'+(ap[1]+14)+'">A '+role+'</text>';});
+    graphic+='<circle cx="'+Number(row.predicted_centroid_x)+'" cy="'+Number(row.predicted_centroid_y)+'" r="5" fill="none" stroke="var(--cursor)" stroke-width="2" stroke-dasharray="3 3"/><text class="svg-label" x="'+(Number(row.predicted_centroid_x)+7)+'" y="'+(Number(row.predicted_centroid_y)-7)+'">P centroid</text><circle cx="'+Number(row.actual_centroid_x)+'" cy="'+Number(row.actual_centroid_y)+'" r="4" fill="var(--text)" stroke="var(--text)"/><text class="svg-label" x="'+(Number(row.actual_centroid_x)+7)+'" y="'+(Number(row.actual_centroid_y)+14)+'">A centroid</text><text class="svg-label" x="18" y="24">PREDICTED D+1 (dashed) / ACTUAL AS-OF D+1 (solid)</text>';
+    svg.innerHTML=graphic;}
   const roleRows=roles.map(role=>{
     const key=role.toLowerCase();
     return '<tr><td>'+role+'</td><td>'+format(row['predicted_'+key+'_phase'])+'°</td><td>'+format(row['actual_'+key+'_phase'])+'°</td><td>'+format(row[key+'_angular_error'])+'°</td><td>'+format(row[key+'_xy_distance'])+'</td><td>'+row['predicted_'+key+'_k']+' → '+row['actual_'+key+'_k']+' / '+yesNo(row[key+'_component_same_k'])+'</td></tr>';
@@ -1758,7 +1768,7 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     page = page.replace("__MACHINE__", machine).replace("__CUTOFF__", REGIME_CUTOFF_DATE).replace("__ROW_MAX__", str(max(0, len(rows) - 1))).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     panels = '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny">Each selected date uses only observations through that date. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div id="nfftComparison"></div></section>'
     panels += '<section class="panel chart-panel" id="nextPredictionPanel"><h2>NEXT PHASE PREDICTION</h2><div class="tiny">Prediction uses only the source date D prefix FFT. Target D+1 As-of coordinates are answer-check data only; no bullish/bearish model is used.</div><svg id="nextPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Predicted and actual next Phase Space"></svg><div id="nextPredictionSummary" class="tiny"></div></section>'
-    panels += '<section class="panel chart-panel" id="forwardValidationPanel"><h2>FROZEN FORWARD VALIDATION</h2><div class="tiny">This is a forward answer-check of the prediction frozen before the target observation. It is separate from the historical 29-row backtest and is not a bullish/bearish prediction model.</div><div id="forwardValidationSummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="forwardValidationPanel"><h2>FROZEN FORWARD VALIDATION</h2><div class="tiny">This is a forward answer-check of the prediction frozen before the target observation. It is separate from the historical 29-row backtest and is not a bullish/bearish prediction model. Dashed markers/triangle = predicted D+1; solid markers/triangle = actual D+1 As-of.</div><svg id="forwardValidationSpace" viewBox="0 0 600 390" role="img" aria-label="Frozen predicted and actual next Phase Space"></svg><div id="forwardValidationSummary" class="tiny"></div></section>'
     page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
     legacy_page = build_html_v3(machine, rows, components, daily)
     first_end = legacy_page.find('</script>')
