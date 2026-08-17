@@ -6,6 +6,7 @@ import html
 import itertools
 import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -35,6 +36,11 @@ PHASE_SPACE_BASE_RADIUS = 78.0
 PHASE_SPACE_WAVE_RADIUS = 32.0
 PHASE_CONVERGENCE_QUANTILE = 0.80
 CONVERGENCE_SCORE_BIN_WIDTH = 0.20
+TRANSFORMATION_MIN_IMPROVEMENT = 0.20
+TRANSFORMATION_MIN_SHAPE_SIMILARITY = 0.65
+TRANSFORMATION_MIN_ROTATION_DEG = 15.0
+IDENTITY_DISTANCE_QUANTILE = 0.25
+IDENTITY_CENTROID_QUANTILE = 0.25
 
 
 def next_power_of_two(value: int) -> int:
@@ -110,12 +116,15 @@ def normalize_date(value: str) -> str:
     return text
 
 
-def load_machine_rows(machine: str) -> list[dict]:
+def load_machine_rows(machine: str, cutoff_date: str | None = None) -> list[dict]:
     daily, _meta = load_chart_daily_ohlc({machine})
     rows = []
     for date, values in sorted(daily.get(str(int(machine)), {}).items()):
+        normalized = normalize_date(date)
+        if cutoff_date and normalized > cutoff_date:
+            continue
         rows.append({
-            "date": normalize_date(date),
+            "date": normalized,
             "machine": machine,
             "open": clean_number(values["open"]),
             "high": clean_number(values["high"]),
@@ -779,6 +788,336 @@ def _prediction_geometry(points: list[tuple[float, float]]) -> dict:
         "top_wave_count": len(top_roles),
         "top_wave_pattern": _asof_top_pattern(top_roles),
     }
+
+
+def _sum_point_distances(left: list[tuple[float, float]], right: list[tuple[float, float]]) -> float:
+    return sum(math.dist(a, b) for a, b in zip(left, right))
+
+
+def _rotate_points(points: list[tuple[float, float]], degrees: float) -> list[tuple[float, float]]:
+    angle = math.radians(degrees)
+    cosine, sine = math.cos(angle), math.sin(angle)
+    result = []
+    for x, y in points:
+        dx, dy = x - PHASE_SPACE_CENTER_X, y - PHASE_SPACE_CENTER_Y
+        result.append((PHASE_SPACE_CENTER_X + cosine * dx - sine * dy, PHASE_SPACE_CENTER_Y + sine * dx + cosine * dy))
+    return result
+
+
+def _mirror_points(points: list[tuple[float, float]], mirror_type: str) -> list[tuple[float, float]]:
+    result = []
+    for x, y in points:
+        if mirror_type == "VERTICAL":
+            result.append((2.0 * PHASE_SPACE_CENTER_X - x, y))
+        else:
+            result.append((x, 2.0 * PHASE_SPACE_CENTER_Y - y))
+    return result
+
+
+def _best_rotation(points: list[tuple[float, float]], actual: list[tuple[float, float]]) -> tuple[float, list[tuple[float, float]], float]:
+    dot = cross = 0.0
+    for (px, py), (ax, ay) in zip(points, actual):
+        pdx, pdy = px - PHASE_SPACE_CENTER_X, py - PHASE_SPACE_CENTER_Y
+        adx, ady = ax - PHASE_SPACE_CENTER_X, ay - PHASE_SPACE_CENTER_Y
+        dot += pdx * adx + pdy * ady
+        cross += pdx * ady - pdy * adx
+    degrees = math.degrees(math.atan2(cross, dot)) if dot or cross else 0.0
+    transformed = _rotate_points(points, degrees)
+    return degrees, transformed, _sum_point_distances(transformed, actual)
+
+
+def _shape_metrics(points: list[tuple[float, float]]) -> dict:
+    sides = {
+        "long_mid": math.dist(points[0], points[1]),
+        "mid_short": math.dist(points[1], points[2]),
+        "short_long": math.dist(points[2], points[0]),
+    }
+    perimeter = sum(sides.values())
+    area = abs((points[1][0] - points[0][0]) * (points[2][1] - points[0][1]) - (points[1][1] - points[0][1]) * (points[2][0] - points[0][0])) / 2.0
+    normalized = {key: value / perimeter if perimeter else 0.0 for key, value in sides.items()}
+    return {"sides": sides, "perimeter": perimeter, "area": area, "normalized_sides": normalized}
+
+
+def _shape_similarity(predicted: dict, actual: dict) -> float:
+    difference = sum(abs(predicted["normalized_sides"][key] - actual["normalized_sides"][key]) for key in predicted["sides"])
+    return clip01(1.0 - difference / 2.0)
+
+
+def _permutation_name(permutation: tuple[int, int, int]) -> str:
+    names = ("LONG", "MID", "SHORT")
+    if permutation == (0, 1, 2):
+        return "IDENTITY"
+    return "->".join(names[index] for index in permutation)
+
+
+def _permuted_points(points: list[tuple[float, float]], permutation: tuple[int, int, int]) -> list[tuple[float, float]]:
+    # The tuple says which predicted role is compared with actual LONG/MID/SHORT.
+    return [points[index] for index in permutation]
+
+
+def phase_transformation_rows(predictions: list[dict], daily: list[dict], asof_by_date: dict[str, dict] | None = None) -> list[dict]:
+    """Classify historical D -> D+1 geometry only; never reads beyond the prediction CSV."""
+    source_bullish = {row["date"]: bool(row["bullish"]) for row in daily}
+    results = []
+    permutations = {
+        "IDENTITY": (0, 1, 2),
+        "LONG_MID_SWAP": (1, 0, 2),
+        "LONG_SHORT_SWAP": (2, 1, 0),
+        "MID_SHORT_SWAP": (0, 2, 1),
+        "3_CYCLE_A": (1, 2, 0),
+        "3_CYCLE_B": (2, 0, 1),
+    }
+    for prediction in predictions:
+        if prediction.get("status") != "VALID_PREDICTION" or prediction.get("long_angular_error_deg", "") == "":
+            continue
+        predicted = [(float(prediction[f"{role}_predicted_x"]), float(prediction[f"{role}_predicted_y"])) for role in ("long", "mid", "short")]
+        actual = [(float(prediction[f"{role}_actual_x"]), float(prediction[f"{role}_actual_y"])) for role in ("long", "mid", "short")]
+        identity_distance = _sum_point_distances(predicted, actual)
+        rotation_deg, rotation_points, rotation_distance = _best_rotation(predicted, actual)
+        inversion_points = _rotate_points(predicted, 180.0)
+        inversion_distance = _sum_point_distances(inversion_points, actual)
+        mirror_candidates = {name: _mirror_points(predicted, name) for name in ("VERTICAL", "HORIZONTAL")}
+        mirror_distances = {name: _sum_point_distances(points, actual) for name, points in mirror_candidates.items()}
+        best_mirror_type = min(mirror_distances, key=mirror_distances.get)
+        permutation_distances = {name: _sum_point_distances(_permuted_points(predicted, permutation), actual) for name, permutation in permutations.items()}
+        best_permutation = min(permutation_distances, key=permutation_distances.get)
+        best_permutation_points = _permuted_points(predicted, permutations[best_permutation])
+        rotation_permutation = {}
+        for name, permutation in permutations.items():
+            degrees, points, distance = _best_rotation(best_permutation_points if name == best_permutation else _permuted_points(predicted, permutation), actual)
+            rotation_permutation[name] = (degrees, points, distance)
+        best_rotation_permutation = min(rotation_permutation, key=lambda name: rotation_permutation[name][2])
+        best_rp_angle, best_rp_points, best_rp_distance = rotation_permutation[best_rotation_permutation]
+        candidates = {
+            "ROTATION": (rotation_points, rotation_distance),
+            "INVERSION_180": (inversion_points, inversion_distance),
+            "MIRROR_VERTICAL": (mirror_candidates["VERTICAL"], mirror_distances["VERTICAL"]),
+            "MIRROR_HORIZONTAL": (mirror_candidates["HORIZONTAL"], mirror_distances["HORIZONTAL"]),
+            "ROLE_SWAP": (best_permutation_points, permutation_distances[best_permutation]),
+            "ROTATION_PLUS_ROLE_SWAP": (best_rp_points, best_rp_distance),
+        }
+        candidate_name = min(candidates, key=lambda name: candidates[name][1])
+        transformed_points, transformed_distance = candidates[candidate_name]
+        improvement = max(0.0, 1.0 - transformed_distance / identity_distance) if identity_distance else 0.0
+        predicted_shape, actual_shape = _shape_metrics(predicted), _shape_metrics(actual)
+        shape_similarity = _shape_similarity(predicted_shape, actual_shape)
+        if shape_similarity < TRANSFORMATION_MIN_SHAPE_SIMILARITY:
+            transformation_type = "IRREGULAR"
+        elif improvement < TRANSFORMATION_MIN_IMPROVEMENT:
+            transformation_type = "IDENTITY_STABLE"
+        elif candidate_name == "ROTATION_PLUS_ROLE_SWAP" and best_rotation_permutation != "IDENTITY":
+            transformation_type = "ROTATION_PLUS_ROLE_SWAP" if abs(best_rp_angle) >= TRANSFORMATION_MIN_ROTATION_DEG else "ROLE_SWAP"
+        elif candidate_name == "ROLE_SWAP" and best_permutation != "IDENTITY":
+            transformation_type = "ROLE_SWAP"
+        elif candidate_name == "INVERSION_180":
+            transformation_type = "INVERSION_180"
+        elif candidate_name.startswith("MIRROR_"):
+            transformation_type = candidate_name
+        elif candidate_name == "ROTATION" and abs(rotation_deg) >= TRANSFORMATION_MIN_ROTATION_DEG:
+            transformation_type = "ROTATION"
+        else:
+            transformation_type = "IRREGULAR"
+        centroid_pred = _prediction_geometry(predicted)
+        centroid_actual = _prediction_geometry(actual)
+        source_asof = (asof_by_date or {}).get(prediction["source_date"], {})
+        source_shape = _shape_metrics([(float(source_asof[role + "_x"]), float(source_asof[role + "_y"])) for role in ("long", "mid", "short")]) if source_asof.get("status") == "VALID" else {}
+        row = {
+            "source_date": prediction["source_date"], "target_date": prediction["target_date"], "machine": prediction["machine"], "comparison_scope": prediction.get("comparison_scope", "HISTORICAL_BACKTEST"),
+            "source_regime": prediction.get("source_regime", ""), "source_n_fft": prediction.get("source_n_fft", ""),
+            "source_component_reorder": prediction.get("source_component_reorder", ""), "source_bullish": source_bullish.get(prediction["source_date"], ""),
+            "target_bullish": prediction.get("target_bullish", ""), "transformation_type": transformation_type,
+            "best_permutation": best_permutation, "identity_distance": identity_distance, "best_permutation_distance": permutation_distances[best_permutation],
+            "permutation_improvement": max(0.0, 1.0 - permutation_distances[best_permutation] / identity_distance) if identity_distance else 0.0,
+            "best_rotation_deg": rotation_deg, "rotation_residual": rotation_distance, "inversion_distance": inversion_distance,
+            "inversion_improvement_vs_identity": max(0.0, 1.0 - inversion_distance / identity_distance) if identity_distance else 0.0,
+            "vertical_mirror_distance": mirror_distances["VERTICAL"], "horizontal_mirror_distance": mirror_distances["HORIZONTAL"],
+            "best_mirror_type": best_mirror_type, "best_mirror_distance": mirror_distances[best_mirror_type],
+            "best_rotation_permutation": best_rotation_permutation, "best_rotation_plus_swap_deg": best_rp_angle,
+            "best_transformation_distance": transformed_distance, "transformation_improvement": improvement,
+            "classification_confidence": improvement * shape_similarity, "shape_similarity": shape_similarity,
+            "centroid_distance": math.dist((centroid_pred["centroid_x"], centroid_pred["centroid_y"]), (centroid_actual["centroid_x"], centroid_actual["centroid_y"])),
+            "centroid_region_match": centroid_pred["centroid_region"] == centroid_actual["centroid_region"],
+            "predicted_centroid_region": centroid_pred["centroid_region"], "actual_centroid_region": centroid_actual["centroid_region"],
+            "predicted_perimeter": predicted_shape["perimeter"], "actual_perimeter": actual_shape["perimeter"],
+            "predicted_area": predicted_shape["area"], "actual_area": actual_shape["area"],
+            "area_ratio": actual_shape["area"] / predicted_shape["area"] if predicted_shape["area"] else "",
+            "source_top_wave_count": source_asof.get("top_wave_count", ""), "source_top_wave_pattern": source_asof.get("top_wave_pattern", ""),
+            "source_centroid_region": source_asof.get("centroid_region", ""), "source_phase_alignment_score": source_asof.get("phase_alignment_score", ""),
+            "source_convergence_score": source_asof.get("convergence_score", ""), "source_long_k": source_asof.get("long_k", ""), "source_mid_k": source_asof.get("mid_k", ""), "source_short_k": source_asof.get("short_k", ""),
+            "source_perimeter": source_shape.get("perimeter", ""), "source_area": source_shape.get("area", ""),
+        }
+        for key, value in predicted_shape["sides"].items():
+            row["predicted_" + key + "_side"] = value
+            row["actual_" + key + "_side"] = actual_shape["sides"][key]
+            row[key + "_side_ratio"] = actual_shape["sides"][key] / value if value else ""
+        for role, point in zip(("long", "mid", "short"), transformed_points):
+            row["transformed_" + role + "_x"], row["transformed_" + role + "_y"] = point
+        for role in ("long", "mid", "short"):
+            for side in ("predicted", "actual"):
+                row[side + "_" + role + "_phase"] = prediction[role + "_" + side + "_phase"]
+            row[role + "_angular_error"] = prediction.get(role + "_angular_error_deg", "")
+            row[role + "_xy_distance"] = prediction.get(role + "_xy_error", "")
+            row["predicted_" + role + "_x"] = prediction[role + "_predicted_x"]
+            row["predicted_" + role + "_y"] = prediction[role + "_predicted_y"]
+            row["actual_" + role + "_x"] = prediction[role + "_actual_x"]
+            row["actual_" + role + "_y"] = prediction[role + "_actual_y"]
+        results.append(row)
+    return results
+
+
+def refine_identity_classification(rows: list[dict], reference_rows: list[dict] | None = None) -> tuple[float, float]:
+    reference = reference_rows or rows
+    identity_threshold = quantile([float(row["identity_distance"]) for row in reference], IDENTITY_DISTANCE_QUANTILE) if reference else 0.0
+    centroid_threshold = quantile([float(row["centroid_distance"]) for row in reference], IDENTITY_CENTROID_QUANTILE) if reference else 0.0
+    for row in rows:
+        row["identity_distance_threshold"] = identity_threshold
+        row["identity_centroid_threshold"] = centroid_threshold
+        if row.get("transformation_type") == "IDENTITY_STABLE" and (
+            float(row["identity_distance"]) > identity_threshold
+            or float(row["centroid_distance"]) > centroid_threshold
+            or float(row["shape_similarity"]) < TRANSFORMATION_MIN_SHAPE_SIMILARITY
+        ):
+            row["transformation_type"] = "NO_CLEAR_TRANSFORM"
+    return identity_threshold, centroid_threshold
+
+
+def phase_transformation_stats(rows: list[dict], key: str = "transformation_type", values: tuple | None = None) -> list[dict]:
+    values = values or ("IDENTITY_STABLE", "ROTATION", "INVERSION_180", "MIRROR_VERTICAL", "MIRROR_HORIZONTAL", "ROLE_SWAP", "ROTATION_PLUS_ROLE_SWAP", "NO_CLEAR_TRANSFORM", "IRREGULAR")
+    result = []
+    for value in values:
+        subset = [row for row in rows if row.get(key) == value]
+        target = [_csv_bool(row, "target_bullish") for row in subset]
+        source = [bool(row["source_bullish"]) for row in subset]
+        result.append({"group": key, "value": value, "samples": len(subset), "percentage": len(subset) / len(rows) * 100.0 if rows else "", "source_bullish_count": sum(source), "source_bullish_rate": sum(source) / len(source) * 100.0 if source else "", "target_bullish_count": sum(target), "target_bullish_rate": sum(target) / len(target) * 100.0 if target else "", "mean_improvement": _safe_mean([float(row["transformation_improvement"]) for row in subset]), "mean_shape_similarity": _safe_mean([float(row["shape_similarity"]) for row in subset])})
+    return result
+
+
+def forward_transformation_input(forward: dict, daily: list[dict]) -> dict:
+    """Adapt the already-frozen 8/15 -> 8/16 row without recalculating it."""
+    row = {"source_date": forward["source_date"], "target_date": forward["target_date"], "machine": forward["machine"], "status": "VALID_PREDICTION", "source_regime": forward.get("source_regime", ""), "source_n_fft": forward.get("source_n_fft", ""), "source_component_reorder": "", "target_bullish": forward.get("actual_bullish", ""), "comparison_scope": "FORWARD_FROZEN"}
+    source = next((item for item in daily if item["date"] == forward["source_date"]), None)
+    row["source_bullish"] = source["bullish"] if source else ""
+    for role in ("long", "mid", "short"):
+        row[role + "_predicted_x"] = forward["predicted_" + role + "_x"]
+        row[role + "_predicted_y"] = forward["predicted_" + role + "_y"]
+        row[role + "_actual_x"] = forward["actual_" + role + "_x"]
+        row[role + "_actual_y"] = forward["actual_" + role + "_y"]
+        row[role + "_predicted_phase"] = forward["predicted_" + role + "_phase"]
+        row[role + "_actual_phase"] = forward["actual_" + role + "_phase"]
+        row[role + "_angular_error_deg"] = forward.get(role + "_angular_error", "")
+        row[role + "_xy_error"] = forward.get(role + "_xy_distance", "")
+        row[role + "_component_same_k"] = forward.get(role + "_component_same_k", "")
+    return row
+
+
+def _phase_from_xy(point: tuple[float, float]) -> float:
+    return math.degrees(math.atan2(point[0] - PHASE_SPACE_CENTER_X, point[1] - PHASE_SPACE_CENTER_Y)) % 360.0
+
+
+def _geometry_scores(points: list[tuple[float, float]]) -> dict:
+    phases = [_phase_from_xy(point) for point in points]
+    resultant = abs(sum(complex(math.cos(math.radians(phase)), math.sin(math.radians(phase))) for phase in phases) / 3.0)
+    max_pair = max(math.dist(points[i], points[j]) for i in range(3) for j in range(i + 1, 3))
+    return {"phases": phases, "phase_alignment_score": clip01(resultant), "convergence_score": clip01(1.0 - max_pair / (2.0 * (PHASE_SPACE_BASE_RADIUS + PHASE_SPACE_WAVE_RADIUS)))}
+
+
+def _candidate_similarity(candidate: dict, source: dict) -> float:
+    score = 0.0
+    if candidate.get("source_regime") == source.get("source_regime"):
+        score += 4.0
+    if str(candidate.get("source_n_fft")) == str(source.get("source_n_fft")):
+        score += 3.0
+    if str(candidate.get("source_top_wave_count")) == str(source.get("source_top_wave_count")):
+        score += 2.0
+    if candidate.get("source_top_wave_pattern") and candidate.get("source_top_wave_pattern") == source.get("source_top_wave_pattern"):
+        score += 2.0
+    if candidate.get("source_centroid_region") == source.get("source_centroid_region"):
+        score += 1.5
+    if candidate.get("source_long_k") == source.get("source_long_k"):
+        score += 0.75
+    if candidate.get("source_mid_k") == source.get("source_mid_k"):
+        score += 0.75
+    if candidate.get("source_short_k") == source.get("source_short_k"):
+        score += 0.75
+    for key in ("source_phase_alignment_score", "source_convergence_score"):
+        if candidate.get(key, "") != "" and source.get(key, "") != "" and abs(float(candidate[key]) - float(source[key])) <= 0.15:
+            score += 1.0
+    if candidate.get("source_area", "") != "" and source.get("source_area", "") != "":
+        score += 1.0 if abs(math.log((float(candidate["source_area"]) + 1.0) / (float(source["source_area"]) + 1.0))) <= 0.35 else 0.0
+    return score
+
+
+def _permutation_tuple(name: str) -> tuple[int, int, int]:
+    return {"IDENTITY": (0, 1, 2), "LONG_MID_SWAP": (1, 0, 2), "LONG_SHORT_SWAP": (2, 1, 0), "MID_SHORT_SWAP": (0, 2, 1), "3_CYCLE_A": (1, 2, 0), "3_CYCLE_B": (2, 0, 1)}.get(name, (0, 1, 2))
+
+
+def _apply_transformation(points: list[tuple[float, float]], candidate: dict) -> list[tuple[float, float]]:
+    transformation = candidate.get("transformation_type", "NO_CLEAR_TRANSFORM")
+    if transformation == "ROLE_SWAP":
+        return _permuted_points(points, _permutation_tuple(candidate.get("best_permutation", "IDENTITY")))
+    if transformation == "ROTATION":
+        return _rotate_points(points, float(candidate.get("best_rotation_deg", 0.0)))
+    if transformation == "INVERSION_180":
+        return _rotate_points(points, 180.0)
+    if transformation in ("MIRROR_VERTICAL", "MIRROR_HORIZONTAL"):
+        return _mirror_points(points, transformation.removeprefix("MIRROR_"))
+    if transformation == "ROTATION_PLUS_ROLE_SWAP":
+        permuted = _permuted_points(points, _permutation_tuple(candidate.get("best_rotation_permutation", "IDENTITY")))
+        return _rotate_points(permuted, float(candidate.get("best_rotation_plus_swap_deg", 0.0)))
+    return points[:]
+
+
+def select_transformation(source_prediction: dict, source_asof: dict, history: list[dict]) -> dict:
+    source_points = [(float(source_asof[role + "_x"]), float(source_asof[role + "_y"])) for role in ("long", "mid", "short")]
+    source_shape = _shape_metrics(source_points)
+    source_scores = _geometry_scores(source_points)
+    source = {"source_regime": source_prediction.get("source_regime", ""), "source_n_fft": source_prediction.get("source_n_fft", ""), "source_top_wave_count": source_asof.get("top_wave_count", ""), "source_top_wave_pattern": source_asof.get("top_wave_pattern", ""), "source_centroid_region": source_asof.get("centroid_region", ""), "source_phase_alignment_score": source_scores["phase_alignment_score"], "source_convergence_score": source_scores["convergence_score"], "source_long_k": source_asof.get("long_k", ""), "source_mid_k": source_asof.get("mid_k", ""), "source_short_k": source_asof.get("short_k", ""), "source_area": source_shape["area"]}
+    scoped = [row for row in history if row.get("source_regime") == source["source_regime"] and str(row.get("source_n_fft")) == str(source["source_n_fft"])]
+    basis = "same machine + same source regime + same n_fft"
+    if len(scoped) < 3:
+        scoped = [row for row in history if str(row.get("source_n_fft")) == str(source["source_n_fft"])]
+        basis = "same machine + same n_fft"
+    if len(scoped) < 3:
+        scoped = history[:]
+        basis = "same machine + all historical transformation cases"
+    ranked = sorted(((round(_candidate_similarity(row, source), 6), row) for row in scoped), key=lambda item: (item[0], item[1].get("source_date", "")), reverse=True)
+    selected_cases = [row for _score, row in ranked[: min(5, len(ranked))]]
+    counts = {}
+    for row in selected_cases:
+        counts[row["transformation_type"]] = counts.get(row["transformation_type"], 0) + 1
+    selected = max(counts, key=counts.get) if counts else "NO_CLEAR_TRANSFORM"
+    return {"selected_transformation": selected, "selection_basis": basis + f"; nearest_cases={len(selected_cases)}", "support_samples": len(selected_cases), "transformation_probability": counts.get(selected, 0) / len(selected_cases) if selected_cases else 0.0, "selected_case": next((row for row in selected_cases if row["transformation_type"] == selected), {})}
+
+
+def frozen_next_phase_predictions(machine: str, source_rows: list[dict], historical_transformations: list[dict], forward_transformations: list[dict]) -> list[dict]:
+    raw_rows = source_rows
+    source_rows = [{**row, "bullish": row["close"] > row["open"], "next_day_bullish": (raw_rows[index + 1]["close"] > raw_rows[index + 1]["open"]) if index + 1 < len(raw_rows) else None} for index, row in enumerate(raw_rows)]
+    components, daily, _centered, _comparison = analyze(source_rows)
+    convergence, _ = phase_convergence_analysis(daily, components)
+    alignment, _ = phase_alignment_analysis(convergence)
+    regime, _events = period_regime_history(source_rows, convergence, alignment)
+    asof = asof_phase_space_history(source_rows, regime)
+    asof_by_date = {row["date"]: {**next(item for item in regime if item["date"] == row["date"]), **row} for row in asof}
+    predictions = asof_next_phase_predictions(source_rows, asof, regime)
+    source_prediction = next(row for row in predictions if row["source_date"] == "2026-08-16")
+    source_asof = asof_by_date["2026-08-16"]
+    baseline_points = [(float(source_prediction[role + "_predicted_x"]), float(source_prediction[role + "_predicted_y"])) for role in ("long", "mid", "short")]
+    history = historical_transformations + forward_transformations
+    selection = select_transformation(source_prediction, source_asof, history)
+    transformed_points = _apply_transformation(baseline_points, selection["selected_case"])
+    baseline_geometry = _prediction_geometry(baseline_points)
+    transformed_geometry = _prediction_geometry(transformed_points)
+    baseline_scores = _geometry_scores(baseline_points)
+    transformed_scores = _geometry_scores(transformed_points)
+    generated_at = datetime.now(timezone.utc).isoformat()
+    rows = []
+    for prediction_type, points, geometry, scores in (("BASELINE", baseline_points, baseline_geometry, baseline_scores), ("TRANSFORMATION_AWARE", transformed_points, transformed_geometry, transformed_scores)):
+        row = {"source_date": "2026-08-16", "target_date": "2026-08-17", "machine": machine, "prediction_version": "NEXT_PHASE_TRANSFORMATION_V1", "prediction_type": prediction_type, "source_regime": source_prediction.get("source_regime", ""), "source_n_fft": source_prediction.get("source_n_fft", ""), "selected_transformation": selection["selected_transformation"] if prediction_type == "TRANSFORMATION_AWARE" else "NO_TRANSFORM", "selection_basis": selection["selection_basis"] if prediction_type == "TRANSFORMATION_AWARE" else "BASELINE: existing as-of phase extrapolation", "support_samples": selection["support_samples"] if prediction_type == "TRANSFORMATION_AWARE" else "", "transformation_probability": selection["transformation_probability"] if prediction_type == "TRANSFORMATION_AWARE" else "", "support_status": "LOW_SUPPORT" if prediction_type == "TRANSFORMATION_AWARE" and selection["support_samples"] < 3 else "", "generated_at": generated_at, "source_cutoff": "2026-08-16", "logic_version": "asof_phase_extrapolation_plus_historical_transformation_v1", "source_commit": "", "prediction_status": "FROZEN_BEFORE_ACTUAL", "predicted_centroid_x": geometry["centroid_x"], "predicted_centroid_y": geometry["centroid_y"], "predicted_centroid_y_offset": geometry["centroid_y_offset"], "predicted_centroid_region": geometry["centroid_region"], "predicted_top_wave_count": geometry["top_wave_count"], "predicted_top_wave_pattern": geometry["top_wave_pattern"], "predicted_phase_alignment_score": scores["phase_alignment_score"], "predicted_convergence_score": scores["convergence_score"]}
+        for role, point in zip(("long", "mid", "short"), points):
+            row[role + "_phase"] = _phase_from_xy(point)
+            row[role + "_x"], row[role + "_y"] = point
+        rows.append(row)
+    return rows
 
 
 def _prediction_row_base(source: dict, target: dict | None, source_asof: dict, target_asof: dict | None) -> dict:
@@ -1672,7 +2011,43 @@ def forward_validation_script() -> str:
 """
 
 
-def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None) -> str:
+def transformation_script() -> str:
+    return """function drawTransformation(){
+  const box=document.getElementById('transformationSummary'),svg=document.getElementById('transformationSpace');
+  if(!box||!svg)return;
+  const row=(Array.isArray(transformationRows)?transformationRows:[]).find(item=>item.source_date===rows[uiIndex].date);
+  const cx=300,cy=190,r=116;
+  const frame='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';
+  if(!row){svg.innerHTML=frame+'<text class="svg-label" x="170" y="190">NO HISTORICAL TRANSFORMATION</text>';box.textContent='選択日には有効なhistorical 1-observation comparisonがありません。';return;}
+  const points=(prefix,suffix='')=>roles.map(role=>{const key=role.toLowerCase();return [Number(row[prefix+key+suffix+'_x']),Number(row[prefix+key+suffix+'_y'])];});
+  const original=points('predicted_'),transformed=points('transformed_'),actual=points('actual_');
+  let out=frame;
+  out+='<polygon points="'+original.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="1.8" stroke-dasharray="6 4"/>';
+  out+='<polygon points="'+transformed.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#f0b35b" stroke-width="2" stroke-dasharray="2 3"/>';
+  out+='<polygon points="'+actual.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--text)" stroke-width="2"/>';
+  roles.forEach((role,i)=>{const color=colors[role],p=original[i],t=transformed[i],a=actual[i];out+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="none" stroke="'+color+'" stroke-dasharray="4 3"/><text class="svg-label" x="'+(p[0]+7)+'" y="'+(p[1]-7)+'">P '+role+'</text><circle cx="'+t[0]+'" cy="'+t[1]+'" r="7" fill="none" stroke="#f0b35b" stroke-dasharray="2 3"/><text class="svg-label" x="'+(t[0]+7)+'" y="'+(t[1]+9)+'">T '+role+'</text><circle cx="'+a[0]+'" cy="'+a[1]+'" r="5" fill="'+color+'" stroke="var(--text)"/><text class="svg-label" x="'+(a[0]+7)+'" y="'+(a[1]+15)+'">A '+role+'</text>';});
+  out+='<text class="svg-label" x="18" y="24">P original / T best transformation / A actual</text>';svg.innerHTML=out;
+  const f=v=>v===''||v===undefined||v===null?'—':Number(v).toFixed(2);
+  box.innerHTML='<p><b>Source:</b> '+esc(row.source_date)+' → <b>Target:</b> '+esc(row.target_date)+' / <b>type:</b> '+esc(row.transformation_type)+' / <b>best permutation:</b> '+esc(row.best_permutation)+'</p><p><b>rotation:</b> '+f(row.best_rotation_deg)+'° / <b>identity distance:</b> '+f(row.identity_distance)+' / <b>transformed distance:</b> '+f(row.best_transformation_distance)+' / <b>improvement:</b> '+f(Number(row.transformation_improvement)*100)+'%</p><p><b>centroid distance:</b> '+f(row.centroid_distance)+' / <b>shape similarity:</b> '+f(Number(row.shape_similarity)*100)+'% / <b>confidence:</b> '+f(Number(row.classification_confidence)*100)+'%</p>';
+}
+"""
+
+
+def frozen_prediction_script() -> str:
+    return """function drawFrozenPrediction(){
+  const box=document.getElementById('frozenPredictionSummary'),svg=document.getElementById('frozenPredictionSpace');
+  if(!box||!svg)return;
+  const rows2=Array.isArray(frozenPredictionRows)?frozenPredictionRows:[],baseline=rows2.find(row=>row.prediction_type==='BASELINE'),aware=rows2.find(row=>row.prediction_type==='TRANSFORMATION_AWARE');
+  if(!baseline||!aware){box.textContent='FROZEN prediction payload unavailable';return;}
+  const cx=300,cy=190,r=116,frame='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';
+  const pts=row=>roles.map(role=>[Number(row[role.toLowerCase()+'_x']),Number(row[role.toLowerCase()+'_y'])]);const bp=pts(baseline),tp=pts(aware);let out=frame+'<polygon points="'+bp.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="2" stroke-dasharray="6 4"/><polygon points="'+tp.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#f0b35b" stroke-width="2" stroke-dasharray="2 3"/>';
+  roles.forEach((role,i)=>{const color=colors[role];out+='<circle cx="'+bp[i][0]+'" cy="'+bp[i][1]+'" r="7" fill="none" stroke="'+color+'" stroke-dasharray="4 3"/><text class="svg-label" x="'+(bp[i][0]+7)+'" y="'+(bp[i][1]-7)+'">B '+role+'</text><circle cx="'+tp[i][0]+'" cy="'+tp[i][1]+'" r="7" fill="none" stroke="#f0b35b" stroke-dasharray="2 3"/><text class="svg-label" x="'+(tp[i][0]+7)+'" y="'+(tp[i][1]+12)+'">T '+role+'</text>';});out+='<text class="svg-label" x="18" y="24">B BASELINE / T TRANSFORMATION-AWARE</text>';svg.innerHTML=out;
+  box.innerHTML='<p><b>Source:</b> '+esc(baseline.source_date)+' → <b>Target:</b> '+esc(baseline.target_date)+' / <b>Status:</b> '+esc(baseline.prediction_status)+'</p><p><b>BASELINE:</b> phases '+roles.map(role=>Number(baseline[role.toLowerCase()+'_phase']).toFixed(1)+'°').join(' / ')+' / TOP '+baseline.predicted_top_wave_count+' / '+esc(baseline.predicted_top_wave_pattern)+' / '+esc(baseline.predicted_centroid_region)+'</p><p><b>TRANSFORMATION-AWARE:</b> '+esc(aware.selected_transformation)+' / support '+esc(aware.support_samples)+' / probability '+(Number(aware.transformation_probability)*100).toFixed(1)+'% / '+esc(aware.support_status||'OK')+' / phases '+roles.map(role=>Number(aware[role.toLowerCase()+'_phase']).toFixed(1)+'°').join(' / ')+' / TOP '+aware.predicted_top_wave_count+' / '+esc(aware.predicted_top_wave_pattern)+' / '+esc(aware.predicted_centroid_region)+'</p>';
+}
+"""
+
+
+def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None, transformation_rows: list[dict] | None = None, frozen_prediction_rows: list[dict] | None = None) -> str:
     """ASCII-safe interactive dashboard; data labels remain unambiguous in any locale."""
     public_components = [
         {key: component[key] for key in (
@@ -1723,6 +2098,8 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
                "asof_nfft_transition_detail": asof_nfft_transition_detail(asof_rows, regime_rows),
                "next_phase_rows": next_phase_rows,
                "forward_validation": [forward_validation] if forward_validation else [],
+               "transformation_rows": transformation_rows or [],
+               "frozen_prediction_rows": frozen_prediction_rows or [],
                "next_phase_stats": next_phase_prediction_stats(next_phase_rows),
                "next_phase_regime_stats": next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")),
                "next_phase_nfft_stats": next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)),
@@ -1749,6 +2126,8 @@ const DATA=__DATA__, rows=DATA.rows, components=DATA.components, roles=['LONG','
 const convergenceRows=Array.isArray(DATA.convergence_rows)?DATA.convergence_rows:[], alignmentRows=Array.isArray(DATA.alignment_rows)?DATA.alignment_rows:[], positionRows=Array.isArray(DATA.phase_position_rows)?DATA.phase_position_rows:[];
 const asofRows=Array.isArray(DATA.asof_phase_rows)?DATA.asof_phase_rows:[], regimeRows=Array.isArray(DATA.regime_rows)?DATA.regime_rows:[];
 const nextPhaseRows=Array.isArray(DATA.next_phase_rows)?DATA.next_phase_rows:[];
+const transformationRows=Array.isArray(DATA.transformation_rows)?DATA.transformation_rows:[];
+const frozenPredictionRows=Array.isArray(DATA.frozen_prediction_rows)?DATA.frozen_prediction_rows:[];
 const roleIndex={}; components.forEach((c,i)=>roleIndex[c.role]=i+1);
 const colors={LONG:'var(--long)',MID:'var(--mid)',SHORT:'var(--short)',COMBINED:'var(--combined)'};
 const slider=document.getElementById('uiSlider'), sliderLabel=document.getElementById('uiSliderLabel'); slider.max=String(rows.length-1); slider.value=String(rows.length-1);
@@ -1769,6 +2148,8 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     panels = '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny">Each selected date uses only observations through that date. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div id="nfftComparison"></div></section>'
     panels += '<section class="panel chart-panel" id="nextPredictionPanel"><h2>NEXT PHASE PREDICTION</h2><div class="tiny">Prediction uses only the source date D prefix FFT. Target D+1 As-of coordinates are answer-check data only; no bullish/bearish model is used.</div><svg id="nextPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Predicted and actual next Phase Space"></svg><div id="nextPredictionSummary" class="tiny"></div></section>'
     panels += '<section class="panel chart-panel" id="forwardValidationPanel"><h2>FROZEN FORWARD VALIDATION</h2><div class="tiny">This is a forward answer-check of the prediction frozen before the target observation. It is separate from the historical 29-row backtest and is not a bullish/bearish prediction model. Dashed markers/triangle = predicted D+1; solid markers/triangle = actual D+1 As-of.</div><svg id="forwardValidationSpace" viewBox="0 0 600 390" role="img" aria-label="Frozen predicted and actual next Phase Space"></svg><div id="forwardValidationSummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="transformationPanel"><h2>PHASE SPACE TRANSFORMATION</h2><div class="tiny">Historical D→D+1 geometry only. P = original prediction, T = best-fit transformation, A = actual As-of. This exploration does not use 2026-08-17 data.</div><svg id="transformationSpace" viewBox="0 0 600 390" role="img" aria-label="Phase Space transformation comparison"></svg><div id="transformationSummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="frozenPredictionPanel"><h2>NEXT PHASE PREDICTION: BASELINE vs TRANSFORMATION-AWARE</h2><div class="tiny">Frozen from observations through 2026-08-16 only. No 2026-08-17 OHLC or As-of data is used. B = baseline, T = transformation-aware; actual target points are not shown.</div><svg id="frozenPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Baseline and transformation-aware frozen prediction"></svg><div id="frozenPredictionSummary" class="tiny"></div></section>'
     page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
     legacy_page = build_html_v3(machine, rows, components, daily)
     first_end = legacy_page.find('</script>')
@@ -1782,8 +2163,8 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     controls_end = legacy_extra.find(";", controls_start)
     if controls_start >= 0 and controls_end >= controls_start:
         legacy_extra = legacy_extra[:controls_start] + "/* static controls retained */" + legacy_extra[controls_end + 1:]
-    legacy_extra = legacy_extra.replace("function updateView(index){", forward_validation_script() + "function updateView(index){")
-    legacy_extra = legacy_extra.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation)")
+    legacy_extra = legacy_extra.replace("function updateView(index){", forward_validation_script() + transformation_script() + frozen_prediction_script() + "function updateView(index){")
+    legacy_extra = legacy_extra.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation),panelSafe('Phase Space Transformation',drawTransformation),panelSafe('Frozen Next Prediction',drawFrozenPrediction)")
     return page.replace('</script></body>', '</script>' + legacy_extra + '</body>')
 
 
@@ -2040,7 +2421,8 @@ def add_interactive_ui(html: str) -> str:
 
 def run(machine: str) -> Path:
     machine = parse_machine(machine)
-    all_rows = load_machine_rows(machine)
+    # The frozen 8/16 prediction deliberately loads no observation after 8/16.
+    all_rows = load_machine_rows(machine, FORWARD_TARGET_DATE)
     rows = [row for row in all_rows if row["date"] <= REGIME_CUTOFF_DATE]
     if not rows:
         raise FileNotFoundError(f"台{machine}のdaily OHLCが見つかりません")
@@ -2060,7 +2442,13 @@ def run(machine: str) -> Path:
     frozen_prediction_path = out_dir / "next_phase_prediction_daily.csv"
     frozen_next_phase_rows = read_csv_rows(frozen_prediction_path)
     next_phase_rows = frozen_next_phase_rows or asof_next_phase_predictions(daily, asof_rows, regime_rows)
+    asof_by_date = {row["date"]: row for row in asof_rows}
+    transformation_rows = phase_transformation_rows(next_phase_rows, daily, asof_by_date)
     forward_validation = build_forward_validation(machine, frozen_prediction_path, all_rows)
+    forward_transformation_rows = phase_transformation_rows([forward_transformation_input(forward_validation, daily)], daily, asof_by_date)
+    identity_distance_threshold, identity_centroid_threshold = refine_identity_classification(transformation_rows)
+    refine_identity_classification(forward_transformation_rows, transformation_rows)
+    frozen_prediction_rows = frozen_next_phase_predictions(machine, all_rows, transformation_rows, forward_transformation_rows)
     component_fields = ["preprocessing", "rank", "role", "frequency", "period_days", "amplitude", "phase", "relative_power", "phase_definition", "n_observations", "n_fft", "sampling_interval", "frequency_unit", "period_basis"]
     daily_fields = ["date", "machine", "open", "high", "low", "close", "bullish", "next_day_bullish", "wave1_phase", "wave2_phase", "wave3_phase", "wave1_value", "wave2_value", "wave3_value", "combined_wave", "wave1_direction", "wave2_direction", "wave3_direction", "wave1_up", "wave2_up", "wave3_up", "wave_direction_pattern"]
     stats_fields = ["wave", "phase_start", "phase_end", "samples", "bullish_count", "bullish_rate"]
@@ -2113,6 +2501,22 @@ def run(machine: str) -> Path:
     prediction_stat_fields = ["scope", "samples", "mean_angular_error_deg", "median_angular_error_deg", "mean_xy_error", "top_side_accuracy", "component_same_k_rate", "centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
     prediction_group_fields = ["source_regime", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
     prediction_nfft_fields = ["source_n_fft", "samples"] + [f"{role}_{metric}" for role in ("long", "mid", "short") for metric in ("mean_angular_error_deg", "mean_xy_error", "top_side_accuracy")] + ["centroid_mean_distance_error", "centroid_region_accuracy", "top_wave_count_exact_accuracy", "top_wave_pattern_accuracy"]
+    transformation_fields = [
+        "source_date", "target_date", "machine", "comparison_scope", "source_regime", "source_n_fft", "source_component_reorder", "source_bullish", "target_bullish",
+        "transformation_type", "best_permutation", "identity_distance", "best_permutation_distance", "permutation_improvement",
+        "best_rotation_deg", "rotation_residual", "inversion_distance", "inversion_improvement_vs_identity", "vertical_mirror_distance", "horizontal_mirror_distance", "best_mirror_type", "best_mirror_distance",
+        "best_rotation_permutation", "best_rotation_plus_swap_deg", "best_transformation_distance", "transformation_improvement", "classification_confidence", "shape_similarity", "centroid_distance", "centroid_region_match", "predicted_centroid_region", "actual_centroid_region", "identity_distance_threshold", "identity_centroid_threshold",
+        "source_top_wave_count", "source_top_wave_pattern", "source_centroid_region", "source_phase_alignment_score", "source_convergence_score", "source_long_k", "source_mid_k", "source_short_k", "source_perimeter", "source_area",
+        "predicted_perimeter", "actual_perimeter", "predicted_area", "actual_area", "area_ratio",
+    ]
+    for side in ("long_mid", "mid_short", "short_long"):
+        transformation_fields += ["predicted_" + side + "_side", "actual_" + side + "_side", side + "_side_ratio"]
+    for role in ("long", "mid", "short"):
+        transformation_fields += ["predicted_" + role + "_phase", "actual_" + role + "_phase", role + "_angular_error", role + "_xy_distance", "predicted_" + role + "_x", "predicted_" + role + "_y", "actual_" + role + "_x", "actual_" + role + "_y", "transformed_" + role + "_x", "transformed_" + role + "_y"]
+    transformation_stat_fields = ["group", "value", "samples", "percentage", "source_bullish_count", "source_bullish_rate", "target_bullish_count", "target_bullish_rate", "mean_improvement", "mean_shape_similarity"]
+    frozen_prediction_fields = ["source_date", "target_date", "machine", "prediction_version", "prediction_type", "source_regime", "source_n_fft", "selected_transformation", "selection_basis", "support_samples", "transformation_probability", "support_status", "generated_at", "source_cutoff", "logic_version", "source_commit", "prediction_status", "predicted_centroid_x", "predicted_centroid_y", "predicted_centroid_y_offset", "predicted_centroid_region", "predicted_top_wave_count", "predicted_top_wave_pattern", "predicted_phase_alignment_score", "predicted_convergence_score"]
+    for role in ("long", "mid", "short"):
+        frozen_prediction_fields += [role + "_phase", role + "_x", role + "_y"]
     forward_fields = [
         "source_date", "target_date", "machine", "prediction_commit", "prediction_status", "source_regime", "source_n_fft", "target_n_observations", "target_n_fft", "target_regime", "n_fft_changed",
     ]
@@ -2175,12 +2579,24 @@ def run(machine: str) -> Path:
         write_csv(out_dir / "next_phase_prediction_regime_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")), prediction_group_fields)
         write_csv(out_dir / "next_phase_prediction_nfft_stats.csv", next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)), prediction_nfft_fields)
     write_csv(out_dir / "next_phase_forward_validation.csv", [forward_validation], forward_fields)
+    write_csv(out_dir / "phase_transformation_daily.csv", transformation_rows, transformation_fields)
+    write_csv(out_dir / "phase_transformation_forward.csv", forward_transformation_rows, transformation_fields)
+    write_csv(out_dir / "phase_transformation_stats.csv", phase_transformation_stats(transformation_rows), transformation_stat_fields)
+    write_csv(out_dir / "phase_transformation_regime_stats.csv", phase_transformation_stats(transformation_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")), transformation_stat_fields)
+    write_csv(out_dir / "phase_transformation_nfft_stats.csv", phase_transformation_stats(transformation_rows, "source_n_fft", ("32", "64")), transformation_stat_fields)
+    component_rows = [{**row, "component_continuity": "ALL_SAME_K" if all(row.get(role + "_component_same_k") is True or str(row.get(role + "_component_same_k")).lower() == "true" for role in ("long", "mid", "short")) else "ANY_K_CHANGE"} for row in next_phase_rows if row.get("status") == "VALID_PREDICTION" and row.get("long_angular_error_deg", "") != ""]
+    component_transformation_rows = [row for row in transformation_rows if any(item["source_date"] == row["source_date"] for item in component_rows)]
+    continuity_by_date = {row["source_date"]: row["component_continuity"] for row in component_rows}
+    for row in component_transformation_rows:
+        row["component_continuity"] = continuity_by_date.get(row["source_date"], "")
+    write_csv(out_dir / "phase_transformation_component_stats.csv", phase_transformation_stats(component_transformation_rows, "component_continuity", ("ALL_SAME_K", "ANY_K_CHANGE")), transformation_stat_fields)
+    write_csv(out_dir / "next_phase_prediction_frozen.csv", frozen_prediction_rows, frozen_prediction_fields)
     validate_reconstruction()
     validate_daily_reconstruction(daily, components)
     # build_html_v4 contains the complete single dashboard script, including the
     # as-of/regime panels and the playback controls. Keep the static controls in
     # the HTML and avoid stacking a second initializer on top of it.
-    html = add_pages_navigation(build_html_v4(machine, rows, components, daily, forward_validation, next_phase_rows))
+    html = add_pages_navigation(build_html_v4(machine, rows, components, daily, forward_validation, next_phase_rows, transformation_rows + forward_transformation_rows, frozen_prediction_rows))
     (out_dir / "fft_reconstruction.html").write_text(html, encoding="utf-8")
     pages_machine_dir = PAGES_OUTPUT_ROOT / machine
     pages_machine_dir.mkdir(parents=True, exist_ok=True)
