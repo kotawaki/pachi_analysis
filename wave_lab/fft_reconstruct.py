@@ -1307,9 +1307,9 @@ function detail(index){
  document.getElementById('info').innerHTML=`<div class="info-grid"><section><h3>現在選択日</h3><table><tbody>${dirRows}</tbody></table><p><b>pattern:</b> ${esc(r.wave_direction_pattern)}</p><p><b>combined:</b> ${Number(r.combined_wave).toFixed(1)}</p></section><section><h3>主要周期 / FFT</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>rank</th><th>freq</th><th>period</th><th>amp</th><th>power</th></tr></thead><tbody>${compRows}</tbody></table></div></section><section><h3>位相別 翌日陽線率</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>phase</th><th>n</th><th>rate</th></tr></thead><tbody>${phaseRows}</tbody></table></div></section><section><h3>方向パターン別 翌日陽線率</h3><div class="table-wrap"><table><thead><tr><th>pattern</th><th>n</th><th>bull</th><th>rate</th></tr></thead><tbody>${patternRows}</tbody></table></div></section></div>`;
 }
 function render(index){drawMain(index);drawPhase(index);detail(index);}
-slider.addEventListener('input',()=>render(Number(slider.value)));document.getElementById('prev').addEventListener('click',()=>{slider.value=String(Math.max(0,Number(slider.value)-1));render(Number(slider.value));});document.getElementById('next').addEventListener('click',()=>{slider.value=String(Math.min(rows.length-1,Number(slider.value)+1));render(Number(slider.value));});render(Number(slider.value));
+slider.addEventListener('input',()=>render(Number(slider.value)));document.getElementById('uiPrev').addEventListener('click',()=>{slider.value=String(Math.max(0,Number(slider.value)-1));render(Number(slider.value));});document.getElementById('uiNext').addEventListener('click',()=>{slider.value=String(Math.min(rows.length-1,Number(slider.value)+1));render(Number(slider.value));});render(Number(slider.value));
 </script></body></html>'''
-    extra_script = r'''<script>
+    extra_script = r'''<script>document.addEventListener('DOMContentLoaded',()=>{
 const uiControls=document.querySelector('.controls');
 document.querySelector('main').insertAdjacentHTML('beforeend','<p class="note">Faint future trails are display-only research context; this is not an as-of replay.</p>');
 uiControls.innerHTML='<button id="uiPrev" type="button">Prev</button><button id="uiPlay" type="button">Play</button><button id="uiStop" type="button">Stop</button><button id="uiNext" type="button">Next</button><label><input id="uiLoop" type="checkbox"> Loop</label><label>Speed <select id="uiSpeed"><option value="500">Fast</option><option value="1000" selected>Normal (1 obs/sec)</option><option value="2000">Slow</option></select></label><label>OHLC <select id="uiOhlcMode"><option value="zero">0 BASE</option><option value="connect">CLOSE CONNECT</option></select></label><input id="uiSlider" type="range" min="0" max="41" value="41"><span id="uiSliderLabel" class="selected"></span>';
@@ -1326,11 +1326,18 @@ function drawRegimeHistory(){const svg=document.getElementById('periodRegimeChar
 function uiRate(v){return v===''?'-':Number(v).toFixed(1)+'%';}
 function uiDetail(){const r=rows[uiIndex],same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH'),cell=(l,v,c='')=>`<div class="metric"><span class="label">${l}</span><span class="value ${c}">${esc(v)}</span></div>`;document.getElementById('summary').innerHTML=cell('date',r.date,'selected')+cell('Open',r.open)+cell('High',r.high)+cell('Low',r.low)+cell('Close',r.close)+cell('same-day',same,same==='BULLISH'?'bull':'')+cell('next observation',next,next==='BULLISH'?'next':'');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;const dirs=roles.map(role=>{const w=roleIndex[role];return `<tr><td class="role-${role.toLowerCase()}">${role}</td><td>${Number(r[`wave${w}_phase`]).toFixed(1)} deg</td><td>${esc(r[`wave${w}_direction`])}</td><td>${r[`wave${w}_up`]?'UP':'DOWN'}</td><td>${Number(r[`wave${w}_value`]).toFixed(1)}</td></tr>`}).join('');const comps=components.map(c=>`<tr><td class="role-${c.role.toLowerCase()}">${c.role}</td><td>${c.rank}</td><td>${Number(c.frequency).toFixed(5)}</td><td>${Number(c.period_days).toFixed(3)}</td><td>${Number(c.amplitude).toFixed(1)}</td><td>${(Number(c.relative_power)*100).toFixed(1)}%</td></tr>`).join('');document.getElementById('info').innerHTML=`<div class="info-grid"><section><h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>${dirs}</tbody></table><p><b>pattern:</b> ${esc(r.wave_direction_pattern)}</p><p><b>combined:</b> ${Number(r.combined_wave).toFixed(1)}</p></section><section><h3>Components</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>rank</th><th>freq</th><th>period</th><th>amp</th><th>power</th></tr></thead><tbody>${comps}</tbody></table></div></section></div>`;}
 function uiDetail(){const r=rows[uiIndex],regime=regimeRows[uiIndex]||{},asof=asofRows[uiIndex]||{},same=r.bullish?'BULLISH':'BEARISH',next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH');uiSliderLabel.textContent=`${r.date} (${uiIndex+1}/${rows.length})`;document.getElementById('summary').innerHTML='<div class="metric"><span class="label">date</span><span class="value selected">'+esc(r.date)+'</span></div><div class="metric"><span class="label">OHLC</span><span class="value">'+[r.open,r.high,r.low,r.close].map(esc).join(' / ')+'</span></div><div class="metric"><span class="label">same-day</span><span class="value">'+same+'</span></div><div class="metric"><span class="label">next observation</span><span class="value">'+next+'</span></div>';const dirs=roles.map(role=>{const w=roleIndex[role];return '<tr><td>'+role+'</td><td>'+Number(r['wave'+w+'_phase']).toFixed(1)+' deg</td><td>'+esc(r['wave'+w+'_direction'])+'</td><td>'+((r['wave'+w+'_up'])?'UP':'DOWN')+'</td><td>'+Number(r['wave'+w+'_value']).toFixed(1)+'</td></tr>';}).join('');document.getElementById('info').innerHTML='<h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>'+dirs+'</tbody></table><p><b>pattern:</b> '+esc(r.wave_direction_pattern)+'</p><p><b>combined:</b> '+Number(r.combined_wave).toFixed(1)+'</p><h3>PERIOD REGIME HISTORY</h3><p>regime='+esc(regime.regime||'-')+' / n_fft='+esc(regime.n_fft||'-')+' / stability='+(regime.period_stability_score===''?'-':Number(regime.period_stability_score).toFixed(3))+'</p><p>LONG='+(regime.long_period?Number(regime.long_period).toFixed(3):'-')+' / MID='+(regime.mid_period?Number(regime.mid_period).toFixed(3):'-')+' / SHORT='+(regime.short_period?Number(regime.short_period).toFixed(3):'-')+'</p><p>component reorder='+(regime.component_reorder?'YES':'NO')+' / joint repeat='+(regime.joint_repeat_period||'-')+' obs / stable count='+(regime.joint_repeat_stable_count||'-')+'</p><p class="tiny">MIN history='+DATA.min_regime_observations+'; shift threshold='+Number(DATA.regime_shift_pct*100).toFixed(0)+'%.</p>'+(asof.status==='VALID'?'<h3>AS-OF PHASE SPACE</h3><p>regime='+esc(asof.regime)+' / n_fft='+esc(asof.n_fft)+' / TOP waves='+asof.top_wave_count+' / pattern='+esc(asof.top_wave_pattern)+'</p><p>alignment=' + Number(asof.phase_alignment_score).toFixed(3)+' / convergence='+Number(asof.convergence_score).toFixed(3)+' / centroid='+esc(asof.centroid_region)+' / y offset='+Number(asof.centroid_y_offset).toFixed(2)+'</p>':'<h3>AS-OF PHASE SPACE</h3><p>INSUFFICIENT_HISTORY</p>');}
-function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);uiDrawMain();uiDrawPhase();drawRegimeHistory();drawAsOfPhase();uiDetail();}
+const debugOutput=document.getElementById('debugOutput');
+const pathPoints=id=>{const node=document.getElementById(id);const d=node?node.getAttribute('d')||'':'';return d?d.split(' L ').length:0;};
+function assignPhaseIds(){const svg=document.getElementById('phaseSpace');if(!svg)return;const paths=Array.from(svg.querySelectorAll('path'));['long','mid','short'].forEach((role,i)=>{if(paths[i*2])paths[i*2].id=role+'-full-path';if(paths[i*2+1])paths[i*2+1].id=role+'-past-path';});const circles=Array.from(svg.querySelectorAll('circle')).slice(2,5);['long','mid','short'].forEach((role,i)=>{if(circles[i])circles[i].id=role+'-current';});const row=convergenceRows[uiIndex];if(row){const ns='http://www.w3.org/2000/svg';const triangle=document.createElementNS(ns,'polygon');triangle.id='full-phase-triangle';triangle.setAttribute('points',[[row.long_x,row.long_y],[row.mid_x,row.mid_y],[row.short_x,row.short_y]].map(p=>p.join(',')).join(' '));triangle.setAttribute('fill','none');triangle.setAttribute('stroke','var(--cursor)');triangle.setAttribute('stroke-width','1.5');svg.appendChild(triangle);const centroid=document.createElementNS(ns,'circle');centroid.id='full-phase-centroid';centroid.setAttribute('cx',row.centroid_x);centroid.setAttribute('cy',row.centroid_y);centroid.setAttribute('r','4');centroid.setAttribute('fill','var(--cursor)');svg.appendChild(centroid);}}
+function assignAsOfIds(){const svg=document.getElementById('asofPhaseSpace');if(!svg)return;const row=asofRows[uiIndex];if(!row||row.status!=='VALID')return;const circles=Array.from(svg.querySelectorAll('circle'));const current=circles.slice(1,4),ids=['asof-long-current','asof-mid-current','asof-short-current'];ids.forEach((id,i)=>{if(current[i])current[i].id=id;});const polygon=svg.querySelector('polygon');if(polygon)polygon.id='asof-triangle';if(circles[4])circles[4].id='asof-centroid';}
+function updateDebug(lastError){if(!debugOutput)return;const asof=asofRows[uiIndex]||{};const pass=rows.length>0&&pathPoints('long-full-path')>1&&pathPoints('mid-full-path')>1&&pathPoints('short-full-path')>1;debugOutput.textContent='JS initialized: YES | SELF TEST: '+(pass?'PASS':'FAIL')+' | rows='+rows.length+' | selectedIndex='+uiIndex+' | timer='+(uiTimer===null?'stopped':'running')+' | mode='+uiMode.value+' | LONG points='+pathPoints('long-full-path')+' | MID points='+pathPoints('mid-full-path')+' | SHORT points='+pathPoints('short-full-path')+' | As-of='+((asof.status)||'-')+' | last error='+(lastError||'none');}
+function panelSafe(name,fn){try{fn();return '';}catch(error){console.error('Wave Lab '+name+' failed',error);return name+': '+(error&&error.message?error.message:String(error));}}
+function updateView(index){uiIndex=Math.max(0,Math.min(rows.length-1,index));uiSlider.value=String(uiIndex);const errors=[panelSafe('OHLC/Fourier',uiDrawMain),panelSafe('Full Phase Space',()=>{uiDrawPhase();assignPhaseIds()}),panelSafe('Period Regime',drawRegimeHistory),panelSafe('As-of Phase Space',()=>{drawAsOfPhase();assignAsOfIds()}),panelSafe('Info',uiDetail)].filter(Boolean);updateDebug(errors.join('; ')||'');}
 function stopPlayback(){if(uiTimer!==null){clearInterval(uiTimer);uiTimer=null;}document.getElementById('uiPlay').textContent='Play';}
 function advance(){if(uiIndex<rows.length-1){updateView(uiIndex+1);return true;}if(uiLoop.checked){updateView(0);return true;}stopPlayback();return false;}
 function startPlayback(){if(uiTimer!==null)return;if(uiIndex>=rows.length-1&&!uiLoop.checked)return;document.getElementById('uiPlay').textContent='Playing';uiTimer=setInterval(advance,Number(uiSpeed.value));}
 document.getElementById('uiPlay').addEventListener('click',startPlayback);document.getElementById('uiStop').addEventListener('click',stopPlayback);document.getElementById('uiPrev').addEventListener('click',()=>{stopPlayback();updateView(uiIndex-1);});document.getElementById('uiNext').addEventListener('click',()=>{stopPlayback();updateView(uiIndex+1);});uiSlider.addEventListener('input',()=>updateView(Number(uiSlider.value)));uiMode.addEventListener('change',()=>updateView(uiIndex));uiSpeed.addEventListener('change',()=>{if(uiTimer!==null){stopPlayback();startPlayback();}});updateView(uiIndex);
+});
 </script>'''
     return page.replace("__MACHINE__", machine).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":"))).replace("</script></body>", "</script>" + extra_script + "</body>")
 
@@ -1396,16 +1403,18 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#102940 0,#07111d 48%);color:var(--text);font:14px/1.45 system-ui,sans-serif}main{max-width:1440px;margin:auto;padding:20px}.header{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:14px}.header h1{margin:0;font-size:24px}.muted,.note{color:var(--muted)}.note{font-size:12px}.controls,.panel{background:linear-gradient(145deg,var(--panel),#0a1725);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px #0004}.controls{display:flex;align-items:center;gap:10px;padding:12px;margin-bottom:14px;flex-wrap:wrap}.controls input[type=range]{flex:1;min-width:240px;accent-color:var(--cursor)}button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:6px 12px;cursor:pointer}button:hover,button:focus-visible{border-color:var(--cursor);outline:none}.selected{color:var(--cursor);font-weight:700}.summary{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:8px;margin-bottom:14px}.metric{padding:9px;background:#0b1a2a;border:1px solid var(--line);border-radius:8px}.metric .label{display:block;color:var(--muted);font-size:11px}.metric .value{font-weight:600}.panel{padding:12px}.panel h2{font-size:16px;margin:0 0 8px}.chart-panel{margin-bottom:14px}.chart-panel svg,.phase-panel svg{width:100%;height:auto;display:block}.bottom{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(380px,.85fr);gap:14px}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.info-grid h3{font-size:13px;color:var(--muted);margin:4px 0}.table-wrap{overflow:auto;max-height:270px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right;white-space:nowrap}th,td:first-child{text-align:left}th{color:var(--muted)}.role-long{color:var(--long)}.role-mid{color:var(--mid)}.role-short{color:var(--short)}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px}.swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}.sw-long{background:var(--long)}.sw-mid{background:var(--mid)}.sw-short{background:var(--short)}.sw-combined{background:var(--combined)}.sw-cursor{background:var(--cursor)}.bull{color:var(--bull)}.next{color:var(--next)}.tiny{font-size:11px;color:var(--muted)}.svg-label{fill:var(--muted);font-size:12px}.svg-axis{stroke:var(--line);stroke-width:1}.svg-cursor{stroke:var(--cursor);stroke-width:2;stroke-dasharray:5 4}.svg-candle{stroke:#b8c7d5;stroke-width:1}.svg-wave{fill:none}.svg-point{stroke:var(--cursor);stroke-width:2}@media(max-width:900px){.summary{grid-template-columns:repeat(3,1fr)}.bottom{grid-template-columns:1fr}.info-grid{grid-template-columns:1fr}}@media(max-width:520px){main{padding:10px}.header{display:block}.summary{grid-template-columns:repeat(2,1fr)}.controls input[type=range]{min-width:160px}.info-grid{display:block}}
 </style></head><body><main>
 <div class="header"><div><h1>Wave Lab / Machine __MACHINE__</h1><div class="muted">as-of cutoff __CUTOFF__ / Close / observation-based Fourier research</div></div><div class="note">retrospective / exploratory analysis<br>not predictive performance</div></div>
-<div class="controls"><button id="prev" type="button">Prev</button><button id="next" type="button">Next</button><label for="dateSlider">Observation</label><input id="dateSlider" type="range" min="0" max="41" value="41"><span id="sliderLabel" class="selected"></span></div>
+<div class="controls" id="waveLabControls"><button id="uiPrev" type="button">Prev</button><button id="uiPlay" type="button">Play</button><button id="uiStop" type="button">Stop</button><button id="uiNext" type="button">Next</button><label><input id="uiLoop" type="checkbox"> Loop</label><label>Speed <select id="uiSpeed"><option value="500">Fast</option><option value="1000" selected>Normal</option><option value="2000">Slow</option></select></label><label>OHLC <select id="uiOhlcMode"><option value="zero">0 BASE</option><option value="connect">CLOSE CONNECT</option></select></label><label for="uiSlider">Observation</label><input id="uiSlider" type="range" min="0" max="__ROW_MAX__" value="__ROW_MAX__"><span id="uiSliderLabel" class="selected"></span></div>
 <div id="summary" class="summary"></div>
 <section class="panel chart-panel"><h2>OHLC and Fourier reconstructed waves</h2><div class="legend"><span><i class="swatch sw-long"></i>LONG</span><span><i class="swatch sw-mid"></i>MID</span><span><i class="swatch sw-short"></i>SHORT</span><span><i class="swatch sw-combined"></i>COMBINED</span><span><i class="swatch sw-cursor"></i>selected date</span><span class="bull">● same-day bullish</span><span class="next">&#9733; next-observation bullish</span></div><svg id="mainChart" viewBox="0 0 1200 650" role="img" aria-label="OHLC and reconstructed waves"></svg></section>
 <div class="bottom"><section class="panel phase-panel"><h2>Phase space</h2><div class="tiny">0 deg = trough / 90 deg = rising / 180 deg = crest / 270 deg = falling. Faint points are all observations; bright points are selected.</div><svg id="phaseSpace" viewBox="0 0 600 390" role="img" aria-label="LONG MID SHORT phase space"></svg></section><section class="panel"><h2>Selected date and statistics</h2><div id="info"></div></section></div>
-<p class="note">Frequency = cycles / observation, d = 1 observation, period = 1 / frequency. The full FFT uses all observations through the cutoff; n_fft is the next power of two and may change in as-of history. Units are observations, not calendar days. Faint future trails are display-only research context, not an as-of replay.</p>
+<p class="note">Frequency = cycles / observation, d = 1 observation, period = 1 / frequency. The full FFT uses all observations through the cutoff; n_fft is the next power of two and may change in as-of history. Units are observations, not calendar days. Faint future trails are display-only research context, not an as-of replay.</p><section class="panel" id="debugPanel"><h2>DEBUG</h2><pre id="debugOutput" class="tiny">JS initialized: NO</pre></section>
 </main><script>
 const DATA=__DATA__, rows=DATA.rows, components=DATA.components, roles=['LONG','MID','SHORT'];
+const convergenceRows=Array.isArray(DATA.convergence_rows)?DATA.convergence_rows:[], alignmentRows=Array.isArray(DATA.alignment_rows)?DATA.alignment_rows:[], positionRows=Array.isArray(DATA.phase_position_rows)?DATA.phase_position_rows:[];
+const asofRows=Array.isArray(DATA.asof_phase_rows)?DATA.asof_phase_rows:[], regimeRows=Array.isArray(DATA.regime_rows)?DATA.regime_rows:[];
 const roleIndex={}; components.forEach((c,i)=>roleIndex[c.role]=i+1);
 const colors={LONG:'var(--long)',MID:'var(--mid)',SHORT:'var(--short)',COMBINED:'var(--combined)'};
-const slider=document.getElementById('dateSlider'), sliderLabel=document.getElementById('sliderLabel'); slider.max=String(rows.length-1); slider.value=String(rows.length-1);
+const slider=document.getElementById('uiSlider'), sliderLabel=document.getElementById('uiSliderLabel'); slider.max=String(rows.length-1); slider.value=String(rows.length-1);
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const xAt=(i,left=70,width=1080)=>left+width*i/Math.max(1,rows.length-1);
 const ext=a=>[Math.min(...a),Math.max(...a)];
@@ -1417,9 +1426,24 @@ function drawMain(index){const svg=document.getElementById('mainChart'), left=70
 function drawPhase(index){const svg=document.getElementById('phaseSpace'),cx=300,cy=190,r=112;let out=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line)"/><circle cx="${cx}" cy="${cy}" r="${r*.5}" fill="none" stroke="var(--line)" opacity=".5"/><line class="svg-axis" x1="${cx-r-20}" y1="${cy}" x2="${cx+r+20}" y2="${cy}"/><line class="svg-axis" x1="${cx}" y1="${cy-r-20}" x2="${cx}" y2="${cy+r+20}"/><text class="svg-label" x="${cx-20}" y="${cy-r-28}">180 crest</text><text class="svg-label" x="${cx-20}" y="${cy+r+35}">0 trough</text><text class="svg-label" x="${cx+r+25}" y="${cy+4}">90 rising</text><text class="svg-label" x="${cx-r-85}" y="${cy+4}">270 falling</text>`;for(const role of roles){const col=colors[role];for(let i=0;i<rows.length;i++){const a=phase(role,i)*Math.PI/180,rr=i===index?r:r*.86,px=cx+rr*Math.sin(a),py=cy+rr*Math.cos(a);out+=`<circle cx="${px}" cy="${py}" r="${i===index?8:3}" fill="${col}" opacity="${i===index?1:.28}"/>`;}const a=phase(role,index)*Math.PI/180;out+=`<text class="svg-label" x="${cx+r*.65*Math.sin(a)}" y="${cy+r*.65*Math.cos(a)-8}">${role}</text>`;}svg.innerHTML=out;}
 function rate(v){return v===''?'-':Number(v).toFixed(1)+'%';}
 function detail(index){const r=rows[index], same=r.bullish?'BULLISH':'BEARISH', next=r.next_day_bullish===null?'N/A':(r.next_day_bullish?'BULLISH':'BEARISH'),cell=(l,v,c='')=>`<div class="metric"><span class="label">${l}</span><span class="value ${c}">${esc(v)}</span></div>`;document.getElementById('summary').innerHTML=cell('date',r.date,'selected')+cell('Open',r.open)+cell('High',r.high)+cell('Low',r.low)+cell('Close',r.close)+cell('same-day',same,same==='BULLISH'?'bull':'')+cell('next observation',next,next==='BULLISH'?'next':'');sliderLabel.textContent=`${r.date} (${index+1}/${rows.length})`;const dirRows=roles.map(role=>{const w=roleIndex[role];return `<tr><td class="role-${role.toLowerCase()}">${role}</td><td>${Number(r[`wave${w}_phase`]).toFixed(1)} deg</td><td>${esc(r[`wave${w}_direction`])}</td><td>${r[`wave${w}_up`]?'UP':'DOWN'}</td><td>${Number(r[`wave${w}_value`]).toFixed(1)}</td></tr>`}).join('');const compRows=components.map(c=>`<tr><td class="role-${c.role.toLowerCase()}">${c.role}</td><td>${c.rank}</td><td>${Number(c.frequency).toFixed(5)}</td><td>${Number(c.period_days).toFixed(3)}</td><td>${Number(c.amplitude).toFixed(1)}</td><td>${(Number(c.relative_power)*100).toFixed(1)}%</td></tr>`).join('');const phaseRows=DATA.phase_stats.map(s=>`<tr><td class="role-${s.role.toLowerCase()}">${s.role}</td><td>${s.phase_bin} deg</td><td>${s.samples}</td><td>${rate(s.next_day_bullish_rate)}</td></tr>`).join('');const patternRows=DATA.pattern_stats.map(s=>`<tr><td>${s.pattern}</td><td>${s.samples}</td><td>${s.next_day_bullish_count}</td><td>${rate(s.next_day_bullish_rate)}</td></tr>`).join('');document.getElementById('info').innerHTML=`<div class="info-grid"><section><h3>Selected wave state</h3><table><thead><tr><th>role</th><th>phase</th><th>direction</th><th>UP/DOWN</th><th>value</th></tr></thead><tbody>${dirRows}</tbody></table><p><b>pattern:</b> ${esc(r.wave_direction_pattern)}</p><p><b>combined:</b> ${Number(r.combined_wave).toFixed(1)}</p></section><section><h3>Components</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>rank</th><th>freq</th><th>period</th><th>amp</th><th>power</th></tr></thead><tbody>${compRows}</tbody></table></div></section><section><h3>Phase / next bullish rate</h3><div class="table-wrap"><table><thead><tr><th>role</th><th>phase</th><th>n</th><th>rate</th></tr></thead><tbody>${phaseRows}</tbody></table></div></section><section><h3>Direction pattern / next bullish rate</h3><div class="table-wrap"><table><thead><tr><th>pattern</th><th>n</th><th>bull</th><th>rate</th></tr></thead><tbody>${patternRows}</tbody></table></div></section></div>`;}
-function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('input',()=>render(Number(slider.value)));document.getElementById('prev').addEventListener('click',()=>{slider.value=String(Math.max(0,Number(slider.value)-1));render(Number(slider.value));});document.getElementById('next').addEventListener('click',()=>{slider.value=String(Math.min(rows.length-1,Number(slider.value)+1));render(Number(slider.value));});render(Number(slider.value));
+function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('input',()=>render(Number(slider.value)));document.getElementById('uiPrev').addEventListener('click',()=>{slider.value=String(Math.max(0,Number(slider.value)-1));render(Number(slider.value));});document.getElementById('uiNext').addEventListener('click',()=>{slider.value=String(Math.min(rows.length-1,Number(slider.value)+1));render(Number(slider.value));});render(Number(slider.value));
 </script></body></html>'''
-    return page.replace("__MACHINE__", machine).replace("__CUTOFF__", REGIME_CUTOFF_DATE).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    page = page.replace("__MACHINE__", machine).replace("__CUTOFF__", REGIME_CUTOFF_DATE).replace("__ROW_MAX__", str(max(0, len(rows) - 1))).replace("__DATA__", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    panels = '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny">Each selected date uses only observations through that date. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div id="nfftComparison"></div></section>'
+    page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
+    legacy_page = build_html_v3(machine, rows, components, daily)
+    first_end = legacy_page.find('</script>')
+    legacy_start = legacy_page.find('<script>', first_end)
+    legacy_end = legacy_page.find('</script>', legacy_start) + len('</script>')
+    legacy_extra = legacy_page[legacy_start:legacy_end]
+    # Keep the controls in the HTML body.  The legacy script used to replace
+    # them at runtime, which made the whole control bar disappear when any
+    # later initializer threw.  Only listeners/state are restored here.
+    controls_start = legacy_extra.find("uiControls.innerHTML=")
+    controls_end = legacy_extra.find(";", controls_start)
+    if controls_start >= 0 and controls_end >= controls_start:
+        legacy_extra = legacy_extra[:controls_start] + "/* static controls retained */" + legacy_extra[controls_end + 1:]
+    return page.replace('</script></body>', '</script>' + legacy_extra + '</body>')
 
 
 def add_interactive_ui(html: str) -> str:
@@ -1428,7 +1452,7 @@ def add_interactive_ui(html: str) -> str:
 (() => {
   "use strict";
   const start = () => {
-    const controls = document.querySelector(".controls");
+    const controls = document.getElementById("waveLabControls");
     const mainChart = document.getElementById("mainChart");
     const phaseSpace = document.getElementById("phaseSpace");
     if (!controls || !mainChart || !phaseSpace || !Array.isArray(rows) || !rows.length) {
@@ -1440,26 +1464,18 @@ def add_interactive_ui(html: str) -> str:
     const regimeRows = Array.isArray(DATA.regime_rows) ? DATA.regime_rows : [];
     const asofRows = Array.isArray(DATA.asof_phase_rows) ? DATA.asof_phase_rows : [];
     const positionRows = Array.isArray(DATA.phase_position_rows) ? DATA.phase_position_rows : [];
-    controls.innerHTML = '<button id="uiPrev" type="button">Prev</button>' +
-      '<button id="uiPlay" type="button">Play</button>' +
-      '<button id="uiStop" type="button">Stop</button>' +
-      '<button id="uiNext" type="button">Next</button>' +
-      '<label><input id="uiLoop" type="checkbox"> Loop</label>' +
-      '<label>Speed <select id="uiSpeed"><option value="500">Fast</option>' +
-      '<option value="1000" selected>Normal (1 observation/sec)</option>' +
-      '<option value="2000">Slow</option></select></label>' +
-      '<label>OHLC <select id="uiOhlcMode"><option value="zero">0 BASE</option>' +
-      '<option value="connect">CLOSE CONNECT</option></select></label>' +
-      '<input id="uiSlider" type="range" min="0" max="' + (rows.length - 1) +
-      '" value="' + (rows.length - 1) + '"><span id="uiSliderLabel" class="selected"></span>' +
-      '<span id="uiDebug" class="tiny" aria-live="polite"></span>';
+    const requiredControls = ["uiPrev", "uiPlay", "uiStop", "uiNext", "uiLoop", "uiSpeed", "uiOhlcMode", "uiSlider", "uiSliderLabel"];
+    if (requiredControls.some(id => !document.getElementById(id))) {
+      console.error("Wave Lab UI init failed: static control missing");
+      return;
+    }
     document.querySelector('main').insertAdjacentHTML('beforeend', '<section class="panel chart-panel" id="periodRegimePanel"><h2>PERIOD REGIME HISTORY</h2><div class="tiny">Expanding/as-of FFT: each date uses only observations through that date. STABLE / TRANSITION / UNSTABLE and n_fft changes are shown on the same observation axis.</div><svg id="periodRegimeChart" viewBox="0 0 1200 360" role="img" aria-label="Period Regime History"></svg><div id="periodRegimeSummary" class="tiny"></div></section><section class="panel chart-panel" id="asofPhasePanel"><h2>AS-OF PHASE SPACE</h2><div class="tiny"><b>FULL PERIOD PHASE SPACE:</b> uses all observations through the cutoff, so future observations can affect past positions. <b>AS-OF PHASE SPACE:</b> each selected date uses only observations through that date; future observations are not used for that day's FFT, phase, or position. This remains exploratory and does not guarantee prediction performance. The first 20 observations are INSUFFICIENT_HISTORY.</div><svg id="asofPhaseSpace" viewBox="0 0 600 390" role="img" aria-label="As-of Phase Space"></svg><div id="asofPhaseSummary" class="tiny"></div></section><section class="panel chart-panel" id="nfftComparisonPanel"><h2>FFT FRAME COMPARISON</h2><div class="tiny">n_fft=32/64 is a common FFT calculation frame, not a machine-specific period. At the 32→64 boundary, frequency-bin resolution, component selection, period, phase, and regime can change together.</div><div id="nfftComparison"></div></section>');
     const slider = document.getElementById("uiSlider");
     const label = document.getElementById("uiSliderLabel");
     const mode = document.getElementById("uiOhlcMode");
     const loop = document.getElementById("uiLoop");
     const speed = document.getElementById("uiSpeed");
-    const debug = document.getElementById("uiDebug");
+    const debug = document.getElementById("debugOutput");
     let selectedIndex = rows.length - 1;
     let timerId = null;
 
@@ -1557,10 +1573,11 @@ def add_interactive_ui(html: str) -> str:
         '"/><line class="svg-axis" x1="' + cx + '" y1="' + (cy-r-20) + '" x2="' + cx + '" y2="' + (cy+r+20) + '"/>';
       for (const role of roles) {
         const full = pathTo(role, rows.length - 1), past = pathTo(role, selectedIndex);
-        if (full) out += '<path class="phase-full" d="' + full + '" fill="none" stroke="' + colors[role] + '" stroke-width="2" opacity=".18"/>';
-        if (past) out += '<path class="phase-past" d="' + past + '" fill="none" stroke="' + colors[role] + '" stroke-width="3" opacity=".9"/>';
+        const prefix = role.toLowerCase();
+        if (full) out += '<path id="' + prefix + '-full-path" class="phase-full" d="' + full + '" fill="none" stroke="' + colors[role] + '" stroke-width="2" opacity=".18"></path>';
+        if (past) out += '<path id="' + prefix + '-past-path" class="phase-past" d="' + past + '" fill="none" stroke="' + colors[role] + '" stroke-width="3" opacity=".9"></path>';
         const point = phasePoint(role, selectedIndex);
-        if (point) out += '<circle class="phase-current" cx="' + point[0] + '" cy="' + point[1] +
+        if (point) out += '<circle id="' + prefix + '-current" class="phase-current" cx="' + point[0] + '" cy="' + point[1] +
           '" r="8" fill="' + colors[role] + '" stroke="var(--cursor)" stroke-width="2"/><text class="svg-label" x="' +
           (point[0] + 8) + '" y="' + (point[1] - 8) + '">' + role + '</text>';
       }
@@ -1568,9 +1585,9 @@ def add_interactive_ui(html: str) -> str:
       const alignment = alignmentRows[selectedIndex];
       if (convergence) {
         const triangle = [[convergence.long_x, convergence.long_y], [convergence.mid_x, convergence.mid_y], [convergence.short_x, convergence.short_y]];
-        out += '<polygon points="' + triangle.map(point => point[0] + ',' + point[1]).join(' ') +
+        out += '<polygon id="full-phase-triangle" points="' + triangle.map(point => point[0] + ',' + point[1]).join(' ') +
           '" fill="none" stroke="var(--cursor)" stroke-width="1.5" opacity=".75"/>';
-        out += '<circle cx="' + convergence.centroid_x + '" cy="' + convergence.centroid_y +
+        out += '<circle id="full-phase-centroid" cx="' + convergence.centroid_x + '" cy="' + convergence.centroid_y +
           '" r="4" fill="var(--cursor)" stroke="var(--text)" stroke-width="1"/>';
         if (convergence.phase_convergence || (alignment && alignment.high_alignment)) {
           const label = convergence.phase_convergence && alignment && alignment.high_alignment ? 'CONVERGENCE + ALIGNMENT' :
@@ -1643,6 +1660,18 @@ def add_interactive_ui(html: str) -> str:
         console.error('Wave Lab updateView failed', error);
       }
     };
+    const drawNfftComparison = () => {
+      const box = document.getElementById('nfftComparison');
+      if (!box) return;
+      const stats = Array.isArray(DATA.asof_nfft_stats) ? DATA.asof_nfft_stats : [];
+      const regimeStats = Array.isArray(DATA.asof_nfft_regime_stats) ? DATA.asof_nfft_regime_stats : [];
+      const formatRate = value => value === '' || value === undefined || value === null ? '-' : Number(value).toFixed(1) + '%';
+      let output = '<div class="table-wrap"><table><thead><tr><th>n_fft</th><th>TOP count</th><th>samples</th><th>bullish rate</th><th>next bullish rate</th></tr></thead><tbody>';
+      for (const row of stats) output += '<tr><td>' + row.n_fft + '</td><td>' + row.top_wave_count + '</td><td>' + row.samples + '</td><td>' + formatRate(row.bullish_rate) + '</td><td>' + formatRate(row.next_day_bullish_rate) + '</td></tr>';
+      output += '</tbody></table></div><h3>n_fft × regime × 2+ TOP</h3><div class="table-wrap"><table><thead><tr><th>n_fft</th><th>regime</th><th>samples</th><th>bullish rate</th><th>next bullish rate</th></tr></thead><tbody>';
+      for (const row of regimeStats) output += '<tr><td>' + row.n_fft + '</td><td>' + row.regime + '</td><td>' + row.samples + '</td><td>' + formatRate(row.bullish_rate) + '</td><td>' + formatRate(row.next_day_bullish_rate) + '</td></tr>';
+      box.innerHTML = output + '</tbody></table></div><p class="tiny">n_fft is a shared FFT calculation frame, not a machine-specific period.</p>';
+    };
     const stop = () => { if (timerId !== null) { clearInterval(timerId); timerId = null; } document.getElementById('uiPlay').textContent = 'Play'; updateInfo(); };
     const advance = () => { if (selectedIndex < rows.length - 1) updateView(selectedIndex + 1); else if (loop.checked) updateView(0); else stop(); };
     const play = () => { if (timerId !== null || (selectedIndex >= rows.length - 1 && !loop.checked)) return; document.getElementById('uiPlay').textContent = 'Playing'; timerId = setInterval(advance, Number(speed.value)); updateInfo(); };
@@ -1653,8 +1682,13 @@ def add_interactive_ui(html: str) -> str:
     slider.addEventListener('input', () => { stop(); updateView(slider.value); });
     mode.addEventListener('change', () => updateView(selectedIndex));
     speed.addEventListener('change', () => { if (timerId !== null) { stop(); play(); } });
-    drawNfftComparison();
-    updateView(selectedIndex);
+    try {
+      drawNfftComparison();
+      updateView(selectedIndex);
+    } catch (error) {
+      debug.textContent = 'UI initialization error: ' + error.message;
+      console.error('Wave Lab UI initialization failed', error);
+    }
     console.info('Wave Lab UI ready', {rows: rows.length, phasePoints: document.querySelectorAll('#phaseSpace path').length});
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true}); else start();
@@ -1756,7 +1790,10 @@ def run(machine: str) -> Path:
     write_csv(out_dir / "period_regime_stats.csv", period_regime_stats(regime_rows), regime_stat_fields)
     validate_reconstruction()
     validate_daily_reconstruction(daily, components)
-    html = add_pages_navigation(add_interactive_ui(build_html_v4(machine, rows, components, daily)))
+    # build_html_v4 contains the complete single dashboard script, including the
+    # as-of/regime panels and the playback controls. Keep the static controls in
+    # the HTML and avoid stacking a second initializer on top of it.
+    html = add_pages_navigation(build_html_v4(machine, rows, components, daily))
     (out_dir / "fft_reconstruction.html").write_text(html, encoding="utf-8")
     pages_machine_dir = PAGES_OUTPUT_ROOT / machine
     pages_machine_dir.mkdir(parents=True, exist_ok=True)
