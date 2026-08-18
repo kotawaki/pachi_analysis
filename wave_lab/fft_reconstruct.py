@@ -41,6 +41,15 @@ TRANSFORMATION_MIN_SHAPE_SIMILARITY = 0.65
 TRANSFORMATION_MIN_ROTATION_DEG = 15.0
 IDENTITY_DISTANCE_QUANTILE = 0.25
 IDENTITY_CENTROID_QUANTILE = 0.25
+TRANSFORMATION_PROBABILITY_TYPES = frozenset({
+    "ROLE_SWAP", "ROTATION", "ROTATION_PLUS_ROLE_SWAP", "INVERSION_180",
+    "MIRROR_VERTICAL", "MIRROR_HORIZONTAL",
+})
+PROBABILITY_GEOMETRY_DISTANCE_THRESHOLD = 0.35
+PROBABILITY_MIN_LEVEL1_SUPPORT = 3
+PROBABILITY_MEDIUM_SUPPORT = 3
+PROBABILITY_HIGH_SUPPORT = 6
+PROBABILITY_BUCKET_WIDTH = 0.20
 
 
 def next_power_of_two(value: int) -> int:
@@ -990,6 +999,264 @@ def phase_transformation_stats(rows: list[dict], key: str = "transformation_type
         source = [bool(row["source_bullish"]) for row in subset]
         result.append({"group": key, "value": value, "samples": len(subset), "percentage": len(subset) / len(rows) * 100.0 if rows else "", "source_bullish_count": sum(source), "source_bullish_rate": sum(source) / len(source) * 100.0 if source else "", "target_bullish_count": sum(target), "target_bullish_rate": sum(target) / len(target) * 100.0 if target else "", "mean_improvement": _safe_mean([float(row["transformation_improvement"]) for row in subset]), "mean_shape_similarity": _safe_mean([float(row["shape_similarity"]) for row in subset])})
     return result
+
+
+def _probability_state_from_asof(row: dict, regime: str | None = None) -> dict:
+    """Create a comparable source-state record from an as-of Phase Space row."""
+    state = {
+        "date": row.get("date", ""),
+        "machine": row.get("machine", ""),
+        "source_regime": regime if regime is not None else row.get("regime", ""),
+        "source_n_fft": row.get("n_fft", ""),
+        "source_top_wave_count": row.get("top_wave_count", ""),
+        "source_top_wave_pattern": row.get("top_wave_pattern", ""),
+        "source_centroid_region": row.get("centroid_region", ""),
+        "source_phase_alignment_score": row.get("phase_alignment_score", row.get("asof_phase_alignment_score", "")),
+        "source_convergence_score": row.get("convergence_score", row.get("asof_phase_convergence_score", "")),
+        "source_long_k": row.get("long_k", ""),
+        "source_mid_k": row.get("mid_k", ""),
+        "source_short_k": row.get("short_k", ""),
+    }
+    points = []
+    for role in ("long", "mid", "short"):
+        try:
+            points.append((float(row[role + "_x"]), float(row[role + "_y"])))
+        except (KeyError, TypeError, ValueError):
+            points = []
+            break
+    if len(points) == 3:
+        state["points"] = points
+        state["shape"] = _shape_metrics(points)
+        state["centroid"] = (
+            sum(point[0] for point in points) / 3.0,
+            sum(point[1] for point in points) / 3.0,
+        )
+    else:
+        state["points"] = []
+        state["shape"] = {}
+        state["centroid"] = None
+    return state
+
+
+def _probability_geometry_distance(candidate: dict, source: dict) -> float:
+    """Explainable normalized geometry distance used only by Level 1 support."""
+    candidate_state = candidate.get("_state", {})
+    candidate_points = candidate_state.get("points", [])
+    source_points = source.get("points", [])
+    if len(candidate_points) != 3 or len(source_points) != 3:
+        return 1.0
+    angular = []
+    for left, right in zip(candidate_points, source_points):
+        left_phase = _phase_from_xy(left)
+        right_phase = _phase_from_xy(right)
+        difference = abs(left_phase - right_phase)
+        angular.append(min(difference, 360.0 - difference) / 180.0)
+    centroid_distance = math.dist(candidate_state["centroid"], source["centroid"]) / (2.0 * (PHASE_SPACE_BASE_RADIUS + PHASE_SPACE_WAVE_RADIUS))
+    top_difference = abs(int(float(candidate.get("source_top_wave_count", 0) or 0)) - int(float(source.get("source_top_wave_count", 0) or 0))) / 3.0
+    region_difference = 0.0 if candidate.get("source_centroid_region", "") == source.get("source_centroid_region", "") else 1.0
+    candidate_shape = candidate_state.get("shape", {})
+    source_shape = source.get("shape", {})
+    shape_difference = sum(abs(candidate_shape.get("normalized_sides", {}).get(key, 0.0) - source_shape.get("normalized_sides", {}).get(key, 0.0)) for key in ("long_mid", "mid_short", "short_long")) / 2.0 if candidate_shape and source_shape else 1.0
+    return clip01(0.35 * _safe_mean(angular) + 0.25 * clip01(centroid_distance) + 0.15 * clip01(top_difference) + 0.10 * region_difference + 0.15 * clip01(shape_difference))
+
+
+def _probability_confidence(support_samples: int) -> str:
+    if support_samples < PROBABILITY_MEDIUM_SUPPORT:
+        return "LOW"
+    if support_samples < PROBABILITY_HIGH_SUPPORT:
+        return "MEDIUM"
+    return "HIGH"
+
+
+def _probability_prior(history: list[dict], source_date: str) -> list[dict]:
+    # A target answer is usable only once its observation date has arrived.
+    # Thus target_date <= source_date is allowed, while target_date > source_date
+    # (including 2026-08-18 for the 8/17 freeze) is excluded.
+    return [row for row in history if row.get("target_date", "") <= source_date]
+
+
+def estimate_transformation_probability(source: dict, history: list[dict], asof_by_date: dict[str, dict]) -> dict:
+    """Estimate P(transformation on next observation | source state) walk-forward."""
+    source_date = source.get("date", "")
+    prior = _probability_prior(history, source_date)
+    enriched = []
+    for row in prior:
+        item = dict(row)
+        item["_state"] = _probability_state_from_asof(asof_by_date.get(row.get("source_date", ""), {}), row.get("source_regime", ""))
+        enriched.append(item)
+    same_regime_nfft = [row for row in enriched if row.get("source_regime", "") == source.get("source_regime", "") and str(row.get("source_n_fft", "")) == str(source.get("source_n_fft", ""))]
+    near = [row for row in same_regime_nfft if _probability_geometry_distance(row, source) <= PROBABILITY_GEOMETRY_DISTANCE_THRESHOLD]
+    if len(near) >= PROBABILITY_MIN_LEVEL1_SUPPORT:
+        support = near
+        level = "LEVEL_1"
+        basis = "same machine + same regime + same n_fft + geometry distance <= 0.35"
+    elif len(same_regime_nfft) >= PROBABILITY_MIN_LEVEL1_SUPPORT:
+        support = same_regime_nfft
+        level = "LEVEL_2"
+        basis = "same machine + same regime + same n_fft"
+    else:
+        same_regime = [row for row in enriched if row.get("source_regime", "") == source.get("source_regime", "")]
+        if len(same_regime) >= PROBABILITY_MIN_LEVEL1_SUPPORT:
+            support = same_regime
+            level = "LEVEL_3"
+            basis = "same machine + same regime"
+        else:
+            support = enriched
+            level = "LEVEL_4"
+            basis = "same machine historical transformation records"
+    transform_samples = sum(row.get("transformation_type") in TRANSFORMATION_PROBABILITY_TYPES for row in support)
+    non_transform_samples = len(support) - transform_samples
+    probability = transform_samples / len(support) if support else ""
+    transform_counts = {}
+    for row in support:
+        if row.get("transformation_type") in TRANSFORMATION_PROBABILITY_TYPES:
+            transform_counts[row["transformation_type"]] = transform_counts.get(row["transformation_type"], 0) + 1
+    most_likely = min(transform_counts, key=lambda key: (-transform_counts[key], key)) if transform_counts else ""
+    conditional = transform_counts.get(most_likely, 0) / transform_samples if transform_samples else ""
+    return {
+        "selected_support_level": level, "support_level": level, "support_samples": len(support),
+        "transform_samples": transform_samples, "non_transform_samples": non_transform_samples,
+        "transform_probability": probability, "confidence": _probability_confidence(len(support)),
+        "most_likely_transform_type": most_likely, "conditional_type_probability": conditional,
+        "selection_basis": basis, "geometry_distance_threshold": PROBABILITY_GEOMETRY_DISTANCE_THRESHOLD,
+        "source_date": source_date, "source_regime": source.get("source_regime", ""), "source_n_fft": source.get("source_n_fft", ""),
+    }
+
+
+def _probability_bucket(probability: object) -> str:
+    if probability == "" or probability is None:
+        return "NO_SUPPORT"
+    index = min(4, max(0, int(float(probability) / PROBABILITY_BUCKET_WIDTH)))
+    return f"{index * 20}-{(index + 1) * 20}%"
+
+
+def transformation_probability_daily_rows(transformation_history: list[dict], asof_rows: list[dict], extra_history: list[dict] | None = None) -> list[dict]:
+    """Build strictly walk-forward probability rows for known D -> D+1 answers."""
+    history = list(transformation_history) + list(extra_history or [])
+    asof_by_date = {row.get("date", ""): _probability_state_from_asof(row) for row in asof_rows if row.get("status") == "VALID"}
+    rows = []
+    for actual in sorted(history, key=lambda row: (row.get("source_date", ""), row.get("target_date", ""))):
+        source_state = asof_by_date.get(actual.get("source_date", ""))
+        if not source_state:
+            continue
+        estimate = estimate_transformation_probability(source_state, history, asof_by_date)
+        rows.append({
+            "machine": actual.get("machine", ""), "source_date": actual.get("source_date", ""), "target_date": actual.get("target_date", ""),
+            "source_regime": source_state.get("source_regime", ""), "source_n_fft": source_state.get("source_n_fft", ""),
+            "selected_support_level": estimate["selected_support_level"], "support_samples": estimate["support_samples"],
+            "transform_samples": estimate["transform_samples"], "non_transform_samples": estimate["non_transform_samples"],
+            "transform_probability": estimate["transform_probability"], "confidence": estimate["confidence"],
+            "most_likely_transform_type": estimate["most_likely_transform_type"], "conditional_type_probability": estimate["conditional_type_probability"],
+            "selection_basis": estimate["selection_basis"], "geometry_distance_threshold": estimate["geometry_distance_threshold"],
+            "actual_transform": actual.get("transformation_type", "") in TRANSFORMATION_PROBABILITY_TYPES,
+            "actual_transformation_type": actual.get("transformation_type", ""), "actual_bullish": actual.get("target_bullish", ""),
+            "probability_bucket": _probability_bucket(estimate["transform_probability"]), "status": "WALK_FORWARD_VALIDATION",
+        })
+    return rows
+
+
+def transformation_probability_stats(rows: list[dict]) -> list[dict]:
+    result = []
+    groups = [("overall", rows)] + [(bucket, [row for row in rows if row.get("probability_bucket") == bucket]) for bucket in ("0-20%", "20-40%", "40-60%", "60-80%", "80-100%", "NO_SUPPORT")]
+    for bucket, subset in groups:
+        actual = [1.0 if row.get("actual_transform") in (True, "True", "true", 1, "1") else 0.0 for row in subset]
+        probabilities = [float(row["transform_probability"]) for row in subset if row.get("transform_probability", "") != ""]
+        brier = _safe_mean([(float(row["transform_probability"]) - (1.0 if row.get("actual_transform") in (True, "True", "true", 1, "1") else 0.0)) ** 2 for row in subset if row.get("transform_probability", "") != ""])
+        result.append({"scope": bucket, "samples": len(subset), "mean_predicted_probability": _safe_mean(probabilities), "actual_transform_count": int(sum(actual)), "actual_transform_rate": sum(actual) / len(actual) if actual else "", "brier_score": brier})
+    return result
+
+
+def frozen_transformation_probability(source: dict, history: list[dict], asof_by_date: dict[str, dict], target_date: str) -> dict:
+    estimate = estimate_transformation_probability(source, history, asof_by_date)
+    return {**estimate, "machine": source.get("machine", ""), "source_date": source.get("date", ""), "target_date": target_date, "source_cutoff": source.get("date", ""), "status": "PROBABILITY_FROZEN_BEFORE_ACTUAL", "logic_version": "walk_forward_transformation_probability_v1", "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+
+
+def probability_source_from_target_validation(row: dict) -> dict:
+    """Use the known 8/17 as-of row as the 8/17 source state; never reads 8/18."""
+    source = {
+        "date": FROZEN_TWO_WAY_TARGET_DATE, "machine": row.get("machine", ""),
+        "source_regime": row.get("target_regime", ""), "source_n_fft": row.get("target_n_fft", ""),
+        "source_top_wave_count": row.get("actual_top_wave_count", ""), "source_top_wave_pattern": row.get("actual_top_wave_pattern", ""),
+        "source_centroid_region": row.get("actual_centroid_region", ""),
+        "source_phase_alignment_score": row.get("actual_phase_alignment_score", ""), "source_convergence_score": row.get("actual_convergence_score", ""),
+        "source_long_k": row.get("actual_long_k", ""), "source_mid_k": row.get("actual_mid_k", ""), "source_short_k": row.get("actual_short_k", ""),
+    }
+    source["points"] = [(float(row["actual_" + role + "_x"]), float(row["actual_" + role + "_y"])) for role in ("long", "mid", "short")]
+    source["shape"] = _shape_metrics(source["points"])
+    source["centroid"] = (float(row["actual_centroid_x"]), float(row["actual_centroid_y"]))
+    return source
+
+
+def transformation_belt_state(probability: object) -> str:
+    value = float(probability) if probability not in ("", None) else 0.0
+    if value < 0.40:
+        return "BELT_OFF"
+    if value < 0.60:
+        return "BELT_STANDBY"
+    if value < 0.80:
+        return "BELT_GLOWING"
+    return "BELT_ACTIVE"
+
+
+def _frozen_prediction_geometry(points: list[tuple[float, float]]) -> dict:
+    geometry = _prediction_geometry(points)
+    geometry["points"] = points
+    return geometry
+
+
+def frozen_phase_prediction_0817_0818(source_prediction: dict, source_asof: dict, probability: dict, history: list[dict]) -> list[dict]:
+    """Create BASELINE and gated TRANSFORMATION-AWARE predictions without target data."""
+    roles = ("long", "mid", "short")
+    baseline_points = [(float(source_prediction[role + "_predicted_x"]), float(source_prediction[role + "_predicted_y"])) for role in roles]
+    belt = transformation_belt_state(probability.get("transform_probability", ""))
+    if belt == "BELT_OFF":
+        selection = {"selected_transformation": "NO_TRANSFORM_APPLIED", "selection_basis": "BELT_OFF: baseline retained; transformation is reference-only", "support_samples": probability.get("support_samples", ""), "transformation_probability": probability.get("transform_probability", ""), "selected_case": {}}
+        aware_points = baseline_points[:]
+        applied = False
+    elif belt == "BELT_STANDBY":
+        selection = {"selected_transformation": "REFERENCE_ONLY", "selection_basis": "BELT_STANDBY: baseline retained; historical transformation is reference-only", "support_samples": probability.get("support_samples", ""), "transformation_probability": probability.get("transform_probability", ""), "selected_case": {}}
+        aware_points = baseline_points[:]
+        applied = False
+    else:
+        selection = select_transformation(source_prediction, source_asof, history)
+        aware_points = _apply_transformation(baseline_points, selection.get("selected_case", {}))
+        applied = selection.get("selected_transformation") not in ("", "NO_CLEAR_TRANSFORM", "IDENTITY_STABLE")
+    baseline_geometry = _frozen_prediction_geometry(baseline_points)
+    aware_geometry = _frozen_prediction_geometry(aware_points)
+    generated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    common = {
+        "machine": source_prediction.get("machine", ""), "source_date": "2026-08-17", "target_date": "2026-08-18", "source_cutoff": "2026-08-17",
+        "prediction_status": "FROZEN_BEFORE_ACTUAL", "logic_version": "asof_phase_extrapolation_plus_probability_gated_transformation_v1", "generated_at": generated_at, "source_commit": "PENDING_COMMIT",
+        "source_regime": source_prediction.get("source_regime", ""), "source_n_fft": source_prediction.get("source_n_fft", ""),
+        "transform_probability": probability.get("transform_probability", ""), "probability_confidence": probability.get("confidence", ""),
+        "probability_support_samples": probability.get("support_samples", ""), "probability_transform_samples": probability.get("transform_samples", ""), "probability_non_transform_samples": probability.get("non_transform_samples", ""),
+        "belt_state": belt, "most_likely_type": probability.get("most_likely_transform_type", ""), "conditional_probability": probability.get("conditional_type_probability", ""),
+        "selection_support_samples": selection.get("support_samples", ""), "selection_basis": selection.get("selection_basis", ""),
+        "selected_transformation_type": selection.get("selected_transformation", ""), "selected_permutation": selection.get("selected_case", {}).get("best_permutation", ""),
+        "transform_applied": applied,
+    }
+    for role in roles:
+        source_key = role
+        common["baseline_" + role + "_phase"] = source_prediction[source_key + "_predicted_phase"]
+        common["baseline_" + role + "_wave_value"] = source_prediction[source_key + "_predicted_wave_value"]
+        common["baseline_" + role + "_amplitude"] = source_prediction[source_key + "_predicted_amplitude"]
+        common["baseline_" + role + "_radius"] = source_prediction[source_key + "_predicted_radius"]
+        common["baseline_" + role + "_x"] = baseline_points[roles.index(role)][0]
+        common["baseline_" + role + "_y"] = baseline_points[roles.index(role)][1]
+        common["baseline_" + role + "_top_side"] = baseline_points[roles.index(role)][1] < PHASE_SPACE_CENTER_Y
+        common["aware_" + role + "_phase"] = _phase_from_xy(aware_points[roles.index(role)])
+        common["aware_" + role + "_x"] = aware_points[roles.index(role)][0]
+        common["aware_" + role + "_y"] = aware_points[roles.index(role)][1]
+        common["aware_" + role + "_top_side"] = aware_points[roles.index(role)][1] < PHASE_SPACE_CENTER_Y
+    for prefix, geometry in (("baseline", baseline_geometry), ("aware", aware_geometry)):
+        common[prefix + "_top_wave_count"] = geometry["top_wave_count"]
+        common[prefix + "_top_wave_pattern"] = geometry["top_wave_pattern"]
+        common[prefix + "_centroid_x"] = geometry["centroid_x"]
+        common[prefix + "_centroid_y"] = geometry["centroid_y"]
+        common[prefix + "_centroid_region"] = geometry["centroid_region"]
+    baseline_row = {**common, "prediction_type": "BASELINE", "selected_transformation_type": "NO_TRANSFORM_APPLIED", "selected_permutation": "IDENTITY", "transform_applied": False}
+    aware_row = {**common, "prediction_type": "TRANSFORMATION_AWARE"}
+    return [baseline_row, aware_row]
 
 
 def forward_transformation_input(forward: dict, daily: list[dict]) -> dict:
@@ -2187,7 +2454,37 @@ def frozen_prediction_script() -> str:
 """
 
 
-def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None, transformation_rows: list[dict] | None = None, frozen_prediction_rows: list[dict] | None = None, forward_validation_extra: list[dict] | None = None) -> str:
+def transformation_probability_script() -> str:
+    return """function drawNextTransformationProbability(){
+  const box=document.getElementById('nextTransformationProbabilitySummary');
+  if(!box)return;
+  const row=DATA.next_transformation_probability_frozen;
+  if(!row){box.textContent='Transformation probability payload unavailable';return;}
+  const pct=row.transform_probability===''?'—':(Number(row.transform_probability)*100).toFixed(1)+'%';
+  const conditional=row.conditional_type_probability===''?'—':(Number(row.conditional_type_probability)*100).toFixed(1)+'%';
+  const width=row.transform_probability===''?0:Math.max(0,Math.min(100,Number(row.transform_probability)*100));
+  box.innerHTML='<p><b>Source:</b> '+esc(row.source_date)+' → <b>Target:</b> '+esc(row.target_date)+' / <b>Status:</b> '+esc(row.status)+'</p><div style="height:10px;background:var(--line);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+width+'%;background:var(--next)"></div></div><p><b>Transformation probability:</b> '+pct+' / <b>Confidence:</b> '+esc(row.confidence)+'</p><p><b>Support:</b> '+esc(row.support_samples)+' samples / transform '+esc(row.transform_samples)+' / non-transform '+esc(row.non_transform_samples)+' / <b>Level:</b> '+esc(row.selected_support_level)+'</p><p><b>Most likely type:</b> '+esc(row.most_likely_transform_type||'—')+' / <b>conditional probability:</b> '+conditional+'</p><p class="tiny">'+esc(row.selection_basis)+'; geometry threshold='+Number(row.geometry_distance_threshold).toFixed(2)+'. This is P(Transformation on next observation), not a phase or bullish/bearish prediction.</p>';
+}
+"""
+
+
+def frozen_0817_prediction_script() -> str:
+    return """function drawFrozenPrediction1818(){
+  const box=document.getElementById('frozenPrediction1818Summary'),svg=document.getElementById('frozenPrediction1818Space');
+  if(!box||!svg)return;
+  const records=Array.isArray(DATA.frozen_prediction_0817_rows)?DATA.frozen_prediction_0817_rows:[],baseline=records.find(row=>row.prediction_type==='BASELINE'),aware=records.find(row=>row.prediction_type==='TRANSFORMATION_AWARE');
+  if(!baseline||!aware){box.textContent='2026-08-17 → 2026-08-18 frozen prediction payload unavailable';return;}
+  const cx=300,cy=190,r=116,frame='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)"/><line class="svg-axis" x1="'+(cx-r-20)+'" y1="'+cy+'" x2="'+(cx+r+20)+'" y2="'+cy+'"/><line class="svg-axis" x1="'+cx+'" y1="'+(cy-r-20)+'" x2="'+cx+'" y2="'+(cy+r+20)+'"/><text class="svg-label" x="278" y="45">180 crest</text><text class="svg-label" x="278" y="350">0 trough</text><text class="svg-label" x="438" y="194">90 rising</text><text class="svg-label" x="55" y="194">270 falling</text>';
+  const points=(row,prefix)=>roles.map(role=>[Number(row[prefix+'_'+role.toLowerCase()+'_x']),Number(row[prefix+'_'+role.toLowerCase()+'_y'])]);
+  const bp=points(baseline,'baseline'),ap=points(aware,'aware');let out=frame+'<polygon points="'+bp.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--cursor)" stroke-width="2" stroke-dasharray="6 4"/><polygon points="'+ap.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="var(--next)" stroke-width="2" stroke-dasharray="2 3"/>';
+  roles.forEach((role,i)=>{const color=colors[role],b=bp[i],a=ap[i];out+='<circle cx="'+b[0]+'" cy="'+b[1]+'" r="7" fill="none" stroke="'+color+'" stroke-width="3" stroke-dasharray="4 3"/><text class="svg-label" x="'+(b[0]+7)+'" y="'+(b[1]-7)+'">B '+role+'</text><circle cx="'+a[0]+'" cy="'+a[1]+'" r="7" fill="none" stroke="'+color+'" stroke-width="2" stroke-dasharray="2 3"/><text class="svg-label" x="'+(a[0]+7)+'" y="'+(a[1]+13)+'">T '+role+'</text>';});out+='<text class="svg-label" x="18" y="24">B BASELINE / T TRANSFORMATION-AWARE / NO ACTUAL</text>';svg.innerHTML=out;
+  const pct=Number(baseline.transform_probability)*100, f=v=>v===''||v===undefined||v===null?'—':Number(v).toFixed(1), summary=row=>roles.map(role=>f(row['aware_'+role.toLowerCase()+'_phase'])+'°').join(' / ');
+  box.innerHTML='<p><b>Source:</b> 2026-08-17 → <b>Target:</b> 2026-08-18 / <b>Status:</b> '+esc(baseline.prediction_status)+'</p><p><b>BASELINE:</b> phases '+roles.map(role=>f(baseline['baseline_'+role.toLowerCase()+'_phase'])+'°').join(' / ')+' / TOP '+baseline.baseline_top_wave_count+' / '+esc(baseline.baseline_top_wave_pattern)+' / '+esc(baseline.baseline_centroid_region)+'</p><p><b>TRANSFORMATION PROBABILITY:</b> '+f(pct)+'% / '+esc(baseline.probability_confidence)+' / '+esc(baseline.belt_state)+' / support '+esc(baseline.probability_support_samples)+' / most likely '+esc(baseline.most_likely_type||'—')+' / conditional '+f(Number(baseline.conditional_probability)*100)+'%</p><p><b>TRANSFORMATION-AWARE:</b> '+esc(aware.selected_transformation_type)+' / '+esc(aware.selected_permutation||'—')+' / applied '+esc(String(aware.transform_applied))+' / support '+esc(aware.selection_support_samples)+' / phases '+summary(aware)+' / TOP '+aware.aware_top_wave_count+' / '+esc(aware.aware_top_wave_pattern)+' / '+esc(aware.aware_centroid_region)+'</p><p class="tiny">No 2026-08-18 actual data is displayed or used. Transformation probability is not bullish/bearish probability.</p>';
+}
+"""
+
+
+def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily: list[dict], forward_validation: dict | None = None, frozen_next_phase_rows: list[dict] | None = None, transformation_rows: list[dict] | None = None, frozen_prediction_rows: list[dict] | None = None, forward_validation_extra: list[dict] | None = None, next_transformation_probability: dict | None = None, frozen_0817_rows: list[dict] | None = None) -> str:
     """ASCII-safe interactive dashboard; data labels remain unambiguous in any locale."""
     public_components = [
         {key: component[key] for key in (
@@ -2243,6 +2540,8 @@ def build_html_v4(machine: str, rows: list[dict], components: list[dict], daily:
                "next_phase_stats": next_phase_prediction_stats(next_phase_rows),
                "next_phase_regime_stats": next_phase_prediction_group_stats(next_phase_rows, "source_regime", ("STABLE", "TRANSITION", "UNSTABLE")),
                "next_phase_nfft_stats": next_phase_prediction_group_stats(next_phase_rows, "source_n_fft", (32, 64)),
+               "next_transformation_probability_frozen": next_transformation_probability,
+               "frozen_prediction_0817_rows": frozen_0817_rows or [],
                "asof_threshold_min_samples": ASOF_THRESHOLD_MIN_SAMPLES,
                "regime_cutoff_date": REGIME_CUTOFF_DATE,
                "min_regime_observations": MIN_REGIME_OBSERVATIONS,
@@ -2290,6 +2589,8 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     panels += '<section class="panel chart-panel" id="forwardValidationPanel"><h2>FROZEN FORWARD VALIDATION</h2><div class="tiny">This is a forward answer-check of the prediction frozen before the target observation. It is separate from the historical 29-row backtest and is not a bullish/bearish prediction model. Dashed markers/triangle = predicted D+1; solid markers/triangle = actual D+1 As-of.</div><svg id="forwardValidationSpace" viewBox="0 0 600 390" role="img" aria-label="Frozen predicted and actual next Phase Space"></svg><div id="forwardValidationSummary" class="tiny"></div></section>'
     panels += '<section class="panel chart-panel" id="transformationPanel"><h2>PHASE SPACE TRANSFORMATION</h2><div class="tiny">Historical D→D+1 geometry only. P = original prediction, T = best-fit transformation, A = actual As-of. This exploration does not use 2026-08-17 data.</div><svg id="transformationSpace" viewBox="0 0 600 390" role="img" aria-label="Phase Space transformation comparison"></svg><div id="transformationSummary" class="tiny"></div></section>'
     panels += '<section class="panel chart-panel" id="frozenPredictionPanel"><h2>NEXT PHASE PREDICTION: BASELINE vs TRANSFORMATION-AWARE</h2><div class="tiny">Frozen from observations through 2026-08-16 only. No 2026-08-17 OHLC or As-of data is used. B = baseline, T = transformation-aware; actual target points are not shown.</div><svg id="frozenPredictionSpace" viewBox="0 0 600 390" role="img" aria-label="Baseline and transformation-aware frozen prediction"></svg><div id="frozenPredictionSummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="nextTransformationProbabilityPanel"><h2>NEXT TRANSFORMATION PROBABILITY</h2><div class="tiny">Walk-forward empirical probability of a clear Phase Space Transformation on the next observation. This is separate from selecting a transformation type and does not predict bullish/bearish.</div><div id="nextTransformationProbabilitySummary" class="tiny"></div></section>'
+    panels += '<section class="panel chart-panel" id="frozenPrediction1818Panel"><h2>NEXT PHASE PREDICTION: 2026-08-17 → 2026-08-18</h2><div class="tiny">FROZEN_BEFORE_ACTUAL. B = BASELINE; T = TRANSFORMATION-AWARE. No 2026-08-18 actual data is present or used.</div><svg id="frozenPrediction1818Space" viewBox="0 0 600 390" role="img" aria-label="2026-08-17 to 2026-08-18 frozen phase prediction"></svg><div id="frozenPrediction1818Summary" class="tiny"></div></section>'
     page = page.replace('<p class="note">Frequency = cycles / observation', panels + '<p class="note">Frequency = cycles / observation', 1)
     legacy_page = build_html_v3(machine, rows, components, daily)
     first_end = legacy_page.find('</script>')
@@ -2303,8 +2604,8 @@ function render(i){drawMain(i);drawPhase(i);detail(i);}slider.addEventListener('
     controls_end = legacy_extra.find(";", controls_start)
     if controls_start >= 0 and controls_end >= controls_start:
         legacy_extra = legacy_extra[:controls_start] + "/* static controls retained */" + legacy_extra[controls_end + 1:]
-    legacy_extra = legacy_extra.replace("function updateView(index){", forward_validation_script() + transformation_script() + frozen_prediction_script() + "function updateView(index){")
-    legacy_extra = legacy_extra.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation),panelSafe('Phase Space Transformation',drawTransformation),panelSafe('Frozen Next Prediction',drawFrozenPrediction)")
+    legacy_extra = legacy_extra.replace("function updateView(index){", forward_validation_script() + transformation_script() + frozen_prediction_script() + transformation_probability_script() + frozen_0817_prediction_script() + "function updateView(index){")
+    legacy_extra = legacy_extra.replace("panelSafe('Next Phase Prediction',drawNextPrediction)", "panelSafe('Next Phase Prediction',drawNextPrediction),panelSafe('Forward Validation',drawForwardValidation),panelSafe('Phase Space Transformation',drawTransformation),panelSafe('Frozen Next Prediction',drawFrozenPrediction),panelSafe('Next Transformation Probability',drawNextTransformationProbability),panelSafe('Frozen 8/17 to 8/18 Prediction',drawFrozenPrediction1818)")
     return page.replace('</script></body>', '</script>' + legacy_extra + '</body>')
 
 
@@ -2595,6 +2896,28 @@ def run(machine: str) -> Path:
     # Prefer the persisted rows so this run can never regenerate or alter them.
     frozen_prediction_rows = read_csv_rows(frozen_two_way_path) or frozen_next_phase_predictions(machine, all_rows, transformation_rows, forward_transformation_rows)
     frozen_two_way_rows, frozen_two_way_transformations = frozen_two_way_validation(machine, frozen_two_way_path, validation_rows, transformation_rows)
+    probability_history = transformation_rows + forward_transformation_rows + frozen_two_way_transformations
+    probability_daily_rows = transformation_probability_daily_rows(probability_history, asof_rows)
+    frozen_probability_source = probability_source_from_target_validation(frozen_two_way_rows[0]) if frozen_two_way_rows else None
+    frozen_probability = frozen_transformation_probability(frozen_probability_source, probability_history, asof_by_date, "2026-08-18") if frozen_probability_source else None
+    frozen_probability_path = out_dir / "next_transformation_probability_frozen.csv"
+    persisted_probability = read_csv_rows(frozen_probability_path)
+    if persisted_probability:
+        # Preserve the preceding probability freeze byte-for-byte in meaning;
+        # this run only consumes it and never recalculates or rewrites it.
+        frozen_probability = persisted_probability[0]
+    # Build only the 2026-08-17 prefix to obtain the source state for the new
+    # freeze.  No target (2026-08-18) row is loaded or analyzed here.
+    validation_components, validation_daily, _validation_centered, _validation_comparison = analyze(validation_rows)
+    validation_convergence, _validation_convergence_threshold = phase_convergence_analysis(validation_daily, validation_components)
+    validation_alignment, _validation_alignment_threshold = phase_alignment_analysis(validation_convergence)
+    validation_alignment = add_repeat_metadata(validation_alignment, repeat_periods(validation_components)[1])
+    validation_regime, _validation_events = period_regime_history(validation_daily, validation_convergence, validation_alignment)
+    validation_asof = asof_phase_space_history(validation_daily, validation_regime)
+    validation_predictions = asof_next_phase_predictions(validation_daily, validation_asof, validation_regime)
+    source_prediction_0817 = next((row for row in validation_predictions if row.get("source_date") == "2026-08-17"), None)
+    source_asof_0817 = next((row for row in validation_asof if row.get("date") == "2026-08-17"), None)
+    frozen_0817_rows = frozen_phase_prediction_0817_0818(source_prediction_0817, source_asof_0817, frozen_probability, probability_history) if source_prediction_0817 and source_asof_0817 and frozen_probability else []
     component_fields = ["preprocessing", "rank", "role", "frequency", "period_days", "amplitude", "phase", "relative_power", "phase_definition", "n_observations", "n_fft", "sampling_interval", "frequency_unit", "period_basis"]
     daily_fields = ["date", "machine", "open", "high", "low", "close", "bullish", "next_day_bullish", "wave1_phase", "wave2_phase", "wave3_phase", "wave1_value", "wave2_value", "wave3_value", "combined_wave", "wave1_direction", "wave2_direction", "wave3_direction", "wave1_up", "wave2_up", "wave3_up", "wave_direction_pattern"]
     stats_fields = ["wave", "phase_start", "phase_end", "samples", "bullish_count", "bullish_rate"]
@@ -2701,6 +3024,29 @@ def run(machine: str) -> Path:
         "predicted_centroid_region", "actual_centroid_region", "centroid_region_match", "actual_phase_alignment_score", "actual_convergence_score", "actual_wave_direction_pattern", "actual_dominant_rank_signature", "actual_joint_repeat_period", "actual_period_stability_score",
         "actual_open", "actual_high", "actual_low", "actual_close", "actual_bullish",
     ]
+    probability_fields = [
+        "machine", "source_date", "target_date", "source_regime", "source_n_fft", "selected_support_level", "support_samples",
+        "transform_samples", "non_transform_samples", "transform_probability", "confidence", "most_likely_transform_type",
+        "conditional_type_probability", "selection_basis", "geometry_distance_threshold", "actual_transform", "actual_transformation_type",
+        "actual_bullish", "probability_bucket", "status",
+    ]
+    probability_stat_fields = ["scope", "samples", "mean_predicted_probability", "actual_transform_count", "actual_transform_rate", "brier_score"]
+    probability_frozen_fields = [
+        "machine", "source_date", "target_date", "source_regime", "source_n_fft", "selected_support_level", "support_samples",
+        "transform_samples", "non_transform_samples", "transform_probability", "confidence", "most_likely_transform_type",
+        "conditional_type_probability", "selection_basis", "geometry_distance_threshold", "source_cutoff", "status", "logic_version", "generated_at",
+    ]
+    frozen_0817_fields = [
+        "machine", "source_date", "target_date", "source_cutoff", "prediction_status", "prediction_type", "logic_version", "generated_at", "source_commit",
+        "source_regime", "source_n_fft", "transform_probability", "probability_confidence", "probability_support_samples", "probability_transform_samples", "probability_non_transform_samples", "belt_state", "most_likely_type", "conditional_probability",
+        "selected_transformation_type", "selected_permutation", "selection_basis", "selection_support_samples", "transform_applied",
+    ]
+    for prefix in ("baseline", "aware"):
+        frozen_0817_fields += [prefix + "_top_wave_count", prefix + "_top_wave_pattern", prefix + "_centroid_x", prefix + "_centroid_y", prefix + "_centroid_region"]
+        for role in ("long", "mid", "short"):
+            frozen_0817_fields += [prefix + "_" + role + "_phase", prefix + "_" + role + "_x", prefix + "_" + role + "_y", prefix + "_" + role + "_top_side"]
+    for role in ("long", "mid", "short"):
+        frozen_0817_fields += ["baseline_" + role + "_wave_value", "baseline_" + role + "_amplitude", "baseline_" + role + "_radius"]
     regime_fields = [
         "date", "machine", "n_observations", "n_fft", "status", "open", "high", "low", "close", "bullish", "next_day_bullish",
         "long_k", "long_frequency", "long_period", "long_amplitude", "long_power", "long_rank",
@@ -2757,6 +3103,13 @@ def run(machine: str) -> Path:
     for row in component_transformation_rows:
         row["component_continuity"] = continuity_by_date.get(row["source_date"], "")
     write_csv(out_dir / "phase_transformation_component_stats.csv", phase_transformation_stats(component_transformation_rows, "component_continuity", ("ALL_SAME_K", "ANY_K_CHANGE")), transformation_stat_fields)
+    write_csv(out_dir / "next_transformation_probability_daily.csv", probability_daily_rows, probability_fields)
+    write_csv(out_dir / "next_transformation_probability_stats.csv", transformation_probability_stats(probability_daily_rows), probability_stat_fields)
+    forward_probability_rows = [{**row, "status": "FORWARD_PROBABILITY_VALIDATION"} for row in probability_daily_rows if row.get("source_date") in (FORWARD_SOURCE_DATE, FROZEN_TWO_WAY_SOURCE_DATE)]
+    write_csv(out_dir / "next_transformation_probability_forward_validation.csv", forward_probability_rows, probability_fields)
+    if not frozen_probability_path.exists():
+        write_csv(frozen_probability_path, [frozen_probability] if frozen_probability else [], probability_frozen_fields)
+    write_csv(out_dir / "next_phase_prediction_frozen_20260817_20260818.csv", frozen_0817_rows, frozen_0817_fields)
     # Never rewrite an existing frozen prediction file; preserve its exact
     # bytes and metadata as the pre-actual baseline.
     if not frozen_two_way_path.exists():
@@ -2768,7 +3121,7 @@ def run(machine: str) -> Path:
     # build_html_v4 contains the complete single dashboard script, including the
     # as-of/regime panels and the playback controls. Keep the static controls in
     # the HTML and avoid stacking a second initializer on top of it.
-    html = add_pages_navigation(build_html_v4(machine, rows, components, daily, forward_validation, next_phase_rows, transformation_rows + forward_transformation_rows, frozen_prediction_rows, frozen_two_way_rows))
+    html = add_pages_navigation(build_html_v4(machine, rows, components, daily, forward_validation, next_phase_rows, transformation_rows + forward_transformation_rows, frozen_prediction_rows, frozen_two_way_rows, frozen_probability, frozen_0817_rows))
     (out_dir / "fft_reconstruction.html").write_text(html, encoding="utf-8")
     pages_machine_dir = PAGES_OUTPUT_ROOT / machine
     pages_machine_dir.mkdir(parents=True, exist_ok=True)
