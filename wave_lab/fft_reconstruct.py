@@ -24,7 +24,10 @@ MIN_PERIOD_DAYS = 2.0
 MAX_PERIOD_FRACTION_OF_DATA = 0.80
 PHASE_BIN_WIDTH_DEGREES = 45.0
 DIRECTION_SLOPE_EPSILON_FRACTION = 0.02
-REGIME_CUTOFF_DATE = "2026-08-16"
+# Main Wave Lab history is refreshed through the latest formal daily OHLC.
+# The frozen 2026-08-16 -> 2026-08-17 answer-check constants below remain
+# unchanged and continue to protect the historical prediction artifacts.
+REGIME_CUTOFF_DATE = "2026-08-21"
 MIN_REGIME_OBSERVATIONS = 21
 REGIME_REFERENCE_CHANGE = 0.25
 REGIME_SHIFT_PCT = 0.20
@@ -2862,9 +2865,10 @@ def add_interactive_ui(html: str) -> str:
 
 def run(machine: str) -> Path:
     machine = parse_machine(machine)
-    # Keep the main dashboard/past-analysis payload at the 8/16 cutoff.  A
-    # separate 8/17 prefix is loaded only for the frozen answer check below.
-    all_rows = load_machine_rows(machine, FORWARD_TARGET_DATE)
+    # Keep the main dashboard/past-analysis payload current through the latest
+    # formal OHLC.  The separate 8/16 and 8/17 prefixes below are retained for
+    # the frozen answer checks.
+    all_rows = load_machine_rows(machine)
     validation_rows = load_machine_rows(machine, FROZEN_TWO_WAY_TARGET_DATE)
     rows = [row for row in all_rows if row["date"] <= REGIME_CUTOFF_DATE]
     if not rows:
