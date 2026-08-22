@@ -6,8 +6,10 @@ import csv
 import html as html_lib
 import io
 import json
+import math
 import os
 import re
+import statistics
 from bisect import bisect_left
 from html.parser import HTMLParser
 from pathlib import Path
@@ -396,6 +398,482 @@ def build_capture_axes(img: Image.Image, y2_value: int = 10000, y1_value: int = 
         "y1_value": y1_value,
         "source": "image",
     }
+
+
+def _local_capture_grid_rows(img: Image.Image, scan_end: int = 900) -> list[int]:
+    """local_capture 590x1000画像のチャート水平グリッドを抽出する。"""
+    width, height = img.size
+    pixels = img.load()
+    candidates: list[int] = []
+    for y in range(10, min(height, scan_end + 1)):
+        gray_count = 0
+        white_count = 0
+        for x in range(60, min(width, 570)):
+            r, g, b = pixels[x, y]
+            if max(r, g, b) - min(r, g, b) <= 4 and 40 <= r <= 200:
+                gray_count += 1
+            if r >= 220 and g >= 220 and b >= 220:
+                white_count += 1
+        if gray_count >= 70 or white_count >= 300:
+            candidates.append(y)
+
+    rows: list[int] = []
+    for y in candidates:
+        if not rows or y - rows[-1] > 2:
+            rows.append(y)
+        else:
+            rows[-1] = round((rows[-1] + y) / 2)
+
+    # チャート内のグリッドはほぼ等間隔。波形や0ラインで一部の
+    # 水平線が弱くても、前後の実測gridから1本だけ補間する。
+    sequences: list[list[int]] = []
+    for start, first in enumerate(rows):
+        if first > 45 or len(rows) - start < 5:
+            continue
+        differences = [
+            rows[index + 1] - rows[index]
+            for index in range(start, len(rows) - 1)
+            if 30 <= rows[index + 1] - rows[index] <= 100
+        ]
+        if not differences:
+            continue
+        # 波形やOCR由来の水平候補がgrid列の間に混入しても、反復する
+        # 隣接差分（実grid間隔）を優先する。
+        best_spacing = max(
+            differences,
+            key=lambda spacing: sum(abs(other - spacing) <= 3 for other in differences),
+        )
+        spacing_cluster = [other for other in differences if abs(other - best_spacing) <= 3]
+        base_spacing = statistics.median(spacing_cluster)
+        sequence = [first]
+        for row in rows[start + 1:]:
+            expected = sequence[-1] + base_spacing
+            if abs(row - expected) <= base_spacing * 0.15:
+                sequence.append(row)
+            elif row < expected + base_spacing * 0.75:
+                # 期待位置の近傍にある短い線・波形由来の候補は無視し、
+                # 次のgrid候補の探索を継続する。
+                continue
+            else:
+                missing_count = None
+                for gap_count in range(1, 4):
+                    expected_row = expected + base_spacing * gap_count
+                    if abs(row - expected_row) <= base_spacing * 0.15:
+                        missing_count = gap_count
+                        break
+                if missing_count is None:
+                    break
+                sequence.extend(
+                    [round(expected + base_spacing * index) for index in range(missing_count)]
+                    + [row]
+                )
+        if len(sequence) >= 7:
+            sequences.append(sequence)
+    if not sequences:
+        raise ValueError("local_capture: horizontal grid rows not detected")
+
+    # 最も多くのグリッドを含む列を採用する。
+    return max(sequences, key=lambda sequence: (len(sequence), -sequence[0]))
+
+
+def _local_capture_bottom_frame_y(img: Image.Image, start_y: int) -> int | None:
+    """OCR最下ラベルより下にあるチャート右端までの水平枠を探す。"""
+    width, height = img.size
+    pixels = img.load()
+    matches: list[int] = []
+    for y in range(max(10, round(start_y)), height):
+        runs: list[tuple[int, int]] = []
+        run_start: int | None = None
+        for x in range(60, min(width, 570)):
+            r, g, b = pixels[x, y]
+            bright = r >= 220 and g >= 220 and b >= 220
+            if bright and run_start is None:
+                run_start = x
+            elif not bright and run_start is not None:
+                if 70 <= run_start <= 100 and 530 <= x - 1 <= 560:
+                    runs.append((run_start, x - 1))
+                run_start = None
+        if run_start is not None and 70 <= run_start <= 100 and 530 <= width - 1 <= 560:
+            runs.append((run_start, width - 1))
+        if runs:
+            matches.append(y)
+    # 最下OCRラベル直後の最初のチャート枠を採用する。下方のviewport枠を
+    # 後から拾わないため、max(matches)ではなく最初の候補を使う。
+    return min(matches) if matches else None
+
+
+def _local_capture_vertical_grid_columns(img: Image.Image, top_y: int, bottom_y: int) -> list[int]:
+    width, height = img.size
+    pixels = img.load()
+    span = max(1, bottom_y - top_y)
+    columns: list[int] = []
+    for x in range(60, min(width, 560)):
+        gray_count = 0
+        white_count = 0
+        for y in range(top_y, min(bottom_y + 1, height)):
+            r, g, b = pixels[x, y]
+            if max(r, g, b) - min(r, g, b) <= 4 and 40 <= r <= 200:
+                gray_count += 1
+            if r >= 220 and g >= 220 and b >= 220:
+                white_count += 1
+        if gray_count >= max(20, span * 0.12) or white_count >= span * 0.70:
+            columns.append(x)
+    groups: list[list[int]] = []
+    for x in columns:
+        if not groups or x - groups[-1][-1] > 2:
+            groups.append([x])
+        else:
+            groups[-1].append(x)
+    return [round(sum(group) / len(group)) for group in groups]
+
+
+def _local_capture_frame_x(img: Image.Image, top_y: int, bottom_y: int) -> tuple[int, int]:
+    """チャート下枠の連続線からlocal_captureの実測X範囲を求める。"""
+    width, height = img.size
+    pixels = img.load()
+    verticals = _local_capture_vertical_grid_columns(img, top_y, bottom_y)
+    left_candidates = [x for x in verticals if 70 <= x <= 105]
+    grid_candidates = [x for x in verticals if x > 105]
+    estimated_left = min(left_candidates) if left_candidates else None
+    estimated_right = None
+    if len(grid_candidates) >= 3:
+        spacing = statistics.median(
+            right - left for left, right in zip(grid_candidates, grid_candidates[1:])
+        )
+        estimated_right = round(grid_candidates[-1] + spacing)
+
+    for y in range(max(0, bottom_y - 2), min(height, bottom_y + 3)):
+        runs: list[tuple[int, int]] = []
+        start: int | None = None
+        for x in range(width):
+            r, g, b = pixels[x, y]
+            bright = r >= 220 and g >= 220 and b >= 220
+            if bright and start is None:
+                start = x
+            elif not bright and start is not None:
+                if x - start >= 300:
+                    runs.append((start, x - 1))
+                start = None
+        if start is not None and width - start >= 300:
+            runs.append((start, width - 1))
+        if runs:
+            if estimated_left is not None:
+                connected = [run for run in runs if abs(run[0] - estimated_left) <= 8]
+                if connected:
+                    run = max(connected, key=lambda item: item[1] - item[0])
+                    if 530 <= run[1] <= 560:
+                        return run
+                    if estimated_right is None or run[1] <= estimated_right + 20:
+                        return run
+            if estimated_left is not None and estimated_right is not None:
+                return estimated_left, estimated_right
+            return max(runs, key=lambda run: run[1] - run[0])
+    if estimated_left is not None and estimated_right is not None:
+        return estimated_left, estimated_right
+    raise ValueError("local_capture: chart frame X range not detected")
+
+
+def _parse_local_ocr_value(text: str) -> int | None:
+    cleaned = text.replace(",", "").replace("，", "").replace(" ", "")
+    sign = -1 if cleaned.startswith("-") else 1
+    digits = re.sub(r"[^0-9]", "", cleaned)
+    if not digits:
+        return None
+    value = sign * int(digits)
+    # 小レンジ（例: ±2,000）では500単位の目盛りもあるため、
+    # 100未満のノイズだけを除外する。
+    return value if value == 0 or abs(value) >= 100 else None
+
+
+def _ocr_local_y_labels(img: Image.Image) -> tuple[list[dict], list[dict]]:
+    """Y軸ラベルをOCRし、採用候補と除外候補を返す。"""
+    try:
+        import pytesseract
+        from pytesseract import Output
+    except Exception as exc:
+        raise ValueError(f"local_capture: pytesseract unavailable: {exc}") from exc
+    raw: list[dict] = []
+    crop_top = 10
+    scale = 5
+    # チャート高はY軸レンジにより変わるため、590x1000でも485pxで
+    # 打ち切らず、スクリーンショット内の左ラベル帯を下端近くまで読む。
+    base = img.crop((0, crop_top, min(img.width, 82), min(img.height, 900))).convert("L")
+    for threshold in (None, 120, 160):
+        crop = base.resize((base.width * scale, base.height * scale))
+        if threshold is not None:
+            crop = crop.point(lambda pixel: 255 if pixel > threshold else 0)
+        data = pytesseract.image_to_data(
+            crop,
+            config="--psm 11",
+            output_type=Output.DICT,
+        )
+        tokens: list[dict] = []
+        for index, text in enumerate(data["text"]):
+            if not text.strip():
+                continue
+            try:
+                confidence = float(data["conf"][index])
+            except (TypeError, ValueError):
+                confidence = -1.0
+            tokens.append({
+                "text": text,
+                "left": float(data["left"][index]),
+                "pixel_y_scaled": float(data["top"][index]) + float(data["height"][index]) / 2,
+                "confidence": confidence,
+            })
+        # OCRが「20,」と「000」に分割しても同一行として連結する。
+        groups: list[list[dict]] = []
+        for token in sorted(tokens, key=lambda item: (item["pixel_y_scaled"], item["left"])):
+            group = next((group for group in groups if abs(group[0]["pixel_y_scaled"] - token["pixel_y_scaled"]) <= 35), None)
+            if group is None:
+                groups.append([token])
+            else:
+                group.append(token)
+        for group in groups:
+            text = "".join(item["text"] for item in sorted(group, key=lambda item: item["left"]))
+            value = _parse_local_ocr_value(text)
+            if value is None:
+                continue
+            raw.append({
+                "text": text,
+                "value": value,
+                "pixel_y": crop_top + sum(item["pixel_y_scaled"] for item in group) / len(group) / scale,
+                "confidence": sum(item["confidence"] for item in group) / len(group),
+            })
+
+    groups: list[list[dict]] = []
+    for item in sorted(raw, key=lambda row: row["pixel_y"]):
+        group = next((group for group in groups if abs(group[0]["pixel_y"] - item["pixel_y"]) <= 8), None)
+        if group is None:
+            groups.append([item])
+        else:
+            group.append(item)
+
+    # OCR候補の全組合せから、複数ラベルに最も一貫する線形モデルを選ぶ。
+    candidates = [item for group in groups for item in group]
+    best: tuple[int, float, float, float, list[dict]] | None = None
+    for left in candidates:
+        for right in candidates:
+            if abs(left["pixel_y"] - right["pixel_y"]) < 20:
+                continue
+            a = (right["value"] - left["value"]) / (right["pixel_y"] - left["pixel_y"])
+            if a >= 0:
+                continue
+            b = left["value"] - a * left["pixel_y"]
+            selected: list[dict] = []
+            residuals: list[float] = []
+            for group in groups:
+                item = min(group, key=lambda row: abs(row["value"] - (a * row["pixel_y"] + b)))
+                residual = abs(item["value"] - (a * item["pixel_y"] + b))
+                if residual <= 300:
+                    selected.append(item)
+                    residuals.append(residual)
+            if len(selected) < 3:
+                continue
+            rmse = math.sqrt(sum(value * value for value in residuals) / len(residuals))
+            score = (len(selected), -rmse)
+            if best is None or score > (best[0], -best[1]):
+                best = (len(selected), rmse, a, b, selected)
+    if best is None:
+        return [], [{**item, "reason": "no_consistent_fit"} for item in candidates]
+    selected = sorted(best[4], key=lambda row: row["pixel_y"])
+    selected_ids = {id(item) for item in selected}
+    rejected = [{**item, "reason": "fit_outlier"} for item in candidates if id(item) not in selected_ids]
+    return selected, rejected
+
+
+def _fit_local_y_labels(labels: list[dict]) -> tuple[float, float, float]:
+    if len(labels) < 3:
+        raise ValueError("local_capture: fewer than three usable Y-axis OCR labels")
+    if any(left["value"] <= right["value"] for left, right in zip(labels, labels[1:])):
+        raise ValueError("local_capture: Y-axis OCR labels are not monotonically decreasing")
+    mean_y = sum(item["pixel_y"] for item in labels) / len(labels)
+    mean_value = sum(item["value"] for item in labels) / len(labels)
+    denominator = sum((item["pixel_y"] - mean_y) ** 2 for item in labels)
+    if denominator <= 0:
+        raise ValueError("local_capture: degenerate Y-axis OCR pixel positions")
+    a = sum((item["pixel_y"] - mean_y) * (item["value"] - mean_value) for item in labels) / denominator
+    b = mean_value - a * mean_y
+    residuals = [item["value"] - (a * item["pixel_y"] + b) for item in labels]
+    rmse = math.sqrt(sum(value * value for value in residuals) / len(residuals))
+    if a >= 0 or rmse > 500:
+        raise ValueError(f"local_capture: invalid Y-axis fit a={a:.6f} rmse={rmse:.1f}")
+    return a, b, rmse
+
+
+def build_local_capture_axes(img: Image.Image) -> dict:
+    """590x1000 local_capture専用axes生成。Y軸値はOCRを主判定にする。"""
+    labels, rejected = _ocr_local_y_labels(img)
+    # 左側にはチャート外のviewport/DOM線に対応する数値が残ることが
+    # あるため、画像構造から先に求めた最初のチャート下枠より下は除外。
+    frame_hint = _local_capture_bottom_frame_y(img, 10)
+    if frame_hint is not None:
+        outside = [item for item in labels if item["pixel_y"] > frame_hint + 5]
+        labels = [item for item in labels if item["pixel_y"] <= frame_hint + 5]
+        rejected = rejected + [{**item, "reason": "outside_chart_frame"} for item in outside]
+    a, b, rmse = _fit_local_y_labels(labels)
+    positive = [item for item in labels if item["value"] > 0]
+    negative = [item for item in labels if item["value"] < 0]
+    if not positive or not negative:
+        raise ValueError("local_capture: OCR labels lack positive or negative values")
+    zero = [item for item in labels if item["value"] == 0]
+    pixel_steps = [
+        right["pixel_y"] - left["pixel_y"]
+        for left, right in zip(labels, labels[1:])
+        if right["pixel_y"] > left["pixel_y"]
+    ]
+    value_steps = [
+        abs(right["value"] - left["value"])
+        for left, right in zip(labels, labels[1:])
+        if right["value"] != left["value"]
+    ]
+    if not pixel_steps or not value_steps:
+        raise ValueError("local_capture: insufficient OCR grid intervals")
+    grid_step_px = statistics.median(pixel_steps)
+    grid_step_value = statistics.median(value_steps)
+    normalized_rmse = rmse / grid_step_value
+    bottom_hint = frame_hint or _local_capture_bottom_frame_y(img, max(item["pixel_y"] for item in labels))
+    rows = _local_capture_grid_rows(img, bottom_hint or 900)
+    left, right = _local_capture_frame_x(img, rows[0], rows[-1])
+    top_estimated = a * rows[0] + b
+    bottom_estimated = a * rows[-1] + b
+    top_natural = round(top_estimated / grid_step_value) * grid_step_value
+    bottom_natural = round(bottom_estimated / grid_step_value) * grid_step_value
+    top_extension_error = abs(top_estimated - top_natural)
+    bottom_extension_error = abs(bottom_estimated - bottom_natural)
+    single_negative_label_ok = (
+        len(labels) >= 6
+        and len(zero) >= 1
+        and len(positive) >= 3
+        and len(negative) >= 1
+        and a < 0
+        and normalized_rmse <= 0.02
+        and top_extension_error <= grid_step_value * 0.25
+        and bottom_extension_error <= grid_step_value * 0.25
+        and right - left >= 400
+    )
+    y0 = round(-b / a)
+    edge_status = "ok"
+    if (
+        len(labels) < 5
+        or len(zero) < 1
+        or len(positive) < 2
+        or (len(negative) < 2 and not single_negative_label_ok)
+        or normalized_rmse > 0.10
+        or a >= 0
+        or top_extension_error > grid_step_value * 0.25
+        or bottom_extension_error > grid_step_value * 0.25
+    ):
+        edge_status = "needs_review"
+    step = (right - left) / 5.0
+    return {
+        "graph_left": left, "graph_right": right,
+        "graph_top": rows[0], "graph_bottom": rows[-1],
+        "y2_px": rows[0], "y0_px": y0, "y1_px": rows[-1],
+        "x1000_px": round(left + step / 3.0), "x1200_px": round(left + step),
+        "x1800_px": round(left + step * 3.0), "x2230_px": right,
+        "y2_value": top_natural, "y1_value": bottom_natural,
+        "source": "image", "axes_status": edge_status, "grid_rows": rows,
+        "y_labels": labels, "y_labels_rejected": rejected,
+        "fit_a": a, "fit_b": b, "fit_rmse": rmse,
+        "normalized_rmse": normalized_rmse,
+        "grid_step_px": grid_step_px,
+        "grid_step_value": grid_step_value,
+        "top_frame_estimated_value": top_estimated,
+        "bottom_frame_estimated_value": bottom_estimated,
+        "top_frame_value": top_natural,
+        "bottom_frame_value": bottom_natural,
+        "top_extension_error": top_extension_error,
+        "bottom_extension_error": bottom_extension_error,
+    }
+
+
+def build_axes_and_points_from_local_capture_image(
+    chart_path: Path,
+) -> tuple[dict, list[tuple[int, int]]]:
+    """local_capture PNGを既存image analyzerへ接続する入力アダプター。"""
+    img = Image.open(chart_path).convert("RGB")
+    axes = build_local_capture_axes(img)
+    with contextlib.redirect_stdout(io.StringIO()):
+        color = analyze.detect_color(img, axes)
+        points = analyze.trace_line(img, axes, color)
+    if len(points) <= 1 and axes.get("axes_status") == "ok":
+        fallback_points, fallback_color = trace_zero_line_waveform_fallback(img, axes)
+        if len(fallback_points) > len(points):
+            points = fallback_points
+            axes["fallback_used"] = True
+            axes["fallback_color"] = fallback_color
+        else:
+            axes["fallback_used"] = False
+    else:
+        axes["fallback_used"] = False
+    if points:
+        first_x, first_y = points[0]
+        y_shift = axes["y0_px"] - first_y
+        if abs(y_shift) > 0:
+            points = [(x, y + y_shift) for x, y in points]
+    return axes, points
+
+
+def trace_zero_line_waveform_fallback(
+    img: Image.Image,
+    axes: dict,
+) -> tuple[list[tuple[int, int]], tuple[int, int, int] | None]:
+    """0ライン上に重なったlocal_capture波形だけを限定的に再追跡する。
+
+    通常trace_line()の代替ではなく、通常結果が空の場合だけ呼び出す。
+    グリッド/軸線は低彩度として除外し、既存候補色とX方向の持続性を使う。
+    """
+    if axes.get("axes_status") != "ok":
+        return [], None
+    y0 = int(round(axes["y0_px"]))
+    y_top = max(int(axes["y2_px"]) + 2, y0 - 20)
+    y_bottom = min(int(axes["y1_px"]) - 2, y0 + 20)
+    x_start = max(int(axes["x1000_px"]), int(axes["graph_left"]))
+    x_end = min(int(axes["x2230_px"]), img.width - 1)
+    pixels = img.load()
+    votes: dict[str, tuple[int, int, list[tuple[int, int, int]]]] = {}
+    for name, candidate in analyze.CANDIDATE_COLORS:
+        count = 0
+        x_columns: set[int] = set()
+        matched: list[tuple[int, int, int]] = []
+        for x in range(x_start, x_end + 1):
+            for y in range(y_top, y_bottom + 1):
+                rgb = pixels[x, y]
+                r, g, b = rgb
+                maximum, minimum = max(rgb), min(rgb)
+                if maximum < 80 or maximum == 0 or (maximum - minimum) / maximum < 0.15:
+                    continue
+                distance = math.sqrt(sum((rgb[index] - candidate[index]) ** 2 for index in range(3)))
+                if distance < 110:
+                    x_columns.add(x)
+                    matched.append(rgb)
+                    count += 1
+        votes[name] = (len(x_columns), count, matched)
+    if not votes:
+        return [], None
+    best_name, (best_columns, _best_count, best_pixels) = max(
+        votes.items(), key=lambda item: (item[1][0], item[1][1])
+    )
+    if best_columns < 20 or not best_pixels:
+        return [], None
+    color = tuple(sum(rgb[index] for rgb in best_pixels) // len(best_pixels) for index in range(3))
+
+    points: list[tuple[int, int]] = []
+    for x in range(x_start, x_end + 1):
+        ys: list[int] = []
+        for y in range(y_top, y_bottom + 1):
+            rgb = pixels[x, y]
+            r, g, b = rgb
+            maximum, minimum = max(rgb), min(rgb)
+            if maximum < 80 or maximum == 0 or (maximum - minimum) / maximum < 0.15:
+                continue
+            distance = math.sqrt(sum((rgb[index] - color[index]) ** 2 for index in range(3)))
+            if distance < 60:
+                ys.append(y)
+        if ys:
+            points.append((x, round(sum(ys) / len(ys))))
+    return points, color
 
 
 def build_axes_and_points_from_image(
