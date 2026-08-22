@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 from html.parser import HTMLParser
@@ -84,6 +85,18 @@ def read_html_text(path: Path) -> str:
 
 
 def parse_history_rows(html_path: Path) -> list[list[str]]:
+    if html_path.suffix.lower() == ".csv" or html_path.name.endswith("_history.csv"):
+        with html_path.open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            return [
+                [
+                    str(row.get("bonus_id", "")),
+                    str(row.get("time", "")),
+                    str(row.get("start", "")),
+                    str(row.get("status", "")),
+                ]
+                for row in reader
+            ]
     parser = HistoryTableParser()
     parser.feed(read_html_text(html_path))
     return [
@@ -157,11 +170,15 @@ def load_intraday_periods(path: Path) -> dict[str, tuple[int, ...]]:
 def build_daytime_hits(capture_root: Path, date: str, period_report: Path, tolerance: int) -> dict:
     periods_by_machine = load_intraday_periods(period_report)
     html_dir = capture_root / "html"
+    history_dir = capture_root / "history"
+    input_dir = history_dir if history_dir.exists() else html_dir
     machines = {}
     hits = []
 
-    for html_path in sorted(html_dir.glob(f"{date}_*.html")):
-        machine = norm_machine(html_path.stem.rsplit("_", 1)[-1])
+    pattern = "*_history.csv" if input_dir == history_dir else f"{date}_*.html"
+    for html_path in sorted(input_dir.glob(pattern)):
+        stem = html_path.stem.removesuffix("_history")
+        machine = norm_machine(stem.rsplit("_", 1)[-1])
         if not machine:
             continue
 

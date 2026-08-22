@@ -907,7 +907,7 @@ with open(OUT_FILE, 'w', encoding='utf-8') as f:
     f.write(html)
 
 size_kb = os.path.getsize(OUT_FILE) / 1024
-print(f"\n✅ 生成完了: {OUT_FILE}")
+print(f"\nOK: generated {OUT_FILE}")
 print(f"   ファイルサイズ: {size_kb:.0f} KB")
 print(f"\n【使い方】")
 print(f"  ブラウザで開く : {os.path.abspath(OUT_FILE)}")
