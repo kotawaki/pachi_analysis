@@ -20,7 +20,7 @@ import analyze
 
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_CAPTURE_ROOT = ROOT / "captures" / "pscube" / "20260627" / "morning"
+DEFAULT_CAPTURE_ROOT = ROOT / "data" / "local_capture"
 DEFAULT_OUT_DIR = ROOT / "csv" / "pscube_analyze"
 MASTER_PATH = ROOT / "machine_master.csv"
 
@@ -79,6 +79,18 @@ class HistoryTableParser(HTMLParser):
 
 
 def parse_history_rows(html_path: Path) -> list[list[str]]:
+    if html_path.suffix.lower() == ".csv" or html_path.name.endswith("_history.csv"):
+        with html_path.open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            return [
+                [
+                    str(row.get("bonus_id", "")),
+                    str(row.get("time", "")),
+                    str(row.get("start", "")),
+                    str(row.get("status", "")),
+                ]
+                for row in reader
+            ]
     parser = HistoryTableParser()
     parser.feed(read_html_text(html_path))
     return [
@@ -176,6 +188,12 @@ def extract_chart_block(html_text: str, date_str: str) -> str:
     marker = f'id="CHART-{date_str}"'
     start = html_text.find(marker)
     if start < 0:
+        # local_capture morning stores the chart as a standalone SVG rather
+        # than the legacy HTML page containing CHART-YYYYMMDD.
+        raw_start = html_text.find("<svg")
+        raw_end = html_text.rfind("</svg>")
+        if raw_start >= 0 and raw_end >= raw_start:
+            return html_text[raw_start:raw_end + len("</svg>")]
         return ""
     start = html_text.rfind("<ul", 0, start)
     if start < 0:
@@ -267,6 +285,19 @@ def extract_svg_zero_y(block: str) -> float | None:
     return None
 
 
+def extract_svg_plot_bounds(block: str) -> tuple[float, float] | None:
+    match = re.search(r'<path\b[^>]*class="amcharts-plot-area"[^>]*>', block, re.S)
+    if not match:
+        match = re.search(r'<path\b[^>]*d="[^"]+"[^>]*class="amcharts-plot-area"[^>]*>', block, re.S)
+    if not match:
+        return None
+    d_match = re.search(r'\bd="([^"]+)"', match.group(0))
+    if not d_match:
+        return None
+    xs = [float(value) for value in re.findall(r'[ML]\s*([-\d.]+),', d_match.group(1))]
+    return (min(xs), max(xs)) if len(xs) >= 2 else None
+
+
 def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict, list[tuple[int, int]]]:
     html_text = read_html_text(html_path)
     block = extract_chart_block(html_text, date_str)
@@ -313,6 +344,7 @@ def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict
     if len(points) < 2:
         raise ValueError("chart points not found")
 
+    plot_bounds = extract_svg_plot_bounds(block) or (0.0, float(svg_width))
     axes = {
         "graph_left": min(x for x, _y in points),
         "graph_right": max(x for x, _y in points),
@@ -321,10 +353,13 @@ def build_axes_and_points_from_svg(html_path: Path, date_str: str) -> tuple[dict
         "y2_px": round(value_labels[y2_value]),
         "y0_px": round(value_labels[0]),
         "y1_px": round(value_labels[y1_value]),
+        "x0900_px": round(interpolate_x(time_labels, 9 * 60)),
         "x1000_px": round(interpolate_x(time_labels, 10 * 60)),
         "x1200_px": round(interpolate_x(time_labels, 12 * 60)),
         "x1800_px": round(interpolate_x(time_labels, 18 * 60)),
         "x2230_px": round(interpolate_x(time_labels, 22 * 60 + 30)),
+        "svg_plot_left_px": plot_bounds[0],
+        "svg_plot_right_px": plot_bounds[1],
         "y2_value": y2_value,
         "y1_value": y1_value,
         "source": "svg",
@@ -1368,6 +1403,23 @@ def nearest_candidate(candidates: list[tuple[int, int]], target: float, toleranc
     return filtered[0][2]
 
 
+def _overlay_frame_x(img: Image.Image, bottom_y: int) -> tuple[int, int] | None:
+    """画像内のチャート下枠からoverlay用の実測X範囲を取得する。"""
+    pixels = img.load()
+    candidates: list[tuple[int, int]] = []
+    for y in range(max(0, bottom_y - 3), min(img.height, bottom_y + 4)):
+        start: int | None = None
+        for x in range(img.width + 1):
+            bright = x < img.width and all(channel >= 220 for channel in pixels[x, y])
+            if bright and start is None:
+                start = x
+            elif not bright and start is not None:
+                if x - start >= 300 and 60 <= start <= 120:
+                    candidates.append((start, x - 1))
+                start = None
+    return max(candidates, key=lambda item: item[1] - item[0]) if candidates else None
+
+
 def calibrate_overlay_axes(img: Image.Image, axes: dict) -> dict:
     capture_axes = build_capture_axes(
         img,
@@ -1381,7 +1433,11 @@ def calibrate_overlay_axes(img: Image.Image, axes: dict) -> dict:
     # P'sCUBE mobile captures keep the outer chart frame stable, while internal
     # grid-line strength changes by machine/range. Anchor the timeline to the
     # outer 09:00-24:00 frame to avoid per-chart x-axis drift.
-    frame_right = round(left + 461)
+    frame = _overlay_frame_x(img, capture_axes["graph_bottom"])
+    if frame:
+        left, frame_right = frame
+    else:
+        frame_right = round(left + 461)
     pre_spacing = (frame_right - left) / 5.0
     post_spacing = pre_spacing
     x1800 = round(left + pre_spacing * 3.0)
@@ -1428,9 +1484,16 @@ def svg_to_image_point(x: int | float, y: int | float, axes: dict, img: Image.Im
     if axes.get("source") != "svg":
         return round(x), round(y)
     overlay_axes = overlay_axes or calibrate_overlay_axes(img, axes)
-    minutes = analyze.px_to_time(x, axes)
+    # Map the raw SVG plot rectangle to the measured screenshot plot
+    # rectangle. This preserves the SVG's 09:00-24:00 geometry, including
+    # the pre-10:00 portion that px_to_time() intentionally clamps.
+    svg_left = axes.get("svg_plot_left_px", 0.0)
+    svg_right = axes.get("svg_plot_right_px", float(axes.get("svg_width", 1)))
+    ratio = (x - svg_left) / max(1.0, svg_right - svg_left)
+    ratio = max(0.0, min(1.0, ratio))
+    image_x = round(overlay_axes["x0900"] + ratio * (overlay_axes["x2400"] - overlay_axes["x0900"]))
     value = analyze.px_to_val(y, axes)
-    return time_to_overlay_x(minutes, overlay_axes), value_to_image_y(value, axes, overlay_axes)
+    return image_x, value_to_image_y(value, axes, overlay_axes)
 
 
 def overlay_source_label(source_time: str) -> str:
@@ -1477,7 +1540,8 @@ def save_overlay(chart_path: Path, axes: dict, points: list[tuple[int, int]], se
         (axes["x1800_px"], "18:00"),
         (axes["x2230_px"], "22:30"),
     ]:
-        x_img = p(x, axes["y0_px"])[0]
+        minutes = {"10:00": 10 * 60, "12:00": 12 * 60, "18:00": 18 * 60, "22:30": 22 * 60 + 30}[label]
+        x_img = time_to_overlay_x(minutes, overlay_axes) if overlay_axes else p(x, axes["y0_px"])[0]
         draw.line([(x_img, top), (x_img, bottom)], fill=(255, 220, 0, 170), width=2)
         draw.text((x_img + 3, top + 4), label, fill=(255, 220, 0, 230))
 
@@ -1581,9 +1645,15 @@ def save_csv_rows(segments: list[dict], date_label: str, machine: str, group: st
 
 
 def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_dir: Path, adjust: dict, notes: dict[str, dict], args) -> dict:
-    stem_parts = chart_path.stem.split("_")
-    date_str = stem_parts[0]
-    machine = stem_parts[1]
+    if chart_path.parent.name == "screenshots" and (capture_root / "svg").exists():
+        date_str = capture_root.parent.name
+        machine = machine_key(chart_path.stem)
+        svg_path = capture_root / "svg" / f"{machine}.svg"
+    else:
+        stem_parts = chart_path.stem.split("_")
+        date_str = stem_parts[0]
+        machine = stem_parts[1]
+        svg_path = html_path
     date_label = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:8]}"
     group, island = get_machine_info(machine)
 
@@ -1596,7 +1666,7 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
     events = events_from_history(rows, machine, args.pachinko_mode)
     axes, points = build_axes_and_points(
         chart_path,
-        html_path,
+        svg_path,
         date_str,
         adjust,
         args.image_y2_value,
@@ -1629,6 +1699,12 @@ def process_machine(chart_path: Path, html_path: Path, capture_root: Path, out_d
 
 
 def iter_chart_paths(capture_root: Path, machines: set[str] | None) -> list[Path]:
+    local_screenshot_dir = capture_root / "screenshots"
+    if local_screenshot_dir.exists():
+        paths = sorted(local_screenshot_dir.glob("*.png"))
+        if machines:
+            paths = [path for path in paths if machine_key(path.stem) in machines]
+        return paths
     chart_dir = capture_root / "chart"
     paths = sorted(chart_dir.glob("*_chart.png"))
     if machines:
@@ -1658,15 +1734,26 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    capture_root = args.capture_root
+    capture_root = args.capture_root.resolve()
+    if capture_root == DEFAULT_CAPTURE_ROOT:
+        morning_roots = sorted(DEFAULT_CAPTURE_ROOT.glob("*/morning"))
+        if len(morning_roots) != 1:
+            raise SystemExit(
+                "local_captureには複数日分があります。YYYYMMDD\\morningを明示してください。"
+            )
+        capture_root = morning_roots[0]
     notes = load_capture_notes(capture_root)
     adjust = load_adjust()
     machines = {machine_key(item) for item in args.machines} if args.machines else None
 
     results = []
     for chart_path in iter_chart_paths(capture_root, machines):
-        date_str, machine, *_ = chart_path.stem.split("_")
-        html_path = capture_root / "html" / f"{date_str}_{machine}.html"
+        if chart_path.parent.name == "screenshots" and (capture_root / "svg").exists():
+            machine = machine_key(chart_path.stem)
+            html_path = capture_root / "history" / f"{machine}_history.csv"
+        else:
+            date_str, machine, *_ = chart_path.stem.split("_")
+            html_path = capture_root / "html" / f"{date_str}_{machine}.html"
         print(f"\n=== {machine} ===")
         result = process_machine(chart_path, html_path, capture_root, args.out_dir, adjust, notes, args)
         results.append(result)
