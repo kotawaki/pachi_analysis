@@ -156,6 +156,7 @@ def run_daily(
     *,
     base_date: str,
     dry_run: bool = False,
+    evaluate_only: bool = False,
     minimum_sample: int = 5,
 ) -> dict[str, Any]:
     root = Path(root)
@@ -176,6 +177,7 @@ def run_daily(
         "mode": "production",
         "base_date": base,
         "dry_run": dry_run,
+        "evaluate_only": evaluate_only,
         "evaluation": {"prediction_date": base, "result_status": "not_applicable"},
         "experience": {"updated": False, "mode": "production"},
         "next_prediction": {"prediction_date": next_day, "cutoff_date": base},
@@ -239,7 +241,9 @@ def run_daily(
     report["experience"]["updated"] = report["evaluation"].get("status") == "evaluated"
 
     can_generate_next = report["evaluation"].get("status") == "evaluated"
-    if not can_generate_next:
+    if evaluate_only:
+        report["next_prediction"]["action"] = "skip_evaluate_only"
+    elif not can_generate_next:
         report["next_prediction"]["action"] = "wait_for_evaluated_result"
     elif not prediction_store.path_for(next_day).exists():
         pachio, pachiko, manifest = _build_agents(root, base)
@@ -295,8 +299,9 @@ def main() -> int:
     parser.add_argument("--base-date", required=True, help="Completed actual date, YYYYMMDD")
     parser.add_argument("--root", default=".")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--evaluate-only", action="store_true", help="既存locked predictionの評価・reflection・experience・exportだけを行い、翌日predictionを生成しない")
     args = parser.parse_args()
-    report = run_daily(args.root, base_date=args.base_date, dry_run=args.dry_run)
+    report = run_daily(args.root, base_date=args.base_date, dry_run=args.dry_run, evaluate_only=args.evaluate_only)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
