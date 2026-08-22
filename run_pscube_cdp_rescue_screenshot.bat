@@ -20,7 +20,18 @@ if errorlevel 1 (
   exit /b 2
 )
 >"%LAST_DATE_FILE%" echo %TARGET_DATE%
-echo Rescue screenshot capture is not implemented yet.
-echo No rescue capture was started.
+echo Running rescue preflight...
+python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%"
+if errorlevel 1 (
+  echo Preflight FAILED. Rescue will not start.
+  pause
+  exit /b 3
+)
+echo Preflight OK.
+echo Starting PSCUBE rescue screenshot capture...
+echo Press ESC during rescue capture to stop safely.
+python tools\pscube_cdp_rescue_screenshot.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%" --delay-min 3 --delay-max 5
+set "RESULT=%ERRORLEVEL%"
+echo Rescue capture finished: exit=%RESULT%.
 pause
-exit /b 0
+exit /b %RESULT%

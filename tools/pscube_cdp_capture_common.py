@@ -20,6 +20,9 @@ MAX_HISTORY_MORE_CLICKS = 10
 HISTORY_MORE_WAIT_MS = 15000
 LEGACY_VIEWPORT = {"width": 590, "height": 1000, "deviceScaleFactor": 1, "mobile": False}
 TOP_BUTTON_WAIT_MS = 5000
+RESCUE_CHART_STABLE_WAIT_MS = 20000
+RESCUE_CHART_POLL_MS = 500
+RESCUE_CHART_STABLE_ROUNDS = 2
 
 
 def is_challenge(page: Any) -> bool:
@@ -38,6 +41,26 @@ def is_challenge(page: Any) -> bool:
         return True
 
 
+def is_rate_limited(page: Any) -> bool:
+    """Detect an HTTP-429-style page without attempting any bypass."""
+    try:
+        title = page.title().lower()
+        body = page.locator("body").inner_text(timeout=3000).lower()
+        text = f"{title}\n{body}"
+        markers = (
+            "http 429",
+            "429 too many requests",
+            "too many requests",
+            "rate limit",
+            "rate limited",
+            "アクセスが集中",
+            "時間をおいて",
+        )
+        return any(marker in text for marker in markers)
+    except Exception:
+        return False
+
+
 def normalize_machine(value: str) -> str:
     digits = re.sub(r"\D", "", value)
     if not digits:
@@ -54,7 +77,28 @@ def validate_machine(page: Any, machine: str) -> dict[str, Any]:
 
 
 def validate_svg(text: str) -> dict[str, Any]:
-    root = ET.fromstring(text)
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError as error:
+        # Browser-serialized chart SVGs can contain a small number of HTML
+        # named entities (most commonly &nbsp;), which are valid in the DOM
+        # but not standalone XML. Keep the SVG content intact and normalize
+        # only known entities for structural validation.
+        normalized = re.sub(
+            r"&(nbsp|thinsp|ensp|emsp|times|minus);",
+            lambda match: {
+                "nbsp": "&#160;",
+                "thinsp": "&#8201;",
+                "ensp": "&#8194;",
+                "emsp": "&#8195;",
+                "times": "&#215;",
+                "minus": "&#8722;",
+            }[match.group(1)],
+            text,
+        )
+        if normalized == text:
+            raise error
+        root = ET.fromstring(normalized)
     if root.tag.rsplit("}", 1)[-1].lower() != "svg":
         raise ValueError("SVG root is not svg")
     counts = {
@@ -122,7 +166,7 @@ def _history_missing_bonus_ids(rows: list[dict[str, Any]]) -> list[int]:
     return [value for value in range(1, maximum + 1) if value not in set(ids)]
 
 
-def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = None, rate_limit_checker: Any = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Read history; optionally click #tblHISTm until it is gone."""
     rows, raw = _history_dom(page)
     meta: dict[str, Any] = {
@@ -138,6 +182,8 @@ def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = N
         while raw["moreExists"] and raw["moreVisible"] and not raw["moreDisabled"]:
             if abort_checker and abort_checker():
                 raise CaptureAborted("ESC pressed during history expansion")
+            if rate_limit_checker:
+                rate_limit_checker()
             if meta["moreClicks"] >= MAX_HISTORY_MORE_CLICKS:
                 meta["history_complete"] = False
                 meta["history_error"] = f"maximum more clicks exceeded: {MAX_HISTORY_MORE_CLICKS}"
@@ -164,6 +210,8 @@ def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = N
             meta["moreClicks"] += 1
             if abort_checker and abort_checker():
                 raise CaptureAborted("ESC pressed after history expansion")
+            if rate_limit_checker:
+                rate_limit_checker()
             rows, raw = _history_dom(page)
             after_rows = len(rows)
             meta["afterRows"] = after_rows
@@ -241,18 +289,25 @@ def request_meta(url: str, method: str | None = None) -> dict[str, Any]:
 
 def get_page(browser: Any, machine: str) -> Any:
     pages = [page for context in browser.contexts for page in context.pages]
-    candidates = [page for page in pages if "pscube.jp" in page.url and not is_challenge(page)]
+    pscube_pages = [page for page in pages if "pscube.jp" in page.url]
+    candidates = [page for page in pscube_pages if not is_challenge(page)]
     if not candidates:
-        raise RuntimeError("no authenticated non-challenge PSCUBE page found")
+        if pscube_pages:
+            return pscube_pages[0]
+        raise RuntimeError("no PSCUBE page found in existing Chrome")
     page = next((p for p in candidates if f"cd_dai={machine}" in p.url), candidates[0])
     return page
 
 
 def open_machine(page: Any, machine: str, timeout_ms: int = 60000) -> None:
-    page.goto(f"{BASE_URL}?cd_dai={machine}", wait_until="domcontentloaded", timeout=timeout_ms)
+    response = page.goto(f"{BASE_URL}?cd_dai={machine}", wait_until="domcontentloaded", timeout=timeout_ms)
     page.wait_for_timeout(4000)
+    if response is not None and response.status == 429:
+        raise RateLimited(f"HTTP 429 while opening machine {machine}")
+    if is_rate_limited(page):
+        raise RateLimited(f"rate limit page while opening machine {machine}")
     if is_challenge(page):
-        raise RuntimeError("Cloudflare challenge detected; stopping without bypass")
+        raise ChallengeDetected("Cloudflare challenge detected; stopping without bypass")
     validate_machine(page, machine)
 
 
@@ -291,7 +346,190 @@ class CaptureAborted(RuntimeError):
     """Raised when the user requests a safe stop during capture."""
 
 
-def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bool = True, abort_checker: Any = None) -> dict[str, Any]:
+class RateLimited(RuntimeError):
+    """Raised when PSCUBE reports HTTP 429 or a rate-limit page."""
+
+
+class ChallengeDetected(RuntimeError):
+    """Raised when a challenge page is shown; no bypass is attempted."""
+
+
+def png_dimensions(path: Path) -> tuple[int, int] | None:
+    data = path.read_bytes()
+    if len(data) < 24 or data[:8] != bytes([137, 80, 78, 71, 13, 10, 26, 10]):
+        return None
+    return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+
+
+def rescue_chart_snapshot(page: Any, target_date: str) -> dict[str, Any]:
+    return page.evaluate(
+        """date => {
+          const chart = document.querySelector(`#CHART-${date}`);
+          const svg = chart?.querySelector('svg');
+          const visible = e => {
+            if (!e) return false;
+            const s = getComputedStyle(e);
+            const r = e.getBoundingClientRect();
+            return s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity) !== 0 && r.width > 0 && r.height > 0;
+          };
+          const sr = svg?.getBoundingClientRect();
+          const html = svg?.outerHTML || '';
+          return {
+            chart_exists: !!chart,
+            chart_visible: visible(chart),
+            chart_bbox: chart ? (() => { const r=chart.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; })() : null,
+            svg_exists: !!svg,
+            svg_visible: visible(svg),
+            svg_bbox: sr ? {x:sr.x,y:sr.y,width:sr.width,height:sr.height} : null,
+            svg_size: html.length,
+            path: svg?.querySelectorAll('path').length || 0,
+            polyline: svg?.querySelectorAll('polyline').length || 0,
+            text: svg?.querySelectorAll('text').length || 0,
+            rect: svg?.querySelectorAll('rect').length || 0,
+            circle: svg?.querySelectorAll('circle').length || 0,
+            svg_html: html
+          };
+        }""",
+        target_date,
+    )
+
+
+def rescue_chart_diagnostic(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Return safe chart diagnostics without embedding the SVG source in the manifest."""
+    diagnostic = {key: value for key, value in snapshot.items() if key != "svg_html"}
+    html = snapshot.get("svg_html") or ""
+    diagnostic["svg_sha256"] = hashlib.sha256(html.encode("utf-8")).hexdigest() if html else None
+    return diagnostic
+
+
+def wait_for_rescue_chart_stable(page: Any, target_date: str) -> dict[str, Any]:
+    deadline = time.monotonic() + RESCUE_CHART_STABLE_WAIT_MS / 1000
+    previous_signature = None
+    stable_rounds = 0
+    latest: dict[str, Any] = {}
+    while time.monotonic() < deadline:
+        latest = rescue_chart_snapshot(page, target_date)
+        html = latest.get("svg_html", "")
+        signature = (
+            len(html),
+            latest.get("path"),
+            latest.get("polyline"),
+            latest.get("text"),
+            latest.get("rect"),
+            latest.get("circle"),
+            tuple((latest.get("svg_bbox") or {}).get(key) for key in ("width", "height")),
+        )
+        if latest.get("chart_visible") and latest.get("svg_visible") and signature == previous_signature:
+            stable_rounds += 1
+            if stable_rounds >= RESCUE_CHART_STABLE_ROUNDS:
+                return latest
+        else:
+            stable_rounds = 0
+        previous_signature = signature
+        page.wait_for_timeout(RESCUE_CHART_POLL_MS)
+    latest["stability_timeout"] = True
+    return latest
+
+
+def capture_rescue_screenshot(page: Any, machine: str, target_date: str, out: Path, abort_checker: Any = None, rate_limit_checker: Any = None) -> dict[str, Any]:
+    """Capture only a pre-existing date-specific chart PNG from the DOM."""
+    result: dict[str, Any] = {
+        "machine": machine,
+        "target_date": target_date,
+        "chart_selector": f"#CHART-{target_date}",
+        "status": "failed",
+        "missing_items": [],
+        "delay_seconds": 0,
+    }
+    screenshot_dir = out / "screenshots"
+    screenshot_dir.mkdir(parents=True, exist_ok=True)
+    result.update(validate_machine(page, machine))
+    result.update({"url": page.url, "title": page.title(), "challenge": is_challenge(page)})
+    if result["challenge"]:
+        raise ChallengeDetected("Cloudflare challenge detected")
+    if is_rate_limited(page):
+        raise RateLimited("rate limit page detected")
+    if rate_limit_checker:
+        rate_limit_checker()
+    if abort_checker and abort_checker():
+        raise CaptureAborted("ESC pressed before rescue screenshot")
+
+    tab = page.locator(f"#YMD-ul li[data-ymd='{target_date}']").first
+    if tab.count() and "selected" not in (tab.get_attribute("class") or ""):
+        tab.click(timeout=10000)
+
+    chart = page.locator(f"#CHART-{target_date}").first
+    before_snapshot = rescue_chart_snapshot(page, target_date)
+    result["chart_diagnostic_before"] = rescue_chart_diagnostic(before_snapshot)
+    if chart.count() == 0:
+        result["status"] = "no_data"
+        result["error"] = "target chart element not found"
+        return result
+    try:
+        page.wait_for_function(
+            "selector => { const e=document.querySelector(selector); return !!e && !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length); }",
+            arg=f"#CHART-{target_date}",
+            timeout=10000,
+        )
+    except Exception:
+        result["status"] = "no_data"
+        result["error"] = "target chart is not visible"
+        return result
+
+    after_visibility = rescue_chart_snapshot(page, target_date)
+    selected = page.locator("#YMD-ul li.selected").get_attribute("data-ymd") if page.locator("#YMD-ul li.selected").count() else None
+    result["selected_ymd"] = selected
+    if selected and selected != target_date:
+        result["status"] = "no_data"
+        result["error"] = f"selected tab mismatch: expected={target_date}, actual={selected}"
+        return result
+
+    stable_snapshot = wait_for_rescue_chart_stable(page, target_date)
+    result["chart_diagnostic_after_visibility"] = rescue_chart_diagnostic(after_visibility)
+    result["chart_diagnostic_after_stable"] = rescue_chart_diagnostic(stable_snapshot)
+    svg = page.locator(f"#CHART-{target_date} svg").first
+    result["svg_exists"] = bool(svg.count())
+    if not result["svg_exists"]:
+        result["status"] = "no_data"
+        result["error"] = "target chart SVG not found"
+        return result
+    svg_text = stable_snapshot.get("svg_html") or svg.evaluate("el => new XMLSerializer().serializeToString(el)")
+    svg_info = validate_svg(svg_text)
+    result["svg_xml"] = svg_info["xml"]
+    result["svg_size"] = svg_info["bytes"]
+    result["svg_elements"] = svg_info["elements"]
+    result["placeholder"] = is_placeholder_svg(svg_info)
+    if result["placeholder"]:
+        result["status"] = "no_data"
+        result["error"] = "placeholder SVG"
+        return result
+
+    chart.evaluate("el => el.scrollIntoView({block: 'start', inline: 'nearest'})")
+    top_button = wait_for_top_button_hidden(page)
+    result["top_button_state"] = top_button["status"]
+    if top_button["warning"]:
+        result["warnings"] = ["page_top_button_visibility_timeout"]
+    if rate_limit_checker:
+        rate_limit_checker()
+    if abort_checker and abort_checker():
+        raise CaptureAborted("ESC pressed before rescue screenshot")
+
+    png_path = screenshot_dir / f"{machine}.png"
+    page.screenshot(path=str(png_path), full_page=False)
+    dimensions = png_dimensions(png_path)
+    result["png"] = "ok" if png_path.stat().st_size else "failed"
+    result["png_path"] = str(png_path)
+    result["png_size"] = png_path.stat().st_size
+    result["png_width"] = dimensions[0] if dimensions else None
+    result["png_height"] = dimensions[1] if dimensions else None
+    if dimensions != (590, 1000):
+        result["missing_items"].append("png_size")
+    result["status"] = "complete" if not result["missing_items"] else "incomplete"
+    result["captured_at"] = dt.datetime.now().astimezone().isoformat()
+    return result
+
+
+def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bool = True, abort_checker: Any = None, rate_limit_checker: Any = None) -> dict[str, Any]:
     result: dict[str, Any] = {"machine": machine, "status": "failed", "missing_items": []}
     screenshot_dir, svg_dir, history_dir, summary_dir = out / "screenshots", out / "svg", out / "history", out / "summary"
     for directory in (screenshot_dir, svg_dir, history_dir, summary_dir):
@@ -299,7 +537,11 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
     result.update(validate_machine(page, machine))
     result.update({"url": page.url, "title": page.title(), "challenge": is_challenge(page), "selected_ymd": page.locator("#YMD-ul li.selected").get_attribute("data-ymd") if page.locator("#YMD-ul li.selected").count() else None})
     if result["challenge"]:
-        raise RuntimeError("Cloudflare challenge detected")
+        raise ChallengeDetected("Cloudflare challenge detected")
+    if is_rate_limited(page):
+        raise RateLimited("rate limit page detected")
+    if rate_limit_checker:
+        rate_limit_checker()
     if abort_checker and abort_checker():
         raise CaptureAborted("ESC pressed before screenshot")
 
@@ -314,6 +556,8 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
     if include_png:
         if abort_checker and abort_checker():
             raise CaptureAborted("ESC pressed before screenshot")
+        if rate_limit_checker:
+            rate_limit_checker()
         png_path = screenshot_dir / f"{machine}.png"
         page.screenshot(path=str(png_path), full_page=False)
         result["png"] = "ok" if png_path.stat().st_size else "failed"
@@ -337,7 +581,7 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
     if not svg_info["bytes"]:
         result["missing_items"].append("svg")
 
-    rows, history_meta = extract_history(page, expand_more=True, abort_checker=abort_checker)
+    rows, history_meta = extract_history(page, expand_more=True, abort_checker=abort_checker, rate_limit_checker=rate_limit_checker)
     history_path = history_dir / f"{machine}_history.csv"
     write_csv(history_path, rows)
     result.update({
@@ -476,13 +720,24 @@ def capture_rescue(page: Any, machine: str, date: str, out: Path, include_png: b
 
 def write_manifest(path: Path, manifest: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    manifest["failed_machines"] = [r["machine"] for r in manifest.get("results", []) if r.get("status") != "complete"]
+    manifest["timestamp"] = dt.datetime.now().astimezone().isoformat()
+    completed = [r["machine"] for r in manifest.get("results", []) if r.get("status") == "complete"]
+    manifest.setdefault("completed_machines", completed)
+    remaining = list(manifest.get("remaining_machines", []))
+    failed = [r["machine"] for r in manifest.get("results", []) if r.get("status") != "complete"]
+    manifest["failed_machines"] = list(dict.fromkeys(failed + remaining))
     missing: dict[str, list[str]] = {}
     for result in manifest.get("results", []):
         if result.get("missing_items"):
             missing[result["machine"]] = result["missing_items"]
     manifest["missing_items"] = missing
-    if manifest.get("aborted"):
+    manifest["complete_count"] = len(completed)
+    manifest["incomplete_count"] = max(0, len(manifest.get("machines", [])) - len(completed))
+    if manifest.get("rate_limited"):
+        manifest["status"] = "rate_limited"
+    elif manifest.get("challenge_detected"):
+        manifest["status"] = "challenge"
+    elif manifest.get("aborted"):
         manifest["status"] = "aborted"
     else:
         manifest["status"] = "complete" if manifest.get("results") and not manifest["failed_machines"] else "incomplete"

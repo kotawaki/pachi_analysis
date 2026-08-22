@@ -36,7 +36,7 @@ if errorlevel 1 (
 )
 echo Preflight OK.
 echo Press ESC during capture to stop safely.
-python tools\pscube_cdp_morning_capture.py --machine %MACHINES% --date "%TARGET_DATE%" --retries 2
+python tools\pscube_cdp_morning_capture.py --machine %MACHINES% --date "%TARGET_DATE%" --retries 2 --delay-min 3 --delay-max 5
 set "RESULT=%ERRORLEVEL%"
 echo Selected capture finished: exit=%RESULT%.
 pause
