@@ -240,7 +240,14 @@ def run_daily(
     report["experience"]["evaluated_result_dates_before_next_prediction"] = list(builder.memory["evaluated_result_dates"])
     report["experience"]["updated"] = report["evaluation"].get("status") == "evaluated"
 
-    can_generate_next = report["evaluation"].get("status") == "evaluated"
+    # A missing prediction for the completed day is a legitimate gap: do not
+    # backfill it, but allow production to resume when that day's formal OHLC
+    # is available and the next prediction can be built as-of that day.
+    base_data_available = bool(load_daily_ohlc_rows_for_date(ohlc_root, base))
+    can_generate_next = (
+        report["evaluation"].get("status") == "evaluated"
+        or (current_prediction is None and base_data_available)
+    )
     if evaluate_only:
         report["next_prediction"]["action"] = "skip_evaluate_only"
     elif not can_generate_next:
