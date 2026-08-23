@@ -27,7 +27,7 @@ DIRECTION_SLOPE_EPSILON_FRACTION = 0.02
 # Main Wave Lab history is refreshed through the latest formal daily OHLC.
 # The frozen 2026-08-16 -> 2026-08-17 answer-check constants below remain
 # unchanged and continue to protect the historical prediction artifacts.
-REGIME_CUTOFF_DATE = "2026-08-21"
+REGIME_CUTOFF_DATE = "2026-08-22"
 MIN_REGIME_OBSERVATIONS = 21
 REGIME_REFERENCE_CHANGE = 0.25
 REGIME_SHIFT_PCT = 0.20
