@@ -58,11 +58,11 @@ def norm_machine(value: str) -> str:
     if not text:
         return ""
     number = int(text)
-    return f"{number:03d}" if number < 1000 else str(number)
+    return f"{number:04d}" if number < 10000 else str(number)
 
 
 def display_machine(value: str) -> str:
-    return str(int(value)) if str(value).strip().isdigit() else str(value)
+    return f"{int(value):04d}" if str(value).strip().isdigit() else str(value)
 
 
 def time_text(minutes: int) -> str:
@@ -210,7 +210,7 @@ def build_daytime_hits(capture_root: Path, date: str, period_report: Path, toler
         machine_key = display_machine(machine)
         is_hit = bool(hit_periods)
         if is_hit:
-            hits.append(int(machine_key))
+            hits.append(machine_key)
         machines[machine_key] = {
             "machine": machine,
             "key": machine,
