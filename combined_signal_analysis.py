@@ -567,7 +567,7 @@ def reverse_pattern_section(rows):
     for row in sorted([r for r in reverse if r["date"] == "20260621"], key=lambda item: item["actual"], reverse=True):
         features = " / ".join(sorted(row["chart_features"])[:5]) or "-"
         hit = ",".join(f"{p}分" for p in row["intraday_hit_periods"]) or "-"
-        lines.append(f"|{int(row['machine'])}|{signed(row['actual'])}|{hit}|{row['chart_state']}|{features}|")
+        lines.append(f"|{int(row['machine']):04d}|{signed(row['actual'])}|{hit}|{row['chart_state']}|{features}|")
     return "\n".join(lines)
 
 
@@ -781,7 +781,7 @@ def make_html(rows, args):
         label = "特日" if int(date[6:8]) in SPECIAL_DAYS else "通常日"
         reverse_top = sorted(day_reverse, key=lambda row: row["actual"], reverse=True)[:5]
         reverse_html = "".join(
-            f"<li><b>{int(row['machine'])}</b><span>{signed_plain(row['actual'])}</span>"
+            f"<li><b>{int(row['machine']):04d}</b><span>{signed_plain(row['actual'])}</span>"
             f"<em>{','.join(str(p) + '分' for p in row['intraday_hit_periods']) or 'hitなし'} / {row['chart_state']}</em></li>"
             for row in reverse_top
         ) or "<li><em>該当なし</em></li>"
