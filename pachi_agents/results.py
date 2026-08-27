@@ -15,7 +15,7 @@ from .inputs import load_daily_ohlc_rows_for_date, normalize_date
 from .predictions import PredictionAlreadyExists, PredictionNotFound, PredictionStore
 
 
-RESULT_STATUSES = {"pending", "evaluated", "incomplete"}
+RESULT_STATUSES = {"pending", "evaluated", "incomplete", "closed"}
 
 
 class ResultError(Exception):
@@ -255,6 +255,38 @@ def evaluate_prediction(
                 "ana": god_results["ana"],
                 "honmei_outcome": god_results["honmei"].get("outcome"),
             },
+        },
+    }
+    return result_store.save(payload)
+
+
+def record_closed_day(
+    prediction_store: PredictionStore,
+    result_store: ResultStore,
+    *,
+    prediction_date: str,
+    reason_code: str = "STORE_CLOSED",
+) -> Path:
+    """Record a closed day without evaluating or scoring its prediction."""
+    day = normalize_date(prediction_date)
+    prediction = prediction_store.load(day)
+    if prediction.get("status") != "locked":
+        raise PredictionNotLocked(f"predictionがlockedではありません: {day}")
+    payload = {
+        "prediction_date": day,
+        "evaluated_at": datetime.now().astimezone().isoformat(),
+        "result_version": "pachi_agents_result_v1",
+        "status": "closed",
+        "evaluated": False,
+        "closed": True,
+        "reason_code": reason_code,
+        "success": False,
+        "failure": False,
+        "source_manifest": [],
+        "agents": {
+            "pachio": {"primary_machine": prediction.get("agents", {}).get("pachio", {}).get("primary_machine"), "result": None},
+            "pachiko": {"primary_machine": prediction.get("agents", {}).get("pachiko", {}).get("primary_machine"), "result": None},
+            "pachikamisama": {"honmei": None, "taikou": None, "ana": None, "honmei_outcome": None},
         },
     }
     return result_store.save(payload)

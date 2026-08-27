@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from .backtest import _build_agents
+from .closed_days import load_closed_dates, next_non_closed_date
 from .experience import ExperienceBuilder, ExperienceStore
 from .experience_feedback import adjust_agent_candidates, adjust_god_weights
 from .inputs import load_daily_ohlc_rows_for_date, normalize_date
@@ -28,6 +29,7 @@ from .results import (
     _actual_map,
     _selection,
     evaluate_prediction,
+    record_closed_day,
 )
 from .export_web import export_web
 from .reflection import generate_reflection_for_date
@@ -161,8 +163,8 @@ def run_daily(
 ) -> dict[str, Any]:
     root = Path(root)
     base = normalize_date(base_date)
-    next_day = _add_days(base, 1)
     data_root = root / "pachi_agents" / "data"
+    closed_dates = load_closed_dates(data_root)
     if dry_run:
         prediction_store = _read_only_store(PredictionStore, data_root / "predictions")
         result_store = _read_only_store(ResultStore, data_root / "results")
@@ -171,6 +173,8 @@ def run_daily(
         prediction_store = PredictionStore(data_root / "predictions")
         result_store = ResultStore(data_root / "results")
         experience_store = ExperienceStore(data_root / "experience", "production")
+    calendar_next = _add_days(base, 1)
+    next_day = calendar_next if prediction_store.path_for(calendar_next).exists() else next_non_closed_date(base, closed_dates)
     ohlc_root = root / "csv" / "daily_ohlc"
 
     report: dict[str, Any] = {
@@ -201,40 +205,69 @@ def run_daily(
     if current_prediction is not None:
         report["evaluation"]["prediction"] = _prediction_summary(current_prediction)
         report["evaluation"]["prediction_file"] = str(prediction_store.path_for(base))
-        try:
-            current_result = result_store.load(base)
-            _validate_report_alignment(current_prediction, current_result, base)
-            report["evaluation"].update({
-                "status": current_result.get("status"),
-                "action": "skip_existing_result",
-                "result_prediction_date": current_result.get("prediction_date"),
-                "result_file": str(result_store.path_for(base)),
-            })
-        except ResultNotFound:
-            status = _preview_result_status(current_prediction, ohlc_root, base)
-            report["evaluation"].update({
-                "prediction_date": base,
-                "status": status,
-                "action": "evaluate" if status != "pending" else "wait",
-            })
-            if not dry_run and status != "pending":
-                try:
-                    evaluate_prediction(prediction_store, result_store, prediction_date=base, ohlc_root=ohlc_root)
+        if base in closed_dates:
+            try:
+                current_result = result_store.load(base)
+                _validate_report_alignment(current_prediction, current_result, base)
+                if current_result.get("status") != "closed":
+                    raise ResultError("定休日の日付にclosed以外のresultがあります")
+                report["evaluation"].update({
+                    "status": "closed",
+                    "action": "skip_existing_closed_result",
+                    "result_file": str(result_store.path_for(base)),
+                })
+            except ResultNotFound:
+                report["evaluation"].update({
+                    "prediction_date": base,
+                    "status": "closed",
+                    "action": "record_closed" if not dry_run else "would_record_closed",
+                    "reason_code": "STORE_CLOSED",
+                })
+                if not dry_run:
+                    record_closed_day(prediction_store, result_store, prediction_date=base)
                     current_result = result_store.load(base)
-                    _validate_report_alignment(current_prediction, current_result, base)
-                    report["evaluation"].update({
-                        "status": current_result.get("status"),
-                        "result_prediction_date": current_result.get("prediction_date"),
-                        "result_file": str(result_store.path_for(base)),
-                    })
-                except ResultAlreadyExists:
-                    report["evaluation"]["action"] = "skip_race_existing_result"
-        except ResultError as exc:
-            report["evaluation"].update({
-                "prediction_date": base,
-                "status": "result_error",
-                "error": type(exc).__name__,
-            })
+                    report["evaluation"]["result_file"] = str(result_store.path_for(base))
+            except ResultError as exc:
+                report["evaluation"].update({
+                    "prediction_date": base,
+                    "status": "closed_error",
+                    "error": type(exc).__name__,
+                })
+        else:
+            try:
+                current_result = result_store.load(base)
+                _validate_report_alignment(current_prediction, current_result, base)
+                report["evaluation"].update({
+                    "status": current_result.get("status"),
+                    "action": "skip_existing_result",
+                    "result_prediction_date": current_result.get("prediction_date"),
+                    "result_file": str(result_store.path_for(base)),
+                })
+            except ResultNotFound:
+                status = _preview_result_status(current_prediction, ohlc_root, base)
+                report["evaluation"].update({
+                    "prediction_date": base,
+                    "status": status,
+                    "action": "evaluate" if status != "pending" else "wait",
+                })
+                if not dry_run and status != "pending":
+                    try:
+                        evaluate_prediction(prediction_store, result_store, prediction_date=base, ohlc_root=ohlc_root)
+                        current_result = result_store.load(base)
+                        _validate_report_alignment(current_prediction, current_result, base)
+                        report["evaluation"].update({
+                            "status": current_result.get("status"),
+                            "result_prediction_date": current_result.get("prediction_date"),
+                            "result_file": str(result_store.path_for(base)),
+                        })
+                    except ResultAlreadyExists:
+                        report["evaluation"]["action"] = "skip_race_existing_result"
+            except ResultError as exc:
+                report["evaluation"].update({
+                    "prediction_date": base,
+                    "status": "result_error",
+                    "error": type(exc).__name__,
+                })
 
     builder = _load_production_memory(prediction_store, result_store, base, minimum_sample)
     report["experience"]["evaluated_result_dates_before_next_prediction"] = list(builder.memory["evaluated_result_dates"])
@@ -246,6 +279,7 @@ def run_daily(
     base_data_available = bool(load_daily_ohlc_rows_for_date(ohlc_root, base))
     can_generate_next = (
         report["evaluation"].get("status") == "evaluated"
+        or report["evaluation"].get("status") == "closed"
         or (current_prediction is None and base_data_available)
     )
     if evaluate_only:
@@ -289,7 +323,7 @@ def run_daily(
             reflection_path = generate_reflection_for_date(data_root, base, "production")
             report["reflection"] = {"generated": True, "path": str(reflection_path)}
         else:
-            report["reflection"] = {"generated": False, "reason": "result_not_evaluated"}
+            report["reflection"] = {"generated": False, "reason": "closed_day" if report["evaluation"].get("status") == "closed" else "result_not_evaluated"}
         exported = export_web(data_root, root / "docs" / "pachi_agents" / "data", "production")
         report["export"] = {"planned": True, "history_count": len(exported["history"]), "output": str(root / "docs" / "pachi_agents" / "data")}
     else:
