@@ -55,7 +55,7 @@ if "%DRY_RUN%"=="1" (
 )
 
 echo Starting PSCUBE morning capture...
-python tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%" --retries 2 --delay-min 3 --delay-max 5
+python tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
 set "RESULT=%ERRORLEVEL%"
 
 echo.

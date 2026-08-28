@@ -14,7 +14,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-from pscube_cdp_capture_common import ChallengeDetected, CaptureAborted, RateLimited, apply_legacy_viewport, capture_today, clear_legacy_viewport, get_page, is_challenge, is_rate_limited, open_machine, redact_url, write_manifest
+from pscube_cdp_capture_common import ChallengeDetected, CaptureAborted, MACHINE_DELAY_MAX_SECONDS, MACHINE_DELAY_MIN_SECONDS, RateLimited, apply_legacy_viewport, capture_today, clear_legacy_viewport, get_page, is_challenge, is_rate_limited, open_machine, redact_url, write_manifest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,8 +40,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--date", default=dt.datetime.now().strftime("%Y%m%d"))
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9222")
     parser.add_argument("--retries", type=int, default=2)
-    parser.add_argument("--delay-min", type=float, default=3.0)
-    parser.add_argument("--delay-max", type=float, default=5.0)
+    parser.add_argument("--delay-min", type=float, default=MACHINE_DELAY_MIN_SECONDS)
+    parser.add_argument("--delay-max", type=float, default=MACHINE_DELAY_MAX_SECONDS)
     return parser.parse_args()
 
 
