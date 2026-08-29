@@ -14,7 +14,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-from pscube_cdp_capture_common import ChallengeDetected, CaptureAborted, MACHINE_DELAY_MAX_SECONDS, MACHINE_DELAY_MIN_SECONDS, RateLimited, apply_legacy_viewport, capture_today, clear_legacy_viewport, get_page, is_challenge, is_rate_limited, open_machine, redact_url, write_manifest
+from pscube_cdp_capture_common import BATCH_PAUSE_SECONDS, BATCH_SIZE, ChallengeDetected, CaptureAborted, MACHINE_DELAY_MAX_SECONDS, MACHINE_DELAY_MIN_SECONDS, RateLimited, apply_legacy_viewport, capture_today, clear_legacy_viewport, get_page, is_challenge, is_rate_limited, open_machine, redact_url, write_manifest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,7 +69,7 @@ def main() -> int:
     logs = out / "logs"
     logs.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", handlers=[logging.FileHandler(logs / "capture.log", encoding="utf-8"), logging.StreamHandler()])
-    manifest = {"date": args.date, "mode": "morning", "browser": "existing_chrome_cdp", "machines": machines, "results": [], "retry_limit": args.retries, "delay_min": args.delay_min, "delay_max": args.delay_max, "aborted": False, "rate_limited": False, "challenge_detected": False}
+    manifest = {"date": args.date, "mode": "morning", "browser": "existing_chrome_cdp", "machines": machines, "results": [], "retry_limit": args.retries, "delay_min": args.delay_min, "delay_max": args.delay_max, "batch_size": BATCH_SIZE, "batch_pause_seconds": BATCH_PAUSE_SECONDS, "batch_pause_count": 0, "aborted": False, "rate_limited": False, "challenge_detected": False}
 
     pw = sync_playwright().start()
     viewport_session = None
@@ -167,6 +167,12 @@ def main() -> int:
                 logging.info("morning machine=%s delay_seconds=%.3f", machine, delay_seconds)
                 try:
                     wait_between_machines(delay_seconds)
+                    completed_count = sum(1 for item in manifest["results"] if item.get("status") == "complete")
+                    if completed_count == BATCH_SIZE and index < len(machines) - 1:
+                        logging.info("morning batch_pause start completed=%s pause_seconds=%s", completed_count, BATCH_PAUSE_SECONDS)
+                        wait_between_machines(BATCH_PAUSE_SECONDS)
+                        manifest["batch_pause_count"] += 1
+                        logging.info("morning batch_pause end completed=%s", completed_count)
                 except CaptureAborted as exc:
                     print("ESC pressed. Stopping capture safely...", flush=True)
                     manifest.update({"aborted": True, "aborted_at_machine": machines[index + 1], "aborted_at": dt.datetime.now().astimezone().isoformat(), "completed_machines": [r["machine"] for r in manifest["results"] if r.get("status") == "complete"], "remaining_machines": machines[index + 1:]})
