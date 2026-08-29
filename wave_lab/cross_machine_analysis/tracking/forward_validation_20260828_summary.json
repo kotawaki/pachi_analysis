@@ -33,8 +33,27 @@
       "ALL_3_machines": "046",
       "single_ALL3_in_strong_group": true,
       "candidate_machine": "046",
-      "evaluation_status": "pending"
+      "evaluation_status": "evaluated"
     }
   ],
-  "evaluation_status": "pending"
+  "evaluation_status": "evaluated",
+  "actual_source": "csv/daily_ohlc/20260829/20260829_daily_ohlc.csv",
+  "evaluation": {
+    "actual_bullish_count": 19,
+    "actual_bullish_rate": 0.48717948717948717,
+    "actual_close_mean": -588.4615384615385,
+    "actual_close_median": -1244.0,
+    "actual_high_mean": 6999.666666666667,
+    "actual_low_mean": -8695.333333333334,
+    "actual_close_ge_5000_count": 14,
+    "actual_close_ge_10000_count": 8,
+    "actual_close_ge_15000_count": 2,
+    "actual_close_ge_20000_count": 1
+  },
+  "future_outcome": {
+    "bullish_evaluated": true,
+    "close_thresholds_evaluated": true,
+    "group_result_evaluated": true,
+    "all3_result_evaluated": true
+  }
 }

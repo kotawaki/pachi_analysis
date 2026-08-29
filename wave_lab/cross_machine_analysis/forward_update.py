@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import argparse
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -56,8 +57,10 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def machine_signal(machine: str) -> dict:
-    rows = load_machine_rows(machine, SIGNAL_DATE)
+def machine_signal(machine: str, signal_date: str | None = None, target_date: str | None = None) -> dict:
+    signal_date = signal_date or SIGNAL_DATE
+    target_date = target_date or TARGET_DATE
+    rows = load_machine_rows(machine, signal_date)
     if not rows:
         raise ValueError(f"no OHLC rows for {machine}")
     components, daily, _centered, _comparison = analyze(rows)
@@ -73,8 +76,8 @@ def machine_signal(machine: str) -> dict:
     down_down_down = pattern == "DOWN-DOWN-DOWN"
     score = int(up_up_up) + int(right) + int(low_convergence_right)
     return {
-        "signal_date": SIGNAL_DATE,
-        "target_date": TARGET_DATE,
+        "signal_date": signal_date,
+        "target_date": target_date,
         "machine": machine,
         "group": MACHINE_GROUP[machine],
         "wave_direction_pattern": pattern,
@@ -96,8 +99,14 @@ def machine_signal(machine: str) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--signal-date", default=SIGNAL_DATE)
+    parser.add_argument("--target-date", default=TARGET_DATE)
+    parser.add_argument("--append", action="store_true")
+    args = parser.parse_args()
+    signal_date, target_date = args.signal_date, args.target_date
     TRACK.mkdir(parents=True, exist_ok=True)
-    machines = [machine_signal(machine) for machine in MACHINES]
+    machines = [machine_signal(machine, signal_date, target_date) for machine in MACHINES]
 
     machine_fields = [
         "signal_date", "target_date", "machine", "group",
@@ -106,9 +115,13 @@ def main() -> int:
         "ALL_3", "score", "evaluation_status", "actual_bullish",
         "actual_open", "actual_high", "actual_low", "actual_close",
     ]
-    write_csv(TRACK / "forward_machine_signal_tracking.csv", [
-        {field: row[field] for field in machine_fields} for row in machines
-    ])
+    machine_path = TRACK / "forward_machine_signal_tracking.csv"
+    new_machine_rows = [{field: row[field] for field in machine_fields} for row in machines]
+    if args.append and machine_path.exists():
+        with machine_path.open(encoding="utf-8-sig", newline="") as handle:
+            old = list(csv.DictReader(handle))
+        new_machine_rows = [row for row in old if row.get("signal_date") != signal_date] + new_machine_rows
+    write_csv(machine_path, new_machine_rows)
 
     counts = {
         "UP_UP_UP_count": sum(row["UP_UP_UP"] for row in machines),
@@ -119,21 +132,27 @@ def main() -> int:
         "DOWN_DOWN_DOWN_count": sum(row["DOWN_DOWN_DOWN"] for row in machines),
     }
     daily = {
-        "signal_date": SIGNAL_DATE,
-        "target_date": TARGET_DATE,
+        "signal_date": signal_date,
+        "target_date": target_date,
         **counts,
         "direction_balance": counts["UP_UP_UP_count"] - counts["DOWN_DOWN_DOWN_count"],
         "evaluation_status": "pending",
     }
-    write_csv(TRACK / "forward_daily_signal_tracking.csv", [daily])
+    daily_path = TRACK / "forward_daily_signal_tracking.csv"
+    daily_rows = [daily]
+    if args.append and daily_path.exists():
+        with daily_path.open(encoding="utf-8-sig", newline="") as handle:
+            old = list(csv.DictReader(handle))
+        daily_rows = [row for row in old if row.get("signal_date") != signal_date] + [daily]
+    write_csv(daily_path, daily_rows)
 
     groups = []
     for group, group_machines in GROUPS.items():
         rows = [row for row in machines if row["machine"] in group_machines]
         signal_total = sum(row["score"] for row in rows)
         groups.append({
-            "signal_date": SIGNAL_DATE,
-            "target_date": TARGET_DATE,
+            "signal_date": signal_date,
+            "target_date": target_date,
             "group": group,
             "machine_count": len(rows),
             "UP_UP_UP_count": sum(row["UP_UP_UP"] for row in rows),
@@ -153,7 +172,13 @@ def main() -> int:
         row["B_all3_ge1"] = row["ALL_3_count"] >= 1
         row["C_direction_positive"] = row["direction_balance"] > 0
         row["STRONG_GROUP"] = row["A_rank_top3"] and row["B_all3_ge1"] and row["C_direction_positive"]
-    write_csv(TRACK / "forward_group_signal_tracking.csv", ranked)
+    group_path = TRACK / "forward_group_signal_tracking.csv"
+    group_rows = ranked
+    if args.append and group_path.exists():
+        with group_path.open(encoding="utf-8-sig", newline="") as handle:
+            old = list(csv.DictReader(handle))
+        group_rows = [row for row in old if row.get("signal_date") != signal_date] + ranked
+    write_csv(group_path, group_rows)
 
     strong = []
     for row in ranked:
@@ -161,8 +186,8 @@ def main() -> int:
             continue
         candidates = [machine for machine in machines if machine["group"] == row["group"] and machine["ALL_3"]]
         strong.append({
-            "signal_date": SIGNAL_DATE,
-            "target_date": TARGET_DATE,
+            "signal_date": signal_date,
+            "target_date": target_date,
             "group": row["group"],
             "group_signal_rank": row["group_signal_rank"],
             "group_signal_score": row["group_signal_score"],
@@ -173,16 +198,22 @@ def main() -> int:
             "candidate_machine": candidates[0]["machine"] if len(candidates) == 1 else "",
             "evaluation_status": "pending",
         })
-    write_csv(TRACK / "forward_strong_group_tracking.csv", strong or [{
-        "signal_date": SIGNAL_DATE, "target_date": TARGET_DATE,
+    strong_rows = strong or [{
+        "signal_date": signal_date, "target_date": target_date,
         "evaluation_status": "pending", "strong_group_count": 0,
-    }])
+    }]
+    strong_path = TRACK / "forward_strong_group_tracking.csv"
+    if args.append and strong_path.exists():
+        with strong_path.open(encoding="utf-8-sig", newline="") as handle:
+            old = list(csv.DictReader(handle))
+        strong_rows = [row for row in old if row.get("signal_date") != signal_date] + strong_rows
+    write_csv(strong_path, strong_rows)
 
     summary = {
-        "signal_date": SIGNAL_DATE,
-        "target_date": TARGET_DATE,
+        "signal_date": signal_date,
+        "target_date": target_date,
         "mode": "forward/prospective",
-        "max_input_date": SIGNAL_DATE,
+        "max_input_date": signal_date,
         "future_data_used": False,
         "machines": len(machines),
         "groups": len(groups),
@@ -192,7 +223,8 @@ def main() -> int:
         "strong_groups": strong,
         "evaluation_status": "pending",
     }
-    (TRACK / "forward_validation_20260828_summary.json").write_text(
+    summary_path = TRACK / f"forward_validation_{signal_date.replace('-', '')}_summary.json"
+    summary_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(json.dumps(summary, ensure_ascii=False))

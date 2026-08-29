@@ -65,31 +65,38 @@ def history_row(summary):
 
 
 def main():
-    with (TRACKING / "forward_validation_20260828_summary.json").open(encoding="utf-8") as handle:
-        summary = json.load(handle)
+    summaries = []
+    for path in TRACKING.glob("forward_validation_*_summary.json"):
+        with path.open(encoding="utf-8") as handle:
+            summaries.append(json.load(handle))
+    if not summaries:
+        raise FileNotFoundError("no forward validation summaries")
+    summary = max(summaries, key=lambda item: item["signal_date"])
     machines = [machine_row(row) for row in read_csv("forward_machine_signal_tracking.csv")]
     groups = [group_row(row) for row in read_csv("forward_group_signal_tracking.csv")]
-    strong = json.loads(json.dumps(summary.get("strong_groups", [])))
-    detail = {
-        **summary,
-        "machine_signals": machines,
-        "group_signals": groups,
-        "strong_groups": strong,
-        "signal_candidates": {
-            "ALL_3": [row["machine"] for row in machines if row["ALL_3"]],
-            "UP_UP_UP": [row["machine"] for row in machines if row["UP_UP_UP"]],
-            "RIGHT": [row["machine"] for row in machines if row["RIGHT"]],
-            "LOW_CONVERGENCE_RIGHT": [row["machine"] for row in machines if row["LOW_CONVERGENCE_RIGHT"]],
-        },
-        "group_top3": groups[:3],
-        "future_outcome": {
-            "actual_open": None, "actual_high": None, "actual_low": None, "actual_close": None,
-            "bullish": None, "close_ge_5000": None, "close_ge_10000": None, "close_ge_20000": None,
-            "group_bullish_machine_rate": None, "group_mean_close": None, "group_max_close": None,
-            "strong_machines_ge_5000": None, "strong_machines_ge_10000": None,
-            "all3_group_close_rank": None, "all3_top2": None, "all3_top3": None,
-        },
-    }
+    def detail_for(item):
+        item_machines = [row for row in machines if row["signal_date"] == item["signal_date"]]
+        item_groups = [row for row in groups if row["signal_date"] == item["signal_date"]]
+        return {
+            **item,
+            "machine_signals": item_machines,
+            "group_signals": item_groups,
+            "strong_groups": json.loads(json.dumps(item.get("strong_groups", []))),
+            "signal_candidates": {
+                "ALL_3": [row["machine"] for row in item_machines if row["ALL_3"]],
+                "UP_UP_UP": [row["machine"] for row in item_machines if row["UP_UP_UP"]],
+                "RIGHT": [row["machine"] for row in item_machines if row["RIGHT"]],
+                "LOW_CONVERGENCE_RIGHT": [row["machine"] for row in item_machines if row["LOW_CONVERGENCE_RIGHT"]],
+            },
+            "group_top3": item_groups[:3],
+            "future_outcome": {
+                "actual_open": None, "actual_high": None, "actual_low": None, "actual_close": None,
+                "bullish": None, "close_ge_5000": None, "close_ge_10000": None, "close_ge_20000": None,
+                "group_bullish_machine_rate": None, "group_mean_close": None, "group_max_close": None,
+                "strong_machines_ge_5000": None, "strong_machines_ge_10000": None,
+                "all3_group_close_rank": None, "all3_top2": None, "all3_top3": None,
+            },
+        }
     WEB.mkdir(parents=True, exist_ok=True)
     existing = []
     history_path = WEB / "history.json"
@@ -97,10 +104,16 @@ def main():
         with history_path.open(encoding="utf-8") as handle:
             existing = json.load(handle).get("rows", [])
     rows = {row["signal_date"]: row for row in existing}
-    rows[summary["signal_date"]] = history_row(summary)
+    for item in summaries:
+        rows[item["signal_date"]] = history_row(item)
     history = {"rows": sorted(rows.values(), key=lambda row: row["signal_date"], reverse=True)}
-    for path, payload in ((WEB / "20260828.json", detail), (WEB / "latest.json", detail),
-                          (WEB / "history.json", history)):
+    detail = detail_for(summary)
+    for item in summaries:
+        detail_path = WEB / f'{item["signal_date"].replace("-", "")}.json'
+        with detail_path.open("w", encoding="utf-8", newline="\n") as handle:
+            json.dump(detail_for(item), handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+    for path, payload in ((WEB / "latest.json", detail), (WEB / "history.json", history)):
         with path.open("w", encoding="utf-8", newline="\n") as handle:
             json.dump(payload, handle, ensure_ascii=False, indent=2)
             handle.write("\n")
