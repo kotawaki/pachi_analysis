@@ -1,0 +1,333 @@
+<!doctype html><html lang='ja'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>20260829 Ignition Timeline</title><style>
+body{font-family:system-ui,sans-serif;background:#0f172a;color:#e5e7eb;margin:20px}h1,h2{color:#93c5fd}.note{background:#172033;border-left:4px solid #60a5fa;padding:12px;line-height:1.6}table{border-collapse:collapse;margin:12px 0 28px;font-size:13px}th,td{border:1px solid #374151;padding:5px 8px;text-align:right}th{background:#1f2937}td:first-child,th:first-child{text-align:left}pre{white-space:pre-wrap;background:#111827;padding:12px}
+</style></head><body><h1>20260829 Ignition Timeline Analysis</h1><div class='note'>13:00–15:00のdeltaを全39台で比較する探索表示です。先行観測は因果や起点を意味しません。deltaは既存causal previous-value hold済みtimelineから取得しています。</div><h2>Summary</h2><pre>{
+  &quot;date&quot;: &quot;20260829&quot;,
+  &quot;window&quot;: &quot;13:00-15:00&quot;,
+  &quot;context_window&quot;: &quot;12:30-15:30&quot;,
+  &quot;machines&quot;: 39,
+  &quot;groups&quot;: 9,
+  &quot;island_peak&quot;: {
+    &quot;initial_30m&quot;: &quot;14:20=18&quot;,
+    &quot;continuation_30m&quot;: &quot;14:40=52&quot;,
+    &quot;total_30m&quot;: &quot;14:40=68&quot;
+  },
+  &quot;definition&quot;: &quot;raw deltas from existing 5-minute causal previous-value hold timeline; first positive means delta &gt; 0; no ignition threshold&quot;,
+  &quot;early_movers&quot;: {
+    &quot;five_min&quot;: [
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0039&quot;,
+        &quot;group&quot;: &quot;g3&quot;,
+        &quot;value&quot;: -6933,
+        &quot;delta_5m&quot;: 1689,
+        &quot;delta_10m&quot;: 1689,
+        &quot;delta_30m&quot;: 1689
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0040&quot;,
+        &quot;group&quot;: &quot;g4&quot;,
+        &quot;value&quot;: 11157,
+        &quot;delta_5m&quot;: 2975,
+        &quot;delta_10m&quot;: 2975,
+        &quot;delta_30m&quot;: 2975
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0045&quot;,
+        &quot;group&quot;: &quot;g9&quot;,
+        &quot;value&quot;: -4711,
+        &quot;delta_5m&quot;: 1956,
+        &quot;delta_10m&quot;: 1956,
+        &quot;delta_30m&quot;: 1956
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0047&quot;,
+        &quot;group&quot;: &quot;g2&quot;,
+        &quot;value&quot;: 5517,
+        &quot;delta_5m&quot;: 6939,
+        &quot;delta_10m&quot;: 6939,
+        &quot;delta_30m&quot;: 6939
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0053&quot;,
+        &quot;group&quot;: &quot;g8&quot;,
+        &quot;value&quot;: 6207,
+        &quot;delta_5m&quot;: 7451,
+        &quot;delta_10m&quot;: 7451,
+        &quot;delta_30m&quot;: 7451
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0056&quot;,
+        &quot;group&quot;: &quot;g2&quot;,
+        &quot;value&quot;: 5517,
+        &quot;delta_5m&quot;: 6050,
+        &quot;delta_10m&quot;: 6050,
+        &quot;delta_30m&quot;: 6050
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0068&quot;,
+        &quot;group&quot;: &quot;g5&quot;,
+        &quot;value&quot;: 2931,
+        &quot;delta_5m&quot;: 4531,
+        &quot;delta_10m&quot;: 4531,
+        &quot;delta_30m&quot;: 4531
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0069&quot;,
+        &quot;group&quot;: &quot;g6&quot;,
+        &quot;value&quot;: 690,
+        &quot;delta_5m&quot;: 1046,
+        &quot;delta_10m&quot;: 1046,
+        &quot;delta_30m&quot;: 1046
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0070&quot;,
+        &quot;group&quot;: &quot;g7&quot;,
+        &quot;value&quot;: 3017,
+        &quot;delta_5m&quot;: 1810,
+        &quot;delta_10m&quot;: 1810,
+        &quot;delta_30m&quot;: 1810
+      }
+    ],
+    &quot;ten_min&quot;: [
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0039&quot;,
+        &quot;group&quot;: &quot;g3&quot;,
+        &quot;value&quot;: -6933,
+        &quot;delta_5m&quot;: 1689,
+        &quot;delta_10m&quot;: 1689,
+        &quot;delta_30m&quot;: 1689
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0040&quot;,
+        &quot;group&quot;: &quot;g4&quot;,
+        &quot;value&quot;: 11157,
+        &quot;delta_5m&quot;: 2975,
+        &quot;delta_10m&quot;: 2975,
+        &quot;delta_30m&quot;: 2975
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0045&quot;,
+        &quot;group&quot;: &quot;g9&quot;,
+        &quot;value&quot;: -4711,
+        &quot;delta_5m&quot;: 1956,
+        &quot;delta_10m&quot;: 1956,
+        &quot;delta_30m&quot;: 1956
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0047&quot;,
+        &quot;group&quot;: &quot;g2&quot;,
+        &quot;value&quot;: 5517,
+        &quot;delta_5m&quot;: 6939,
+        &quot;delta_10m&quot;: 6939,
+        &quot;delta_30m&quot;: 6939
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0053&quot;,
+        &quot;group&quot;: &quot;g8&quot;,
+        &quot;value&quot;: 6207,
+        &quot;delta_5m&quot;: 7451,
+        &quot;delta_10m&quot;: 7451,
+        &quot;delta_30m&quot;: 7451
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0056&quot;,
+        &quot;group&quot;: &quot;g2&quot;,
+        &quot;value&quot;: 5517,
+        &quot;delta_5m&quot;: 6050,
+        &quot;delta_10m&quot;: 6050,
+        &quot;delta_30m&quot;: 6050
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0068&quot;,
+        &quot;group&quot;: &quot;g5&quot;,
+        &quot;value&quot;: 2931,
+        &quot;delta_5m&quot;: 4531,
+        &quot;delta_10m&quot;: 4531,
+        &quot;delta_30m&quot;: 4531
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0069&quot;,
+        &quot;group&quot;: &quot;g6&quot;,
+        &quot;value&quot;: 690,
+        &quot;delta_5m&quot;: 1046,
+        &quot;delta_10m&quot;: 1046,
+        &quot;delta_30m&quot;: 1046
+      },
+      {
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;minute&quot;: 805,
+        &quot;machine&quot;: &quot;0070&quot;,
+        &quot;group&quot;: &quot;g7&quot;,
+        &quot;value&quot;: 3017,
+        &quot;delta_5m&quot;: 1810,
+        &quot;delta_10m&quot;: 1810,
+        &quot;delta_30m&quot;: 1810
+      }
+    ],
+    &quot;max_30m_before_14_40&quot;: {
+      &quot;time&quot;: &quot;13:50&quot;,
+      &quot;minute&quot;: 830,
+      &quot;machine&quot;: &quot;0047&quot;,
+      &quot;group&quot;: &quot;g2&quot;,
+      &quot;value&quot;: 9655,
+      &quot;delta_5m&quot;: 4138,
+      &quot;delta_10m&quot;: 4138,
+      &quot;delta_30m&quot;: 11077
+    },
+    &quot;earliest_positive_group_5m&quot;: [
+      {
+        &quot;group&quot;: &quot;g2&quot;,
+        &quot;minute&quot;: 805,
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;delta_5m&quot;: 8889
+      },
+      {
+        &quot;group&quot;: &quot;g8&quot;,
+        &quot;minute&quot;: 805,
+        &quot;time&quot;: &quot;13:25&quot;,
+        &quot;delta_5m&quot;: 4774
+      }
+    ]
+  },
+  &quot;g7_g8&quot;: [
+    {
+      &quot;machine&quot;: &quot;0043&quot;,
+      &quot;group&quot;: &quot;g7&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;14:30&quot;,
+      &quot;max_5m&quot;: 711,
+      &quot;max_5m_time&quot;: &quot;14:30&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;14:30&quot;,
+      &quot;max_10m&quot;: 711,
+      &quot;max_10m_time&quot;: &quot;14:30&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;14:30&quot;,
+      &quot;max_30m&quot;: 711,
+      &quot;max_30m_time&quot;: &quot;14:30&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0044&quot;,
+      &quot;group&quot;: &quot;g8&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;&quot;,
+      &quot;max_5m&quot;: 0,
+      &quot;max_5m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;&quot;,
+      &quot;max_10m&quot;: 0,
+      &quot;max_10m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;&quot;,
+      &quot;max_30m&quot;: 0,
+      &quot;max_30m_time&quot;: &quot;13:00&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0052&quot;,
+      &quot;group&quot;: &quot;g7&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;13:50&quot;,
+      &quot;max_5m&quot;: 2586,
+      &quot;max_5m_time&quot;: &quot;14:30&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;13:50&quot;,
+      &quot;max_10m&quot;: 2586,
+      &quot;max_10m_time&quot;: &quot;14:30&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;13:00&quot;,
+      &quot;max_30m&quot;: 3663,
+      &quot;max_30m_time&quot;: &quot;13:00&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0053&quot;,
+      &quot;group&quot;: &quot;g8&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;13:25&quot;,
+      &quot;max_5m&quot;: 7451,
+      &quot;max_5m_time&quot;: &quot;13:25&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;13:25&quot;,
+      &quot;max_10m&quot;: 7451,
+      &quot;max_10m_time&quot;: &quot;13:25&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;13:00&quot;,
+      &quot;max_30m&quot;: 7451,
+      &quot;max_30m_time&quot;: &quot;13:25&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0061&quot;,
+      &quot;group&quot;: &quot;g7&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;13:50&quot;,
+      &quot;max_5m&quot;: 1512,
+      &quot;max_5m_time&quot;: &quot;13:50&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;13:50&quot;,
+      &quot;max_10m&quot;: 1512,
+      &quot;max_10m_time&quot;: &quot;13:50&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;13:55&quot;,
+      &quot;max_30m&quot;: 1512,
+      &quot;max_30m_time&quot;: &quot;13:55&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0062&quot;,
+      &quot;group&quot;: &quot;g8&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;&quot;,
+      &quot;max_5m&quot;: 0,
+      &quot;max_5m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;&quot;,
+      &quot;max_10m&quot;: 0,
+      &quot;max_10m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;&quot;,
+      &quot;max_30m&quot;: 0,
+      &quot;max_30m_time&quot;: &quot;13:20&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0070&quot;,
+      &quot;group&quot;: &quot;g7&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;13:25&quot;,
+      &quot;max_5m&quot;: 1810,
+      &quot;max_5m_time&quot;: &quot;13:25&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;13:25&quot;,
+      &quot;max_10m&quot;: 1810,
+      &quot;max_10m_time&quot;: &quot;13:25&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;13:00&quot;,
+      &quot;max_30m&quot;: 1810,
+      &quot;max_30m_time&quot;: &quot;13:25&quot;
+    },
+    {
+      &quot;machine&quot;: &quot;0071&quot;,
+      &quot;group&quot;: &quot;g8&quot;,
+      &quot;first_positive_5m_time&quot;: &quot;&quot;,
+      &quot;max_5m&quot;: 0,
+      &quot;max_5m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_10m_time&quot;: &quot;&quot;,
+      &quot;max_10m&quot;: 0,
+      &quot;max_10m_time&quot;: &quot;13:00&quot;,
+      &quot;first_positive_30m_time&quot;: &quot;&quot;,
+      &quot;max_30m&quot;: 0,
+      &quot;max_30m_time&quot;: &quot;13:00&quot;
+    }
+  ],
+  &quot;peak_reference_minute&quot;: 880,
+  &quot;canonical_or_phase2_inputs_changed&quot;: false
+}</pre><h2>13:00–15:00 Event Replay</h2><table><tr><th>time</th><th>island total events</th><th>top machine</th><th>group</th><th>delta 5m</th></tr><tr><td>13:00</td><td>4</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:05</td><td>3</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:10</td><td>2</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:15</td><td>1</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:20</td><td>3</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:25</td><td>6</td><td>0053</td><td>g8</td><td>7451</td></tr><tr><td>13:30</td><td>7</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:35</td><td>6</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:40</td><td>7</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:45</td><td>9</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>13:50</td><td>7</td><td>0072</td><td>g9</td><td>6923</td></tr><tr><td>13:55</td><td>4</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:00</td><td>7</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:05</td><td>10</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:10</td><td>5</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:15</td><td>3</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:20</td><td>5</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:25</td><td>7</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:30</td><td>9</td><td>0040</td><td>g4</td><td>8182</td></tr><tr><td>14:35</td><td>3</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:40</td><td>15</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:45</td><td>15</td><td>0072</td><td>g9</td><td>5641</td></tr><tr><td>14:50</td><td>10</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>14:55</td><td>11</td><td>0039</td><td>g3</td><td>0</td></tr><tr><td>15:00</td><td>9</td><td>0039</td><td>g3</td><td>0</td></tr></table><h2>Machine maxima</h2><table><tr><th>machine</th><th>group</th><th>max5 time</th><th>max5</th><th>max10 time</th><th>max10</th><th>max30 time</th><th>max30</th></tr><tr><td>0039</td><td>g3</td><td>14:30</td><td>4089</td><td>14:30</td><td>4089</td><td>14:45</td><td>5600</td></tr><tr><td>0040</td><td>g4</td><td>14:30</td><td>8182</td><td>14:30</td><td>8182</td><td>14:30</td><td>8182</td></tr><tr><td>0041</td><td>g5</td><td>14:30</td><td>7586</td><td>14:30</td><td>7586</td><td>14:30</td><td>7586</td></tr><tr><td>0042</td><td>g6</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td></tr><tr><td>0043</td><td>g7</td><td>14:30</td><td>711</td><td>14:30</td><td>711</td><td>14:30</td><td>711</td></tr><tr><td>0044</td><td>g8</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td></tr><tr><td>0045</td><td>g9</td><td>14:30</td><td>2844</td><td>14:30</td><td>2844</td><td>13:50</td><td>3734</td></tr><tr><td>0046</td><td>g1</td><td>14:45</td><td>3733</td><td>14:45</td><td>3733</td><td>15:00</td><td>3733</td></tr><tr><td>0047</td><td>g2</td><td>13:25</td><td>6939</td><td>13:25</td><td>6939</td><td>13:50</td><td>11077</td></tr><tr><td>0048</td><td>g3</td><td>14:30</td><td>1067</td><td>14:30</td><td>1067</td><td>14:30</td><td>1067</td></tr><tr><td>0049</td><td>g4</td><td>14:45</td><td>5409</td><td>14:45</td><td>5409</td><td>15:00</td><td>5409</td></tr><tr><td>0050</td><td>g5</td><td>13:50</td><td>3448</td><td>13:50</td><td>3448</td><td>13:55</td><td>3448</td></tr><tr><td>0051</td><td>g6</td><td>14:45</td><td>89</td><td>14:45</td><td>89</td><td>15:00</td><td>89</td></tr><tr><td>0052</td><td>g7</td><td>14:30</td><td>2586</td><td>14:30</td><td>2586</td><td>13:00</td><td>3663</td></tr><tr><td>0053</td><td>g8</td><td>13:25</td><td>7451</td><td>13:25</td><td>7451</td><td>13:25</td><td>7451</td></tr><tr><td>0054</td><td>g9</td><td>14:45</td><td>2613</td><td>14:45</td><td>2613</td><td>14:45</td><td>4035</td></tr><tr><td>0055</td><td>g1</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>889</td></tr><tr><td>0056</td><td>g2</td><td>13:25</td><td>6050</td><td>13:25</td><td>6050</td><td>13:50</td><td>9930</td></tr><tr><td>0057</td><td>g3</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0058</td><td>g4</td><td>14:30</td><td>1600</td><td>14:30</td><td>1600</td><td>14:30</td><td>1600</td></tr><tr><td>0059</td><td>g5</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0060</td><td>g6</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0061</td><td>g7</td><td>13:50</td><td>1512</td><td>13:50</td><td>1512</td><td>13:55</td><td>1512</td></tr><tr><td>0062</td><td>g8</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0063</td><td>g9</td><td>14:45</td><td>2134</td><td>14:45</td><td>2134</td><td>15:00</td><td>2134</td></tr><tr><td>0064</td><td>g1</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0065</td><td>g2</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:20</td><td>0</td></tr><tr><td>0066</td><td>g3</td><td>14:45</td><td>1422</td><td>14:45</td><td>1422</td><td>15:00</td><td>1422</td></tr><tr><td>0067</td><td>g4</td><td>14:45</td><td>3733</td><td>14:45</td><td>3733</td><td>15:00</td><td>3733</td></tr><tr><td>0068</td><td>g5</td><td>13:25</td><td>4531</td><td>13:25</td><td>4531</td><td>13:25</td><td>4531</td></tr><tr><td>0069</td><td>g6</td><td>13:25</td><td>1046</td><td>13:25</td><td>1046</td><td>13:25</td><td>1046</td></tr><tr><td>0070</td><td>g7</td><td>13:25</td><td>1810</td><td>13:25</td><td>1810</td><td>13:25</td><td>1810</td></tr><tr><td>0071</td><td>g8</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td></tr><tr><td>0072</td><td>g9</td><td>14:30</td><td>7692</td><td>14:30</td><td>7692</td><td>14:45</td><td>13333</td></tr><tr><td>0073</td><td>g1</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>689</td></tr><tr><td>0074</td><td>g2</td><td>14:45</td><td>4266</td><td>14:45</td><td>4266</td><td>15:00</td><td>4266</td></tr><tr><td>0075</td><td>g3</td><td>14:45</td><td>2759</td><td>14:45</td><td>2759</td><td>15:00</td><td>2759</td></tr><tr><td>0076</td><td>g4</td><td>14:45</td><td>711</td><td>14:45</td><td>711</td><td>15:00</td><td>711</td></tr><tr><td>0077</td><td>g5</td><td>13:00</td><td>0</td><td>13:00</td><td>0</td><td>13:00</td><td>356</td></tr></table></body></html>

@@ -1,0 +1,40 @@
+{
+  "signal_date": "2026-08-30",
+  "target_date": "2026-08-31",
+  "mode": "forward/prospective",
+  "max_input_date": "2026-08-30",
+  "future_data_used": false,
+  "machines": 39,
+  "groups": 9,
+  "machine_counts": {
+    "UP_UP_UP_count": 3,
+    "RIGHT_count": 7,
+    "LOW_CONVERGENCE_RIGHT_count": 6,
+    "ANY_SIGNAL_count": 9,
+    "ALL_3_count": 1,
+    "DOWN_DOWN_DOWN_count": 4
+  },
+  "direction_balance": -1,
+  "score_distribution": {
+    "0": 30,
+    "1": 3,
+    "2": 5,
+    "3": 1
+  },
+  "strong_groups": [
+    {
+      "signal_date": "2026-08-30",
+      "target_date": "2026-08-31",
+      "group": "g3",
+      "group_signal_rank": 1,
+      "group_signal_score": 1.0,
+      "direction_balance": 1,
+      "ALL_3_count": 1,
+      "ALL_3_machines": "057",
+      "single_ALL3_in_strong_group": true,
+      "candidate_machine": "057",
+      "evaluation_status": "pending"
+    }
+  ],
+  "evaluation_status": "pending"
+}

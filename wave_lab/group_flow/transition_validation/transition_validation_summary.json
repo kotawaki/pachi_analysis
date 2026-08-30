@@ -1,0 +1,38 @@
+{
+  "candidate_dates": [
+    "20260828",
+    "20260829",
+    "20260830"
+  ],
+  "analyzed_dates": [
+    "20260829",
+    "20260830"
+  ],
+  "skipped_dates": [
+    {
+      "target_date": "20260828",
+      "previous_business_day": "",
+      "reason": "previous business-day Wave Lab forward JSON missing; existing transition output missing: transition_group_summary.csv; existing transition output missing: transition_rank_matrix.csv; existing transition output missing: transition_top3_overlap.csv; existing transition output missing: transition_rank_correlation.csv"
+    }
+  ],
+  "analyzed_day_count": 2,
+  "skipped_day_count": 1,
+  "random_top3_baseline": {
+    "group_count": 9,
+    "top_n": 3,
+    "expected_overlap": 1.0,
+    "P(overlap=0)": 0.23809523809523808,
+    "P(overlap=1)": 0.5357142857142857,
+    "P(overlap=2)": 0.21428571428571427,
+    "P(overlap=3)": 0.011904761904761904
+  },
+  "final_overlap_direction_counts": {
+    "FINAL_OVERLAP_UP": 2
+  },
+  "rank1_same_all_stages_days": 0,
+  "rank1_changed_days": 2,
+  "definition_source": "20260829 analyze_transition.py and existing transition artifacts",
+  "definition_changed": false,
+  "threshold_optimized": false,
+  "20260829_reference_included": true
+}
