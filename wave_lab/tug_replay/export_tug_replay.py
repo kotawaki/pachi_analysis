@@ -50,8 +50,8 @@ def load_canonical(date:str):
         for r in csv.DictReader(f): out[str(r["Machine"]).zfill(4)]={k:r.get(k) for k in ("Open","High","Low","Close")}
     return out
 
-def export(date:str,group:str):
-    machines=GROUPS[group]; states=load_state(date); canonical=load_canonical(date)
+def export(date:str,group:str,state_date:str|None=None):
+    machines=GROUPS[group]; states=load_state(state_date or date); canonical=load_canonical(date)
     tracks=[]; finals=[]; common=[]
     for m in machines:
         path=CAPTURE/date/"morning"/"svg"/f"{m}.svg"
@@ -70,7 +70,7 @@ def export(date:str,group:str):
             values.append({"time":f"{minute//60:02d}:{minute%60:02d}","minute":minute,"value":current})
         st=states.get(m,{})
         finals.append({"machine":m[-3:],"svg_final":values[-1]["value"],"canonical_close":int(canonical[m]["Close"]) if canonical.get(m) and canonical[m].get("Close") else None})
-        tracks.append({"machine":m[-3:],"values":values,"source_point_count":len(points),"svg_axes":{"source":"existing analyze_pscube","labels":[f"{x//60:02d}:{x%60:02d}" for x,_ in labels]},"state":{"signal_date":date,"machine":m[-3:],"UP_UP_UP":bool(st.get("UP_UP_UP",False)),"RIGHT":bool(st.get("RIGHT",False)),"LOW_CONVERGENCE_RIGHT":bool(st.get("LOW_CONVERGENCE_RIGHT",False)),"ALL_3":bool(st.get("ALL_3",False)),"DOWN_DOWN_DOWN":bool(st.get("DOWN_DOWN_DOWN",False)),"score":int(st.get("score",0))}})
+        tracks.append({"machine":m[-3:],"values":values,"source_point_count":len(points),"svg_axes":{"source":"existing analyze_pscube","labels":[f"{x//60:02d}:{x%60:02d}" for x,_ in labels]},"state":{"signal_date":state_date or date,"machine":m[-3:],"UP_UP_UP":bool(st.get("UP_UP_UP",False)),"RIGHT":bool(st.get("RIGHT",False)),"LOW_CONVERGENCE_RIGHT":bool(st.get("LOW_CONVERGENCE_RIGHT",False)),"ALL_3":bool(st.get("ALL_3",False)),"DOWN_DOWN_DOWN":bool(st.get("DOWN_DOWN_DOWN",False)),"score":int(st.get("score",0))}})
         common.extend(v["minute"] for v in values)
     timeline=sorted(set(common))
     # Normalize every machine onto one common timeline using a causal previous-value hold.
@@ -87,8 +87,13 @@ def export(date:str,group:str):
         total.append({"time":f"{minute//60:02d}:{minute%60:02d}","minute":minute,"value":sum(lookup[m].get(minute,0) for m in machines)})
     obj={"date":date,"group":group,"machines":tracks,"time_range":{"start":min(t["minute"] for t in total),"end":max(t["minute"] for t in total),"start_time":total[0]["time"],"end_time":total[-1]["time"],"step_minutes":5,"interpolation":"previous-value hold (causal; no future value is used for an earlier point)"},"time_points":[{"time":t["time"],"minute":t["minute"]} for t in total],"group_total":total,"events":[],"validation":{"final_values":finals,"source":"SVG path coordinates via existing analyze_pscube.py + analyze.py px_to_val","canonical_ohlc":str(ROOT/"csv"/"daily_ohlc"/date/f"{date}_daily_ohlc.csv")}}
     dest=OUT/date;dest.mkdir(parents=True,exist_ok=True);(dest/f"{group}.json").write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding="utf-8")
-    index=OUT/"index.json";index.write_text(json.dumps({"datasets":[{"date":date,"group":group,"path":f"data/{date}/{group}.json","machines":[m[-3:] for m in machines]}]},ensure_ascii=False,indent=2),encoding="utf-8")
+    index=OUT/"index.json"
+    existing=json.loads(index.read_text(encoding="utf-8")) if index.exists() else {"datasets":[]}
+    datasets=[d for d in existing.get("datasets",[]) if not (d.get("date")==date and d.get("group")==group)]
+    datasets.append({"date":date,"group":group,"path":f"data/{date}/{group}.json","machines":[m[-3:] for m in machines]})
+    datasets.sort(key=lambda d:(d.get("date", ""), d.get("group", "")))
+    index.write_text(json.dumps({"datasets":datasets},ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps({"date":date,"group":group,"machines":[m[-3:] for m in machines],"points":len(total),"final_values":finals},ensure_ascii=False,indent=2))
 
 if __name__=="__main__":
-    ap=argparse.ArgumentParser();ap.add_argument("--date",required=True);ap.add_argument("--group",required=True,choices=sorted(GROUPS));a=ap.parse_args();export(a.date,a.group)
+    ap=argparse.ArgumentParser();ap.add_argument("--date",required=True);ap.add_argument("--group",required=True,choices=sorted(GROUPS));ap.add_argument("--state-date",default=None);a=ap.parse_args();export(a.date,a.group,a.state_date)
