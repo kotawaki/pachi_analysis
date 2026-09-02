@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FORWARD = ROOT / "docs/wave_lab/data/forward"
 CANONICAL = ROOT / "csv/daily_ohlc"
 OUT = ROOT / "wave_lab/ma_position_research/output"
-FORWARD_DATES = ["20260828", "20260829", "20260830", "20260831", "20260901"]
+FORWARD_DATES = ["20260828", "20260829", "20260830", "20260831", "20260901", "20260902"]
 sys.path.insert(0, str(ROOT))
 from chart_signal_positive import calc_ma, load_daily_ohlc  # noqa: E402
 
