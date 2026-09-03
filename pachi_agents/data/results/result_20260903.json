@@ -1,0 +1,84 @@
+{
+  "prediction_date": "20260903",
+  "evaluated_at": "2026-09-04T07:39:39.841626+09:00",
+  "result_version": "pachi_agents_result_v1",
+  "status": "evaluated",
+  "source_manifest": [
+    {
+      "kind": "daily_ohlc",
+      "path": "csv\\daily_ohlc\\20260903\\20260903_daily_ohlc.csv",
+      "sha256": "647c42114c21654d220fcb9d20271f29bd9f41da56efb31cc89b1a082669e115"
+    }
+  ],
+  "agents": {
+    "pachio": {
+      "primary_machine": "049",
+      "result": {
+        "machine": "049",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -2756.0,
+        "close": -2756.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -2756.0,
+        "outcome": "failure"
+      }
+    },
+    "pachiko": {
+      "primary_machine": "046",
+      "result": {
+        "machine": "046",
+        "status": "available",
+        "open": 0.0,
+        "high": 21570.0,
+        "low": -511.0,
+        "close": 21570.0,
+        "direction": "positive",
+        "max_up": 21570.0,
+        "max_down": -511.0,
+        "outcome": "success"
+      }
+    },
+    "pachikamisama": {
+      "honmei": {
+        "machine": "049",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -2756.0,
+        "close": -2756.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -2756.0,
+        "outcome": "failure"
+      },
+      "taikou": {
+        "machine": "046",
+        "status": "available",
+        "open": 0.0,
+        "high": 21570.0,
+        "low": -511.0,
+        "close": 21570.0,
+        "direction": "positive",
+        "max_up": 21570.0,
+        "max_down": -511.0,
+        "outcome": "success"
+      },
+      "ana": {
+        "machine": "148",
+        "status": "available",
+        "open": 0.0,
+        "high": 0.0,
+        "low": -2133.0,
+        "close": -2133.0,
+        "direction": "non_positive",
+        "max_up": 0.0,
+        "max_down": -2133.0,
+        "outcome": "failure"
+      },
+      "honmei_outcome": "failure"
+    }
+  }
+}

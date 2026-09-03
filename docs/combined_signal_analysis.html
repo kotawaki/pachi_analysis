@@ -23,41 +23,60 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
 <header>
   <a href="index.html">← ダッシュボード</a>
   <h1>複合シグナル検証</h1>
-  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: backfill: 860件 / html: 4279件</div>
+  <div class="meta">周期推定 ± × 特日/通常日 × 日中周期hit × チャート状態。日中周期hitは当日途中の確認シグナルとして扱います。データ元: backfill: 926件 / html: 4279件</div>
 </header>
 <main>
   <p><a href="intraday_hit_regime.html">日中周期hitの日次レジーム追跡を見る</a></p>
 
   <section class="panel">
-    <h2>daytime日中周期hit候補 20260903</h2>
+    <h2>daytime日中周期hit候補 20260904</h2>
     <p class="note">daytime未取得のため、当日H候補はありません。</p>
     <p class="note">当日監視用です。実績一覧・陽線率への反映は翌朝morning取得後に行います。</p>
   </section>
   <section class="panel">
-    <h2>全期間 20260613〜20260902</h2>
-    <div class="summary"><article class="metric base"><span>全体陽線率</span><b>38.5%</b><p>1978/5139 / 中央値 -1,778</p><small>5139件 / 方向一致 2608/5139 (50.7%)</small></article>
-<article class="metric plus"><span>周期プラス</span><b>38.9%</b><p>964/2481 / 中央値 -1,849</p><small>朝時点の上向き候補</small></article>
-<article class="metric minus"><span>周期マイナス</span><b>38.1%</b><p>1014/2658 / 中央値 -1,722</p><small>朝時点の下向き候補</small></article>
-<article class="metric hit"><span>周期+ × 日中hit</span><b>55.2%</b><p>359/650 / 中央値 +1,333</p><small>上向き候補の当日確認</small></article>
-<article class="metric hit"><span>周期- × 日中hit</span><b>55.2%</b><p>333/603 / 中央値 +1,552</p><small>下向きからの反転候補</small></article>
-<article class="metric weak"><span>周期- × hitなし</span><b>33.1%</b><p>681/2055 / 中央値 -2,133</p><small>反転材料なし</small></article>
-<article class="metric hit"><span>日中hit後プラス</span><b>58.4%</b><p>732/1253 / 最終中央値 +1,552</p><small>+30分 979/1253 / +60分 919/1253</small></article></div>
+    <h2>全期間 20260613〜20260903</h2>
+    <div class="summary"><article class="metric base"><span>全体陽線率</span><b>38.5%</b><p>2002/5205 / 中央値 -1,778</p><small>5205件 / 方向一致 2645/5205 (50.8%)</small></article>
+<article class="metric plus"><span>周期プラス</span><b>38.9%</b><p>976/2510 / 中央値 -1,823</p><small>朝時点の上向き候補</small></article>
+<article class="metric minus"><span>周期マイナス</span><b>38.1%</b><p>1026/2695 / 中央値 -1,707</p><small>朝時点の下向き候補</small></article>
+<article class="metric hit"><span>周期+ × 日中hit</span><b>-</b><p>0/0 / 中央値 +0</p><small>上向き候補の当日確認</small></article>
+<article class="metric hit"><span>周期- × 日中hit</span><b>-</b><p>0/0 / 中央値 +0</p><small>下向きからの反転候補</small></article>
+<article class="metric weak"><span>周期- × hitなし</span><b>38.1%</b><p>1026/2695 / 中央値 -1,707</p><small>反転材料なし</small></article>
+<article class="metric hit"><span>日中hit後プラス</span><b>0.0%</b><p>0/0 / 最終中央値 +0</p><small>+30分 0/0 / +60分 0/0</small></article></div>
   </section>
   <section class="panel">
     <h2>条件別リスト</h2>
     <table><thead><tr><th>日区分</th><th>周期</th><th>日中周期</th><th>陽線</th><th>陽線率</th><th>中央値</th><th>平均</th></tr></thead><tbody>
-      <tr><td>通常日</td><td>周期-</td><td>日中hitなし</td><td>520/1574</td><td>33.0%</td><td>-2,133</td><td>-1,372</td></tr><tr><td>通常日</td><td>周期-</td><td>日中hitあり</td><td>238/449</td><td>53.0%</td><td>+1,034</td><td>+3,255</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitなし</td><td>443/1406</td><td>31.5%</td><td>-2,667</td><td>-1,964</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitあり</td><td>278/500</td><td>55.6%</td><td>+1,466</td><td>+2,485</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitなし</td><td>161/481</td><td>33.5%</td><td>-2,133</td><td>-1,492</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitあり</td><td>95/154</td><td>61.7%</td><td>+3,514</td><td>+4,143</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitなし</td><td>162/425</td><td>38.1%</td><td>-1,849</td><td>-723</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitあり</td><td>81/150</td><td>54.0%</td><td>+690</td><td>+2,776</td></tr>
+      <tr><td>通常日</td><td>周期-</td><td>日中hitなし</td><td>758/2023</td><td>37.5%</td><td>-1,867</td><td>-345</td></tr><tr><td>通常日</td><td>周期+</td><td>日中hitなし</td><td>721/1906</td><td>37.8%</td><td>-1,918</td><td>-797</td></tr><tr><td>特日</td><td>周期-</td><td>日中hitなし</td><td>268/672</td><td>39.9%</td><td>-1,431</td><td>-151</td></tr><tr><td>特日</td><td>周期+</td><td>日中hitなし</td><td>255/604</td><td>42.2%</td><td>-1,511</td><td>+269</td></tr>
     </tbody></table>
   </section>
   <section class="panel">
     <h2>日中hit後の差玉推移</h2>
     <table><thead><tr><th>周期</th><th>チャート</th><th>件数</th><th>+30分</th><th>+60分</th><th>最終</th><th>最終中央値</th><th>最大上昇中央値</th></tr></thead><tbody>
-      <tr><td>周期-</td><td>good</td><td>3</td><td>1/3 (33.3%)</td><td>2/3 (66.7%)</td><td>1/3 (33.3%)</td><td>-3,621</td><td>+258</td></tr><tr><td>周期-</td><td>neutral</td><td>22</td><td>13/22 (59.1%)</td><td>13/22 (59.1%)</td><td>6/22 (27.3%)</td><td>-1,423</td><td>+134</td></tr><tr><td>周期-</td><td>weak</td><td>578</td><td>450/578 (77.9%)</td><td>430/578 (74.4%)</td><td>343/578 (59.3%)</td><td>+1,881</td><td>+5,160</td></tr><tr><td>周期+</td><td>good</td><td>3</td><td>3/3 (100.0%)</td><td>2/3 (66.7%)</td><td>2/3 (66.7%)</td><td>+5,517</td><td>+9,483</td></tr><tr><td>周期+</td><td>neutral</td><td>9</td><td>4/9 (44.4%)</td><td>2/9 (22.2%)</td><td>2/9 (22.2%)</td><td>-3,644</td><td>+400</td></tr><tr><td>周期+</td><td>weak</td><td>638</td><td>508/638 (79.6%)</td><td>470/638 (73.7%)</td><td>378/638 (59.2%)</td><td>+1,532</td><td>+4,888</td></tr>
+      
     </tbody></table>
   </section>
   <section>
     <h2>日別リスト</h2>
     <div class="day-list">
+<section class="day-card">
+  <div class="day-head">
+    <h3>20260903</h3><span class="badge special">特日</span>
+  </div>
+  <div class="day-grid">
+    <div><span>周期+</span><b>41.4%</b><small>12/29</small></div>
+    <div><span>周期-</span><b>32.4%</b><small>12/37</small></div>
+    <div><span>差</span><b class="pos">+8.9pt</b><small>周期+ - 周期-</small></div>
+    <div><span>全体</span><b>36.4%</b><small>24/66</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
+  </div>
+  <div class="mini-split">
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
+  </div>
+  <h4>周期マイナスから陽線化 上位</h4>
+  <ul class="reverse-list"><li><b>0055</b><span>+21,322</span><em>hitなし / weak</em></li><li><b>0070</b><span>+18,448</span><em>hitなし / weak</em></li><li><b>0157</b><span>+14,138</span><em>hitなし / weak</em></li><li><b>0036</b><span>+9,052</span><em>hitなし / weak</em></li><li><b>0054</b><span>+5,000</span><em>hitなし / weak</em></li></ul>
+</section>
 <section class="day-card">
   <div class="day-head">
     <h3>20260902</h3><span class="badge ">通常日</span>
@@ -67,15 +86,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.5%</b><small>17/41</small></div>
     <div><span>差</span><b class="neg">-5.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>39.4%</b><small>26/66</small></div>
-    <div><span>日中hit全体</span><b>56.2%</b><small>9/16</small></div>
-    <div><span>周期-陽線</span><b>17台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>17台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/7 (57.1%)</b></p>
-    <p>周期-×hit: <b>5/9 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0150</b><span>+52,812</span><em>hitなし / weak</em></li><li><b>0148</b><span>+35,385</span><em>hitなし / weak</em></li><li><b>0043</b><span>+28,718</span><em>130分 / weak</em></li><li><b>0070</b><span>+25,289</span><em>140分,60分 / weak</em></li><li><b>0042</b><span>+10,000</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0150</b><span>+52,812</span><em>hitなし / weak</em></li><li><b>0148</b><span>+35,385</span><em>hitなし / weak</em></li><li><b>0043</b><span>+28,718</span><em>hitなし / weak</em></li><li><b>0070</b><span>+25,289</span><em>hitなし / weak</em></li><li><b>0042</b><span>+10,000</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -86,15 +105,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>32.4%</b><small>11/34</small></div>
     <div><span>差</span><b class="neg">-10.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>27.3%</b><small>18/66</small></div>
-    <div><span>日中hit全体</span><b>45.5%</b><small>10/22</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/12 (33.3%)</b></p>
-    <p>周期-×hit: <b>6/10 (60.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0045</b><span>+34,615</span><em>hitなし / weak</em></li><li><b>0069</b><span>+23,306</span><em>80分,140分 / weak</em></li><li><b>0119</b><span>+23,306</span><em>hitなし / weak</em></li><li><b>0062</b><span>+20,331</span><em>80分,90分 / weak</em></li><li><b>0155</b><span>+11,724</span><em>20分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0045</b><span>+34,615</span><em>hitなし / weak</em></li><li><b>0069</b><span>+23,306</span><em>hitなし / weak</em></li><li><b>0119</b><span>+23,306</span><em>hitなし / weak</em></li><li><b>0062</b><span>+20,331</span><em>hitなし / weak</em></li><li><b>0155</b><span>+11,724</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -105,15 +124,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>40.5%</b><small>17/42</small></div>
     <div><span>差</span><b class="neg">-7.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>37.9%</b><small>25/66</small></div>
-    <div><span>日中hit全体</span><b>56.2%</b><small>9/16</small></div>
-    <div><span>周期-陽線</span><b>17台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>17台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/10 (50.0%)</b></p>
-    <p>周期-×hit: <b>4/6 (66.7%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0047</b><span>+29,744</span><em>hitなし / weak</em></li><li><b>0077</b><span>+28,205</span><em>hitなし / weak</em></li><li><b>0153</b><span>+24,793</span><em>hitなし / weak</em></li><li><b>0061</b><span>+22,066</span><em>130分 / weak</em></li><li><b>0051</b><span>+19,091</span><em>90分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0047</b><span>+29,744</span><em>hitなし / weak</em></li><li><b>0077</b><span>+28,205</span><em>hitなし / weak</em></li><li><b>0153</b><span>+24,793</span><em>hitなし / weak</em></li><li><b>0061</b><span>+22,066</span><em>hitなし / weak</em></li><li><b>0051</b><span>+19,091</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -124,15 +143,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>44.4%</b><small>16/36</small></div>
     <div><span>差</span><b class="neg">-4.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>42.4%</b><small>28/66</small></div>
-    <div><span>日中hit全体</span><b>70.0%</b><small>14/20</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 10台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/9 (44.4%)</b></p>
-    <p>周期-×hit: <b>10/11 (90.9%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0049</b><span>+46,094</span><em>60分,50分 / weak</em></li><li><b>0039</b><span>+22,314</span><em>50分 / weak</em></li><li><b>0076</b><span>+20,331</span><em>30分,100分,20分 / weak</em></li><li><b>0075</b><span>+19,339</span><em>20分 / weak</em></li><li><b>0057</b><span>+15,862</span><em>110分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0049</b><span>+46,094</span><em>hitなし / weak</em></li><li><b>0039</b><span>+22,314</span><em>hitなし / weak</em></li><li><b>0076</b><span>+20,331</span><em>hitなし / weak</em></li><li><b>0075</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0057</b><span>+15,862</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -143,15 +162,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>55.6%</b><small>20/36</small></div>
     <div><span>差</span><b class="neg">-18.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>47.0%</b><small>31/66</small></div>
-    <div><span>日中hit全体</span><b>52.2%</b><small>12/23</small></div>
-    <div><span>周期-陽線</span><b>20台</b><small>うちhit 9台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>20台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/12 (25.0%)</b></p>
-    <p>周期-×hit: <b>9/11 (81.8%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0148</b><span>+21,074</span><em>hitなし / weak</em></li><li><b>0150</b><span>+14,655</span><em>hitなし / neutral</em></li><li><b>0040</b><span>+14,380</span><em>70分 / weak</em></li><li><b>0052</b><span>+14,138</span><em>70分,130分,20分 / weak</em></li><li><b>0073</b><span>+12,069</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0148</b><span>+21,074</span><em>hitなし / weak</em></li><li><b>0150</b><span>+14,655</span><em>hitなし / neutral</em></li><li><b>0040</b><span>+14,380</span><em>hitなし / weak</em></li><li><b>0052</b><span>+14,138</span><em>hitなし / weak</em></li><li><b>0073</b><span>+12,069</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -162,15 +181,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>48.3%</b><small>14/29</small></div>
     <div><span>差</span><b class="neg">-10.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>42.4%</b><small>28/66</small></div>
-    <div><span>日中hit全体</span><b>56.5%</b><small>13/23</small></div>
-    <div><span>周期-陽線</span><b>14台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>14台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>7/13 (53.8%)</b></p>
-    <p>周期-×hit: <b>6/10 (60.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0053</b><span>+29,504</span><em>130分 / weak</em></li><li><b>0051</b><span>+28,077</span><em>hitなし / weak</em></li><li><b>0063</b><span>+27,273</span><em>60分,110分 / weak</em></li><li><b>0073</b><span>+15,517</span><em>hitなし / weak</em></li><li><b>0157</b><span>+14,655</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0053</b><span>+29,504</span><em>hitなし / weak</em></li><li><b>0051</b><span>+28,077</span><em>hitなし / weak</em></li><li><b>0063</b><span>+27,273</span><em>hitなし / weak</em></li><li><b>0073</b><span>+15,517</span><em>hitなし / weak</em></li><li><b>0157</b><span>+14,655</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -181,15 +200,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>33.3%</b><small>13/39</small></div>
     <div><span>差</span><b class="pos">+0.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.3%</b><small>22/66</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>8/16</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/6 (50.0%)</b></p>
-    <p>周期-×hit: <b>5/10 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0154</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0048</b><span>+23,058</span><em>110分 / weak</em></li><li><b>0157</b><span>+18,793</span><em>hitなし / weak</em></li><li><b>0067</b><span>+16,207</span><em>hitなし / weak</em></li><li><b>0065</b><span>+15,517</span><em>60分,80分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0154</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0048</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0157</b><span>+18,793</span><em>hitなし / weak</em></li><li><b>0067</b><span>+16,207</span><em>hitなし / weak</em></li><li><b>0065</b><span>+15,517</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -200,12 +219,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>6.9%</b><small>2/29</small></div>
     <div><span>差</span><b class="pos">+33.6pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>25.8%</b><small>17/66</small></div>
-    <div><span>日中hit全体</span><b>42.9%</b><small>6/14</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
     <div><span>周期-陽線</span><b>2台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/8 (75.0%)</b></p>
-    <p>周期-×hit: <b>0/6 (0.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0073</b><span>+1,724</span><em>hitなし / weak</em></li><li><b>1180</b><span>+345</span><em>hitなし / weak</em></li></ul>
@@ -219,15 +238,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>48.7%</b><small>19/39</small></div>
     <div><span>差</span><b class="neg">-22.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>39.4%</b><small>26/66</small></div>
-    <div><span>日中hit全体</span><b>75.0%</b><small>6/8</small></div>
-    <div><span>周期-陽線</span><b>19台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>19台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
-    <p>周期-×hit: <b>4/4 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0062</b><span>+16,034</span><em>hitなし / weak</em></li><li><b>0041</b><span>+15,620</span><em>hitなし / weak</em></li><li><b>0067</b><span>+14,828</span><em>50分 / weak</em></li><li><b>0070</b><span>+13,448</span><em>hitなし / weak</em></li><li><b>0038</b><span>+11,207</span><em>70分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0062</b><span>+16,034</span><em>hitなし / weak</em></li><li><b>0041</b><span>+15,620</span><em>hitなし / weak</em></li><li><b>0067</b><span>+14,828</span><em>hitなし / weak</em></li><li><b>0070</b><span>+13,448</span><em>hitなし / weak</em></li><li><b>0038</b><span>+11,207</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -238,15 +257,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.7%</b><small>15/36</small></div>
     <div><span>差</span><b class="neg">-1.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>40.9%</b><small>27/66</small></div>
-    <div><span>日中hit全体</span><b>78.6%</b><small>11/14</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 7台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/6 (66.7%)</b></p>
-    <p>周期-×hit: <b>7/8 (87.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0148</b><span>+20,826</span><em>hitなし / weak</em></li><li><b>0054</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0044</b><span>+17,107</span><em>70分,180分 / weak</em></li><li><b>0155</b><span>+15,172</span><em>hitなし / neutral</em></li><li><b>0061</b><span>+14,380</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0148</b><span>+20,826</span><em>hitなし / weak</em></li><li><b>0054</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0044</b><span>+17,107</span><em>hitなし / weak</em></li><li><b>0155</b><span>+15,172</span><em>hitなし / neutral</em></li><li><b>0061</b><span>+14,380</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -257,15 +276,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.0%</b><small>16/39</small></div>
     <div><span>差</span><b class="neg">-0.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>40.9%</b><small>27/66</small></div>
-    <div><span>日中hit全体</span><b>57.7%</b><small>15/26</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 7台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/12 (66.7%)</b></p>
-    <p>周期-×hit: <b>7/14 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0054</b><span>+35,641</span><em>80分 / weak</em></li><li><b>0043</b><span>+20,826</span><em>hitなし / weak</em></li><li><b>0035</b><span>+13,621</span><em>30分 / weak</em></li><li><b>0049</b><span>+13,448</span><em>hitなし / weak</em></li><li><b>0069</b><span>+9,655</span><em>80分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0054</b><span>+35,641</span><em>hitなし / weak</em></li><li><b>0043</b><span>+20,826</span><em>hitなし / weak</em></li><li><b>0035</b><span>+13,621</span><em>hitなし / weak</em></li><li><b>0049</b><span>+13,448</span><em>hitなし / weak</em></li><li><b>0069</b><span>+9,655</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -276,15 +295,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>30.8%</b><small>12/39</small></div>
     <div><span>差</span><b class="pos">+10.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>34.8%</b><small>23/66</small></div>
-    <div><span>日中hit全体</span><b>57.1%</b><small>12/21</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/8 (75.0%)</b></p>
-    <p>周期-×hit: <b>6/13 (46.2%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0041</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0057</b><span>+17,692</span><em>60分 / weak</em></li><li><b>0060</b><span>+16,724</span><em>60分,110分 / weak</em></li><li><b>0036</b><span>+9,397</span><em>180分 / weak</em></li><li><b>0040</b><span>+7,586</span><em>80分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0041</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0057</b><span>+17,692</span><em>hitなし / weak</em></li><li><b>0060</b><span>+16,724</span><em>hitなし / weak</em></li><li><b>0036</b><span>+9,397</span><em>hitなし / weak</em></li><li><b>0040</b><span>+7,586</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -295,15 +314,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>44.4%</b><small>12/27</small></div>
     <div><span>差</span><b class="neg">-18.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.3%</b><small>22/66</small></div>
-    <div><span>日中hit全体</span><b>80.0%</b><small>8/10</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/6 (66.7%)</b></p>
-    <p>周期-×hit: <b>4/4 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0064</b><span>+18,966</span><em>30分 / weak</em></li><li><b>0155</b><span>+18,276</span><em>20分 / weak</em></li><li><b>0049</b><span>+15,690</span><em>hitなし / weak</em></li><li><b>0153</b><span>+12,893</span><em>170分 / weak</em></li><li><b>0055</b><span>+11,901</span><em>80分,30分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0064</b><span>+18,966</span><em>hitなし / weak</em></li><li><b>0155</b><span>+18,276</span><em>hitなし / weak</em></li><li><b>0049</b><span>+15,690</span><em>hitなし / weak</em></li><li><b>0153</b><span>+12,893</span><em>hitなし / weak</em></li><li><b>0055</b><span>+11,901</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -314,15 +333,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>27.8%</b><small>10/36</small></div>
     <div><span>差</span><b class="pos">+2.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>28.8%</b><small>19/66</small></div>
-    <div><span>日中hit全体</span><b>37.0%</b><small>10/27</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/13 (30.8%)</b></p>
-    <p>周期-×hit: <b>6/14 (42.9%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0076</b><span>+35,938</span><em>30分 / weak</em></li><li><b>0058</b><span>+23,554</span><em>40分 / weak</em></li><li><b>0051</b><span>+18,621</span><em>hitなし / weak</em></li><li><b>0061</b><span>+15,172</span><em>hitなし / weak</em></li><li><b>0049</b><span>+11,207</span><em>70分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0076</b><span>+35,938</span><em>hitなし / weak</em></li><li><b>0058</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0051</b><span>+18,621</span><em>hitなし / weak</em></li><li><b>0061</b><span>+15,172</span><em>hitなし / weak</em></li><li><b>0049</b><span>+11,207</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -333,15 +352,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>31.4%</b><small>11/35</small></div>
     <div><span>差</span><b class="pos">+13.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>37.9%</b><small>25/66</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>11/22</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/12 (66.7%)</b></p>
-    <p>周期-×hit: <b>3/10 (30.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0157</b><span>+32,821</span><em>hitなし / weak</em></li><li><b>0039</b><span>+30,769</span><em>hitなし / weak</em></li><li><b>0051</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0152</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0065</b><span>+17,586</span><em>120分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0157</b><span>+32,821</span><em>hitなし / weak</em></li><li><b>0039</b><span>+30,769</span><em>hitなし / weak</em></li><li><b>0051</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0152</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0065</b><span>+17,586</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -352,15 +371,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>34.2%</b><small>13/38</small></div>
     <div><span>差</span><b class="pos">+8.6pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>37.9%</b><small>25/66</small></div>
-    <div><span>日中hit全体</span><b>45.0%</b><small>9/20</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/9 (55.6%)</b></p>
-    <p>周期-×hit: <b>4/11 (36.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0120</b><span>+74,583</span><em>hitなし / weak</em></li><li><b>0073</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0035</b><span>+12,241</span><em>130分 / weak</em></li><li><b>0050</b><span>+11,207</span><em>hitなし / weak</em></li><li><b>0155</b><span>+7,672</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0120</b><span>+74,583</span><em>hitなし / weak</em></li><li><b>0073</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0035</b><span>+12,241</span><em>hitなし / weak</em></li><li><b>0050</b><span>+11,207</span><em>hitなし / weak</em></li><li><b>0155</b><span>+7,672</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -371,15 +390,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>38.5%</b><small>15/39</small></div>
     <div><span>差</span><b class="pos">+2.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>39.4%</b><small>26/66</small></div>
-    <div><span>日中hit全体</span><b>68.0%</b><small>17/25</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 9台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/13 (61.5%)</b></p>
-    <p>周期-×hit: <b>9/12 (75.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0154</b><span>+21,026</span><em>80分 / weak</em></li><li><b>0068</b><span>+16,034</span><em>100分 / weak</em></li><li><b>0062</b><span>+9,828</span><em>hitなし / weak</em></li><li><b>0054</b><span>+8,103</span><em>160分 / weak</em></li><li><b>0061</b><span>+7,241</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0154</b><span>+21,026</span><em>hitなし / weak</em></li><li><b>0068</b><span>+16,034</span><em>hitなし / weak</em></li><li><b>0062</b><span>+9,828</span><em>hitなし / weak</em></li><li><b>0054</b><span>+8,103</span><em>hitなし / weak</em></li><li><b>0061</b><span>+7,241</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -390,15 +409,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>28.6%</b><small>10/35</small></div>
     <div><span>差</span><b class="pos">+6.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>31.8%</b><small>21/66</small></div>
-    <div><span>日中hit全体</span><b>63.6%</b><small>7/11</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/5 (80.0%)</b></p>
-    <p>周期-×hit: <b>3/6 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0061</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0065</b><span>+14,628</span><em>80分 / weak</em></li><li><b>0041</b><span>+7,759</span><em>hitなし / weak</em></li><li><b>1179</b><span>+7,625</span><em>hitなし / neutral</em></li><li><b>0060</b><span>+1,724</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0061</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0065</b><span>+14,628</span><em>hitなし / weak</em></li><li><b>0041</b><span>+7,759</span><em>hitなし / weak</em></li><li><b>1179</b><span>+7,625</span><em>hitなし / neutral</em></li><li><b>0060</b><span>+1,724</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -409,15 +428,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>28.6%</b><small>8/28</small></div>
     <div><span>差</span><b class="pos">+21.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>40.9%</b><small>27/66</small></div>
-    <div><span>日中hit全体</span><b>62.5%</b><small>15/24</small></div>
-    <div><span>周期-陽線</span><b>8台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>8台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>12/16 (75.0%)</b></p>
-    <p>周期-×hit: <b>3/8 (37.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0073</b><span>+58,125</span><em>80分 / weak</em></li><li><b>0121</b><span>+21,818</span><em>hitなし / weak</em></li><li><b>0060</b><span>+13,884</span><em>hitなし / weak</em></li><li><b>0045</b><span>+9,483</span><em>hitなし / weak</em></li><li><b>1177</b><span>+5,234</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0073</b><span>+58,125</span><em>hitなし / weak</em></li><li><b>0121</b><span>+21,818</span><em>hitなし / weak</em></li><li><b>0060</b><span>+13,884</span><em>hitなし / weak</em></li><li><b>0045</b><span>+9,483</span><em>hitなし / weak</em></li><li><b>1177</b><span>+5,234</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -428,15 +447,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>37.8%</b><small>14/37</small></div>
     <div><span>差</span><b class="neg">-3.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.4%</b><small>24/66</small></div>
-    <div><span>日中hit全体</span><b>68.4%</b><small>13/19</small></div>
-    <div><span>周期-陽線</span><b>14台</b><small>うちhit 8台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>14台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/8 (62.5%)</b></p>
-    <p>周期-×hit: <b>8/11 (72.7%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0048</b><span>+30,769</span><em>hitなし / weak</em></li><li><b>0045</b><span>+22,810</span><em>50分 / weak</em></li><li><b>0061</b><span>+16,379</span><em>80分 / weak</em></li><li><b>0119</b><span>+15,517</span><em>hitなし / weak</em></li><li><b>0051</b><span>+14,828</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0048</b><span>+30,769</span><em>hitなし / weak</em></li><li><b>0045</b><span>+22,810</span><em>hitなし / weak</em></li><li><b>0061</b><span>+16,379</span><em>hitなし / weak</em></li><li><b>0119</b><span>+15,517</span><em>hitなし / weak</em></li><li><b>0051</b><span>+14,828</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -447,12 +466,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>53.1%</b><small>17/32</small></div>
     <div><span>差</span><b class="neg">-14.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>45.5%</b><small>30/66</small></div>
-    <div><span>日中hit全体</span><b>61.5%</b><small>8/13</small></div>
-    <div><span>周期-陽線</span><b>17台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>17台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/6 (66.7%)</b></p>
-    <p>周期-×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0050</b><span>+29,487</span><em>hitなし / weak</em></li><li><b>0118</b><span>+24,615</span><em>hitなし / weak</em></li><li><b>0073</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0070</b><span>+13,793</span><em>hitなし / weak</em></li><li><b>0041</b><span>+8,966</span><em>hitなし / weak</em></li></ul>
@@ -485,15 +504,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.2%</b><small>14/34</small></div>
     <div><span>差</span><b class="neg">-3.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>39.4%</b><small>26/66</small></div>
-    <div><span>日中hit全体</span><b>75.0%</b><small>9/12</small></div>
-    <div><span>周期-陽線</span><b>14台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>14台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/7 (71.4%)</b></p>
-    <p>周期-×hit: <b>4/5 (80.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0055</b><span>+40,104</span><em>80分,30分 / weak</em></li><li><b>0153</b><span>+19,835</span><em>hitなし / neutral</em></li><li><b>0051</b><span>+17,759</span><em>hitなし / weak</em></li><li><b>0044</b><span>+14,655</span><em>180分 / weak</em></li><li><b>0148</b><span>+13,966</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0055</b><span>+40,104</span><em>hitなし / weak</em></li><li><b>0153</b><span>+19,835</span><em>hitなし / neutral</em></li><li><b>0051</b><span>+17,759</span><em>hitなし / weak</em></li><li><b>0044</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0148</b><span>+13,966</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -504,15 +523,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>40.6%</b><small>13/32</small></div>
     <div><span>差</span><b class="neg">-8.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.4%</b><small>24/66</small></div>
-    <div><span>日中hit全体</span><b>38.5%</b><small>5/13</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/6 (33.3%)</b></p>
-    <p>周期-×hit: <b>3/7 (42.9%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0048</b><span>+43,490</span><em>20分 / weak</em></li><li><b>0066</b><span>+21,322</span><em>70分,170分 / weak</em></li><li><b>0050</b><span>+10,690</span><em>hitなし / weak</em></li><li><b>0154</b><span>+10,000</span><em>hitなし / weak</em></li><li><b>0043</b><span>+9,828</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0048</b><span>+43,490</span><em>hitなし / weak</em></li><li><b>0066</b><span>+21,322</span><em>hitなし / weak</em></li><li><b>0050</b><span>+10,690</span><em>hitなし / weak</em></li><li><b>0154</b><span>+10,000</span><em>hitなし / weak</em></li><li><b>0043</b><span>+9,828</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -523,15 +542,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>43.9%</b><small>18/41</small></div>
     <div><span>差</span><b class="neg">-7.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>40.9%</b><small>27/66</small></div>
-    <div><span>日中hit全体</span><b>100.0%</b><small>5/5</small></div>
-    <div><span>周期-陽線</span><b>18台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>18台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/2 (100.0%)</b></p>
-    <p>周期-×hit: <b>3/3 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0153</b><span>+44,271</span><em>hitなし / weak</em></li><li><b>0074</b><span>+27,521</span><em>40分 / weak</em></li><li><b>0071</b><span>+23,306</span><em>hitなし / weak</em></li><li><b>0069</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0046</b><span>+22,810</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0153</b><span>+44,271</span><em>hitなし / weak</em></li><li><b>0074</b><span>+27,521</span><em>hitなし / weak</em></li><li><b>0071</b><span>+23,306</span><em>hitなし / weak</em></li><li><b>0069</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0046</b><span>+22,810</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -542,15 +561,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>26.5%</b><small>9/34</small></div>
     <div><span>差</span><b class="pos">+17.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>34.8%</b><small>23/66</small></div>
-    <div><span>日中hit全体</span><b>43.8%</b><small>7/16</small></div>
-    <div><span>周期-陽線</span><b>9台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>9台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/9 (44.4%)</b></p>
-    <p>周期-×hit: <b>3/7 (42.9%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0048</b><span>+22,314</span><em>90分 / weak</em></li><li><b>0062</b><span>+20,579</span><em>hitなし / weak</em></li><li><b>0070</b><span>+20,083</span><em>hitなし / weak</em></li><li><b>0060</b><span>+11,379</span><em>60分 / weak</em></li><li><b>0065</b><span>+6,638</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0048</b><span>+22,314</span><em>hitなし / weak</em></li><li><b>0062</b><span>+20,579</span><em>hitなし / weak</em></li><li><b>0070</b><span>+20,083</span><em>hitなし / weak</em></li><li><b>0060</b><span>+11,379</span><em>hitなし / weak</em></li><li><b>0065</b><span>+6,638</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -561,15 +580,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>38.2%</b><small>13/34</small></div>
     <div><span>差</span><b class="pos">+18.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>47.0%</b><small>31/66</small></div>
-    <div><span>日中hit全体</span><b>55.6%</b><small>5/9</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/5 (60.0%)</b></p>
-    <p>周期-×hit: <b>2/4 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0058</b><span>+18,347</span><em>hitなし / weak</em></li><li><b>0053</b><span>+18,099</span><em>hitなし / weak</em></li><li><b>0073</b><span>+14,483</span><em>70分 / weak</em></li><li><b>0056</b><span>+13,966</span><em>90分 / weak</em></li><li><b>0042</b><span>+10,517</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0058</b><span>+18,347</span><em>hitなし / weak</em></li><li><b>0053</b><span>+18,099</span><em>hitなし / weak</em></li><li><b>0073</b><span>+14,483</span><em>hitなし / weak</em></li><li><b>0056</b><span>+13,966</span><em>hitなし / weak</em></li><li><b>0042</b><span>+10,517</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -580,15 +599,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>29.7%</b><small>11/37</small></div>
     <div><span>差</span><b class="pos">+8.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.3%</b><small>22/66</small></div>
-    <div><span>日中hit全体</span><b>43.5%</b><small>10/23</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/12 (50.0%)</b></p>
-    <p>周期-×hit: <b>4/11 (36.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0118</b><span>+29,256</span><em>hitなし / weak</em></li><li><b>0051</b><span>+13,103</span><em>100分 / weak</em></li><li><b>0039</b><span>+12,149</span><em>hitなし / weak</em></li><li><b>0071</b><span>+11,552</span><em>120分 / weak</em></li><li><b>0121</b><span>+9,138</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0118</b><span>+29,256</span><em>hitなし / weak</em></li><li><b>0051</b><span>+13,103</span><em>hitなし / weak</em></li><li><b>0039</b><span>+12,149</span><em>hitなし / weak</em></li><li><b>0071</b><span>+11,552</span><em>hitなし / weak</em></li><li><b>0121</b><span>+9,138</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -599,15 +618,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>37.5%</b><small>12/32</small></div>
     <div><span>差</span><b class="pos">+12.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>43.9%</b><small>29/66</small></div>
-    <div><span>日中hit全体</span><b>44.4%</b><small>8/18</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/9 (55.6%)</b></p>
-    <p>周期-×hit: <b>3/9 (33.3%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0119</b><span>+34,359</span><em>hitなし / weak</em></li><li><b>0050</b><span>+32,564</span><em>100分 / weak</em></li><li><b>0062</b><span>+26,529</span><em>90分 / weak</em></li><li><b>0072</b><span>+21,322</span><em>30分 / weak</em></li><li><b>0047</b><span>+12,241</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0119</b><span>+34,359</span><em>hitなし / weak</em></li><li><b>0050</b><span>+32,564</span><em>hitなし / weak</em></li><li><b>0062</b><span>+26,529</span><em>hitなし / weak</em></li><li><b>0072</b><span>+21,322</span><em>hitなし / weak</em></li><li><b>0047</b><span>+12,241</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -618,15 +637,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>39.4%</b><small>13/33</small></div>
     <div><span>差</span><b class="pos">+3.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>40.9%</b><small>27/66</small></div>
-    <div><span>日中hit全体</span><b>64.3%</b><small>9/14</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/7 (71.4%)</b></p>
-    <p>周期-×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0153</b><span>+40,885</span><em>hitなし / weak</em></li><li><b>0058</b><span>+20,192</span><em>hitなし / weak</em></li><li><b>0054</b><span>+18,099</span><em>80分 / weak</em></li><li><b>0050</b><span>+17,107</span><em>hitなし / weak</em></li><li><b>0154</b><span>+17,069</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0153</b><span>+40,885</span><em>hitなし / weak</em></li><li><b>0058</b><span>+20,192</span><em>hitなし / weak</em></li><li><b>0054</b><span>+18,099</span><em>hitなし / weak</em></li><li><b>0050</b><span>+17,107</span><em>hitなし / weak</em></li><li><b>0154</b><span>+17,069</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -637,15 +656,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>24.3%</b><small>9/37</small></div>
     <div><span>差</span><b class="pos">+27.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>68.4%</b><small>13/19</small></div>
-    <div><span>周期-陽線</span><b>9台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>9台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/9 (88.9%)</b></p>
-    <p>周期-×hit: <b>5/10 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0067</b><span>+25,041</span><em>50分 / weak</em></li><li><b>0046</b><span>+20,579</span><em>40分 / weak</em></li><li><b>0039</b><span>+15,862</span><em>50分 / weak</em></li><li><b>0057</b><span>+11,034</span><em>110分,30分 / weak</em></li><li><b>0062</b><span>+6,897</span><em>90分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0067</b><span>+25,041</span><em>hitなし / weak</em></li><li><b>0046</b><span>+20,579</span><em>hitなし / weak</em></li><li><b>0039</b><span>+15,862</span><em>hitなし / weak</em></li><li><b>0057</b><span>+11,034</span><em>hitなし / weak</em></li><li><b>0062</b><span>+6,897</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -656,15 +675,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>36.1%</b><small>13/36</small></div>
     <div><span>差</span><b class="pos">+4.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>38.2%</b><small>26/68</small></div>
-    <div><span>日中hit全体</span><b>66.7%</b><small>8/12</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/3 (66.7%)</b></p>
-    <p>周期-×hit: <b>6/9 (66.7%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0070</b><span>+29,008</span><em>hitなし / weak</em></li><li><b>0076</b><span>+26,410</span><em>20分 / weak</em></li><li><b>0051</b><span>+17,241</span><em>100分 / weak</em></li><li><b>1173</b><span>+12,396</span><em>hitなし / weak</em></li><li><b>0063</b><span>+11,897</span><em>60分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0070</b><span>+29,008</span><em>hitなし / weak</em></li><li><b>0076</b><span>+26,410</span><em>hitなし / weak</em></li><li><b>0051</b><span>+17,241</span><em>hitなし / weak</em></li><li><b>1173</b><span>+12,396</span><em>hitなし / weak</em></li><li><b>0063</b><span>+11,897</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -675,15 +694,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>32.4%</b><small>11/34</small></div>
     <div><span>差</span><b class="pos">+5.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>35.3%</b><small>24/68</small></div>
-    <div><span>日中hit全体</span><b>100.0%</b><small>7/7</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 1台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/6 (100.0%)</b></p>
-    <p>周期-×hit: <b>1/1 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0041</b><span>+31,538</span><em>110分 / weak</em></li><li><b>0069</b><span>+25,577</span><em>hitなし / weak</em></li><li><b>0150</b><span>+20,083</span><em>hitなし / neutral</em></li><li><b>0039</b><span>+14,828</span><em>hitなし / weak</em></li><li><b>0062</b><span>+8,621</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0041</b><span>+31,538</span><em>hitなし / weak</em></li><li><b>0069</b><span>+25,577</span><em>hitなし / weak</em></li><li><b>0150</b><span>+20,083</span><em>hitなし / neutral</em></li><li><b>0039</b><span>+14,828</span><em>hitなし / weak</em></li><li><b>0062</b><span>+8,621</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -694,15 +713,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>42.9%</b><small>15/35</small></div>
     <div><span>差</span><b class="neg">-12.6pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>41.7%</b><small>5/12</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>0/4 (0.0%)</b></p>
-    <p>周期-×hit: <b>5/8 (62.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0042</b><span>+40,885</span><em>hitなし / weak</em></li><li><b>0053</b><span>+20,579</span><em>150分,130分 / weak</em></li><li><b>0118</b><span>+20,331</span><em>20分,40分 / neutral</em></li><li><b>0043</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0062</b><span>+18,843</span><em>80分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0042</b><span>+40,885</span><em>hitなし / weak</em></li><li><b>0053</b><span>+20,579</span><em>hitなし / weak</em></li><li><b>0118</b><span>+20,331</span><em>hitなし / neutral</em></li><li><b>0043</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0062</b><span>+18,843</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -713,15 +732,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>52.8%</b><small>19/36</small></div>
     <div><span>差</span><b class="neg">-34.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>25.0%</b><small>4/16</small></div>
-    <div><span>周期-陽線</span><b>19台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>19台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>1/7 (14.3%)</b></p>
-    <p>周期-×hit: <b>3/9 (33.3%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0152</b><span>+33,846</span><em>50分 / weak</em></li><li><b>0120</b><span>+26,154</span><em>hitなし / weak</em></li><li><b>0122</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0057</b><span>+13,884</span><em>30分 / weak</em></li><li><b>0072</b><span>+12,759</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0152</b><span>+33,846</span><em>hitなし / weak</em></li><li><b>0120</b><span>+26,154</span><em>hitなし / weak</em></li><li><b>0122</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0057</b><span>+13,884</span><em>hitなし / weak</em></li><li><b>0072</b><span>+12,759</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -732,15 +751,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>40.5%</b><small>15/37</small></div>
     <div><span>差</span><b class="neg">-8.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>14/28</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 10台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/10 (40.0%)</b></p>
-    <p>周期-×hit: <b>10/18 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0063</b><span>+30,513</span><em>60分 / weak</em></li><li><b>0118</b><span>+18,654</span><em>20分 / weak</em></li><li><b>0157</b><span>+16,860</span><em>hitなし / good</em></li><li><b>0155</b><span>+15,862</span><em>hitなし / weak</em></li><li><b>0121</b><span>+14,483</span><em>hitなし / neutral</em></li></ul>
+  <ul class="reverse-list"><li><b>0063</b><span>+30,513</span><em>hitなし / weak</em></li><li><b>0118</b><span>+18,654</span><em>hitなし / weak</em></li><li><b>0157</b><span>+16,860</span><em>hitなし / good</em></li><li><b>0155</b><span>+15,862</span><em>hitなし / weak</em></li><li><b>0121</b><span>+14,483</span><em>hitなし / neutral</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -751,15 +770,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>50.0%</b><small>10/20</small></div>
     <div><span>差</span><b class="neg">-10.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>44.2%</b><small>19/43</small></div>
-    <div><span>日中hit全体</span><b>42.9%</b><small>6/14</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/9 (22.2%)</b></p>
-    <p>周期-×hit: <b>4/5 (80.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0075</b><span>+28,264</span><em>80分 / weak</em></li><li><b>0040</b><span>+27,273</span><em>70分 / weak</em></li><li><b>0048</b><span>+13,966</span><em>20分 / weak</em></li><li><b>0054</b><span>+8,362</span><em>80分 / weak</em></li><li><b>0062</b><span>+7,069</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0075</b><span>+28,264</span><em>hitなし / weak</em></li><li><b>0040</b><span>+27,273</span><em>hitなし / weak</em></li><li><b>0048</b><span>+13,966</span><em>hitなし / weak</em></li><li><b>0054</b><span>+8,362</span><em>hitなし / weak</em></li><li><b>0062</b><span>+7,069</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -770,15 +789,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>32.3%</b><small>10/31</small></div>
     <div><span>差</span><b class="pos">+2.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.8%</b><small>23/68</small></div>
-    <div><span>日中hit全体</span><b>53.3%</b><small>8/15</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/10 (30.0%)</b></p>
-    <p>周期-×hit: <b>5/5 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0043</b><span>+23,802</span><em>hitなし / weak</em></li><li><b>0073</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0044</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0057</b><span>+16,552</span><em>30分 / weak</em></li><li><b>0064</b><span>+11,379</span><em>30分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0043</b><span>+23,802</span><em>hitなし / weak</em></li><li><b>0073</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0044</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0057</b><span>+16,552</span><em>hitなし / weak</em></li><li><b>0064</b><span>+11,379</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -789,12 +808,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.2%</b><small>14/34</small></div>
     <div><span>差</span><b class="neg">-8.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>35.3%</b><small>6/17</small></div>
-    <div><span>周期-陽線</span><b>14台</b><small>うちhit 1台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>14台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/9 (55.6%)</b></p>
-    <p>周期-×hit: <b>1/8 (12.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0157</b><span>+28,264</span><em>hitなし / good</em></li><li><b>0041</b><span>+23,802</span><em>hitなし / weak</em></li><li><b>0048</b><span>+23,554</span><em>hitなし / weak</em></li><li><b>0050</b><span>+20,826</span><em>hitなし / weak</em></li><li><b>0122</b><span>+8,793</span><em>hitなし / weak</em></li></ul>
@@ -808,15 +827,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>29.4%</b><small>10/34</small></div>
     <div><span>差</span><b class="pos">+5.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>32.4%</b><small>22/68</small></div>
-    <div><span>日中hit全体</span><b>64.3%</b><small>9/14</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/8 (62.5%)</b></p>
-    <p>周期-×hit: <b>4/6 (66.7%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0056</b><span>+35,641</span><em>160分 / weak</em></li><li><b>0118</b><span>+28,017</span><em>20分 / weak</em></li><li><b>0043</b><span>+24,298</span><em>130分 / weak</em></li><li><b>0044</b><span>+6,379</span><em>hitなし / weak</em></li><li><b>0061</b><span>+5,690</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0056</b><span>+35,641</span><em>hitなし / weak</em></li><li><b>0118</b><span>+28,017</span><em>hitなし / weak</em></li><li><b>0043</b><span>+24,298</span><em>hitなし / weak</em></li><li><b>0044</b><span>+6,379</span><em>hitなし / weak</em></li><li><b>0061</b><span>+5,690</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -827,15 +846,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>29.7%</b><small>11/37</small></div>
     <div><span>差</span><b class="pos">+9.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.8%</b><small>23/68</small></div>
-    <div><span>日中hit全体</span><b>47.8%</b><small>11/23</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>7/13 (53.8%)</b></p>
-    <p>周期-×hit: <b>4/10 (40.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0121</b><span>+29,487</span><em>150分 / weak</em></li><li><b>0054</b><span>+25,041</span><em>70分 / weak</em></li><li><b>0154</b><span>+24,793</span><em>hitなし / weak</em></li><li><b>0048</b><span>+14,483</span><em>20分,90分 / weak</em></li><li><b>0073</b><span>+10,345</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0121</b><span>+29,487</span><em>hitなし / weak</em></li><li><b>0054</b><span>+25,041</span><em>hitなし / weak</em></li><li><b>0154</b><span>+24,793</span><em>hitなし / weak</em></li><li><b>0048</b><span>+14,483</span><em>hitなし / weak</em></li><li><b>0073</b><span>+10,345</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -846,15 +865,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>43.6%</b><small>17/39</small></div>
     <div><span>差</span><b class="neg">-5.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>41.2%</b><small>28/68</small></div>
-    <div><span>日中hit全体</span><b>62.5%</b><small>10/16</small></div>
-    <div><span>周期-陽線</span><b>17台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>17台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/6 (83.3%)</b></p>
-    <p>周期-×hit: <b>5/10 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0073</b><span>+35,897</span><em>hitなし / weak</em></li><li><b>0048</b><span>+25,289</span><em>90分 / weak</em></li><li><b>0150</b><span>+24,298</span><em>hitなし / neutral</em></li><li><b>0061</b><span>+23,058</span><em>130分 / weak</em></li><li><b>0049</b><span>+11,379</span><em>60分,50分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0073</b><span>+35,897</span><em>hitなし / weak</em></li><li><b>0048</b><span>+25,289</span><em>hitなし / weak</em></li><li><b>0150</b><span>+24,298</span><em>hitなし / neutral</em></li><li><b>0061</b><span>+23,058</span><em>hitなし / weak</em></li><li><b>0049</b><span>+11,379</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -865,15 +884,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>33.3%</b><small>10/30</small></div>
     <div><span>差</span><b class="neg">-4.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>30.9%</b><small>21/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>8/16</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/7 (42.9%)</b></p>
-    <p>周期-×hit: <b>5/9 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0123</b><span>+40,885</span><em>60分 / neutral</em></li><li><b>0157</b><span>+37,949</span><em>hitなし / good</em></li><li><b>0072</b><span>+36,154</span><em>hitなし / weak</em></li><li><b>0148</b><span>+24,231</span><em>20分 / weak</em></li><li><b>0063</b><span>+12,931</span><em>60分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0123</b><span>+40,885</span><em>hitなし / neutral</em></li><li><b>0157</b><span>+37,949</span><em>hitなし / good</em></li><li><b>0072</b><span>+36,154</span><em>hitなし / weak</em></li><li><b>0148</b><span>+24,231</span><em>hitなし / weak</em></li><li><b>0063</b><span>+12,931</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -884,15 +903,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>43.2%</b><small>16/37</small></div>
     <div><span>差</span><b class="neg">-14.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>63.2%</b><small>12/19</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 7台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/10 (50.0%)</b></p>
-    <p>周期-×hit: <b>7/9 (77.8%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0153</b><span>+34,615</span><em>90分 / weak</em></li><li><b>0073</b><span>+26,033</span><em>hitなし / weak</em></li><li><b>0041</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0055</b><span>+19,339</span><em>80分 / weak</em></li><li><b>0062</b><span>+15,172</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0153</b><span>+34,615</span><em>hitなし / weak</em></li><li><b>0073</b><span>+26,033</span><em>hitなし / weak</em></li><li><b>0041</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0055</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0062</b><span>+15,172</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -903,15 +922,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>31.2%</b><small>10/32</small></div>
     <div><span>差</span><b class="pos">+2.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>32.4%</b><small>22/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>8/16</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/9 (44.4%)</b></p>
-    <p>周期-×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0070</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0041</b><span>+18,621</span><em>110分 / weak</em></li><li><b>0044</b><span>+14,655</span><em>70分 / weak</em></li><li><b>0155</b><span>+14,138</span><em>hitなし / weak</em></li><li><b>0148</b><span>+13,448</span><em>hitなし / neutral</em></li></ul>
+  <ul class="reverse-list"><li><b>0070</b><span>+19,835</span><em>hitなし / weak</em></li><li><b>0041</b><span>+18,621</span><em>hitなし / weak</em></li><li><b>0044</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0155</b><span>+14,138</span><em>hitなし / weak</em></li><li><b>0148</b><span>+13,448</span><em>hitなし / neutral</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -922,12 +941,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>35.5%</b><small>11/31</small></div>
     <div><span>差</span><b class="neg">-3.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>33.8%</b><small>23/68</small></div>
-    <div><span>日中hit全体</span><b>56.2%</b><small>9/16</small></div>
-    <div><span>周期-陽線</span><b>11台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>11台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>7/11 (63.6%)</b></p>
-    <p>周期-×hit: <b>2/5 (40.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0150</b><span>+36,198</span><em>hitなし / weak</em></li><li><b>0054</b><span>+19,483</span><em>hitなし / weak</em></li><li><b>0061</b><span>+12,759</span><em>hitなし / weak</em></li><li><b>0042</b><span>+11,034</span><em>hitなし / weak</em></li><li><b>0121</b><span>+10,517</span><em>hitなし / weak</em></li></ul>
@@ -941,15 +960,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>39.5%</b><small>15/38</small></div>
     <div><span>差</span><b class="pos">+20.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>48.5%</b><small>33/68</small></div>
-    <div><span>日中hit全体</span><b>36.4%</b><small>4/11</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
-    <p>周期-×hit: <b>2/7 (28.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0042</b><span>+24,661</span><em>hitなし / weak</em></li><li><b>0055</b><span>+20,339</span><em>hitなし / weak</em></li><li><b>0051</b><span>+16,283</span><em>hitなし / weak</em></li><li><b>0048</b><span>+14,513</span><em>20分 / weak</em></li><li><b>1175</b><span>+11,322</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0042</b><span>+24,661</span><em>hitなし / weak</em></li><li><b>0055</b><span>+20,339</span><em>hitなし / weak</em></li><li><b>0051</b><span>+16,283</span><em>hitなし / weak</em></li><li><b>0048</b><span>+14,513</span><em>hitなし / weak</em></li><li><b>1175</b><span>+11,322</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -960,15 +979,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>50.0%</b><small>16/32</small></div>
     <div><span>差</span><b class="neg">-8.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>45.6%</b><small>31/68</small></div>
-    <div><span>日中hit全体</span><b>41.2%</b><small>7/17</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/9 (22.2%)</b></p>
-    <p>周期-×hit: <b>5/8 (62.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0148</b><span>+40,365</span><em>hitなし / neutral</em></li><li><b>0123</b><span>+20,083</span><em>hitなし / neutral</em></li><li><b>0052</b><span>+19,587</span><em>130分 / weak</em></li><li><b>0118</b><span>+17,107</span><em>20分,150分 / weak</em></li><li><b>0053</b><span>+16,379</span><em>100分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0148</b><span>+40,365</span><em>hitなし / neutral</em></li><li><b>0123</b><span>+20,083</span><em>hitなし / neutral</em></li><li><b>0052</b><span>+19,587</span><em>hitなし / weak</em></li><li><b>0118</b><span>+17,107</span><em>hitなし / weak</em></li><li><b>0053</b><span>+16,379</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -979,15 +998,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>37.5%</b><small>12/32</small></div>
     <div><span>差</span><b class="pos">+20.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>48.5%</b><small>33/68</small></div>
-    <div><span>日中hit全体</span><b>57.1%</b><small>12/21</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/12 (66.7%)</b></p>
-    <p>周期-×hit: <b>4/9 (44.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0148</b><span>+43,229</span><em>20分 / weak</em></li><li><b>0157</b><span>+42,969</span><em>hitなし / neutral</em></li><li><b>0051</b><span>+25,289</span><em>hitなし / weak</em></li><li><b>0063</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0070</b><span>+13,140</span><em>60分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0148</b><span>+43,229</span><em>hitなし / weak</em></li><li><b>0157</b><span>+42,969</span><em>hitなし / neutral</em></li><li><b>0051</b><span>+25,289</span><em>hitなし / weak</em></li><li><b>0063</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0070</b><span>+13,140</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -998,15 +1017,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>30.3%</b><small>10/33</small></div>
     <div><span>差</span><b class="neg">-1.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>29.4%</b><small>20/68</small></div>
-    <div><span>日中hit全体</span><b>52.9%</b><small>9/17</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/10 (40.0%)</b></p>
-    <p>周期-×hit: <b>5/7 (71.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0067</b><span>+30,769</span><em>60分,50分 / weak</em></li><li><b>0123</b><span>+19,655</span><em>hitなし / weak</em></li><li><b>0058</b><span>+16,207</span><em>40分,80分 / weak</em></li><li><b>0072</b><span>+6,724</span><em>hitなし / weak</em></li><li><b>0061</b><span>+6,207</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0067</b><span>+30,769</span><em>hitなし / weak</em></li><li><b>0123</b><span>+19,655</span><em>hitなし / weak</em></li><li><b>0058</b><span>+16,207</span><em>hitなし / weak</em></li><li><b>0072</b><span>+6,724</span><em>hitなし / weak</em></li><li><b>0061</b><span>+6,207</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1017,15 +1036,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>18.2%</b><small>6/33</small></div>
     <div><span>差</span><b class="pos">+16.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>26.5%</b><small>18/68</small></div>
-    <div><span>日中hit全体</span><b>39.1%</b><small>9/23</small></div>
-    <div><span>周期-陽線</span><b>6台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>6台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/15 (40.0%)</b></p>
-    <p>周期-×hit: <b>3/8 (37.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0075</b><span>+9,310</span><em>hitなし / weak</em></li><li><b>1180</b><span>+2,695</span><em>hitなし / weak</em></li><li><b>0067</b><span>+2,672</span><em>50分,130分 / weak</em></li><li><b>0063</b><span>+1,293</span><em>110分 / weak</em></li><li><b>0043</b><span>+1,034</span><em>150分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0075</b><span>+9,310</span><em>hitなし / weak</em></li><li><b>1180</b><span>+2,695</span><em>hitなし / weak</em></li><li><b>0067</b><span>+2,672</span><em>hitなし / weak</em></li><li><b>0063</b><span>+1,293</span><em>hitなし / weak</em></li><li><b>0043</b><span>+1,034</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1036,15 +1055,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>36.4%</b><small>12/33</small></div>
     <div><span>差</span><b class="pos">+9.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>41.2%</b><small>28/68</small></div>
-    <div><span>日中hit全体</span><b>70.0%</b><small>14/20</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>9/13 (69.2%)</b></p>
-    <p>周期-×hit: <b>5/7 (71.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0041</b><span>+12,069</span><em>hitなし / weak</em></li><li><b>0048</b><span>+9,483</span><em>hitなし / weak</em></li><li><b>0153</b><span>+8,276</span><em>hitなし / weak</em></li><li><b>0068</b><span>+6,207</span><em>100分 / weak</em></li><li><b>0055</b><span>+4,914</span><em>30分,60分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0041</b><span>+12,069</span><em>hitなし / weak</em></li><li><b>0048</b><span>+9,483</span><em>hitなし / weak</em></li><li><b>0153</b><span>+8,276</span><em>hitなし / weak</em></li><li><b>0068</b><span>+6,207</span><em>hitなし / weak</em></li><li><b>0055</b><span>+4,914</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1055,15 +1074,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>42.4%</b><small>14/33</small></div>
     <div><span>差</span><b class="neg">-5.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>39.7%</b><small>27/68</small></div>
-    <div><span>日中hit全体</span><b>63.2%</b><small>12/19</small></div>
-    <div><span>周期-陽線</span><b>14台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>14台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/10 (80.0%)</b></p>
-    <p>周期-×hit: <b>4/9 (44.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0121</b><span>+43,229</span><em>hitなし / weak</em></li><li><b>0039</b><span>+32,564</span><em>70分 / weak</em></li><li><b>0064</b><span>+26,033</span><em>80分,30分,50分 / weak</em></li><li><b>0060</b><span>+11,724</span><em>hitなし / weak</em></li><li><b>0043</b><span>+10,000</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0121</b><span>+43,229</span><em>hitなし / weak</em></li><li><b>0039</b><span>+32,564</span><em>hitなし / weak</em></li><li><b>0064</b><span>+26,033</span><em>hitなし / weak</em></li><li><b>0060</b><span>+11,724</span><em>hitなし / weak</em></li><li><b>0043</b><span>+10,000</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1074,15 +1093,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>24.3%</b><small>9/37</small></div>
     <div><span>差</span><b class="pos">+17.6pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>32.4%</b><small>22/68</small></div>
-    <div><span>日中hit全体</span><b>69.2%</b><small>9/13</small></div>
-    <div><span>周期-陽線</span><b>9台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>9台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/4 (100.0%)</b></p>
-    <p>周期-×hit: <b>5/9 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0058</b><span>+27,769</span><em>40分 / weak</em></li><li><b>0041</b><span>+16,034</span><em>hitなし / weak</em></li><li><b>0036</b><span>+10,517</span><em>180分 / weak</em></li><li><b>0070</b><span>+7,759</span><em>hitなし / weak</em></li><li><b>0065</b><span>+3,103</span><em>120分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0058</b><span>+27,769</span><em>hitなし / weak</em></li><li><b>0041</b><span>+16,034</span><em>hitなし / weak</em></li><li><b>0036</b><span>+10,517</span><em>hitなし / weak</em></li><li><b>0070</b><span>+7,759</span><em>hitなし / weak</em></li><li><b>0065</b><span>+3,103</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1093,15 +1112,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.4%</b><small>12/29</small></div>
     <div><span>差</span><b class="neg">-8.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>47.4%</b><small>9/19</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/9 (55.6%)</b></p>
-    <p>周期-×hit: <b>4/10 (40.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0119</b><span>+25,577</span><em>20分 / weak</em></li><li><b>0040</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0052</b><span>+15,517</span><em>20分 / weak</em></li><li><b>0076</b><span>+14,655</span><em>30分,20分 / weak</em></li><li><b>0042</b><span>+13,276</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0119</b><span>+25,577</span><em>hitなし / weak</em></li><li><b>0040</b><span>+19,339</span><em>hitなし / weak</em></li><li><b>0052</b><span>+15,517</span><em>hitなし / weak</em></li><li><b>0076</b><span>+14,655</span><em>hitなし / weak</em></li><li><b>0042</b><span>+13,276</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1112,15 +1131,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>23.3%</b><small>7/30</small></div>
     <div><span>差</span><b class="neg">-4.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>20.6%</b><small>14/68</small></div>
-    <div><span>日中hit全体</span><b>25.0%</b><small>7/28</small></div>
-    <div><span>周期-陽線</span><b>7台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>7台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/18 (16.7%)</b></p>
-    <p>周期-×hit: <b>4/10 (40.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0058</b><span>+17,241</span><em>40分,80分 / weak</em></li><li><b>0153</b><span>+16,552</span><em>hitなし / weak</em></li><li><b>0071</b><span>+11,034</span><em>130分 / weak</em></li><li><b>0154</b><span>+8,621</span><em>20分,80分 / weak</em></li><li><b>0123</b><span>+7,845</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0058</b><span>+17,241</span><em>hitなし / weak</em></li><li><b>0153</b><span>+16,552</span><em>hitなし / weak</em></li><li><b>0071</b><span>+11,034</span><em>hitなし / weak</em></li><li><b>0154</b><span>+8,621</span><em>hitなし / weak</em></li><li><b>0123</b><span>+7,845</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1131,15 +1150,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>53.3%</b><small>16/30</small></div>
     <div><span>差</span><b class="neg">-11.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>47.1%</b><small>32/68</small></div>
-    <div><span>日中hit全体</span><b>56.5%</b><small>13/23</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/15 (53.3%)</b></p>
-    <p>周期-×hit: <b>5/8 (62.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0066</b><span>+53,438</span><em>70分,170分 / weak</em></li><li><b>0060</b><span>+35,128</span><em>60分 / weak</em></li><li><b>0052</b><span>+25,041</span><em>70分 / weak</em></li><li><b>0149</b><span>+25,041</span><em>hitなし / weak</em></li><li><b>0057</b><span>+19,091</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0066</b><span>+53,438</span><em>hitなし / weak</em></li><li><b>0060</b><span>+35,128</span><em>hitなし / weak</em></li><li><b>0052</b><span>+25,041</span><em>hitなし / weak</em></li><li><b>0149</b><span>+25,041</span><em>hitなし / weak</em></li><li><b>0057</b><span>+19,091</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1150,15 +1169,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>53.3%</b><small>16/30</small></div>
     <div><span>差</span><b class="pos">+9.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>58.8%</b><small>40/68</small></div>
-    <div><span>日中hit全体</span><b>82.4%</b><small>14/17</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/9 (88.9%)</b></p>
-    <p>周期-×hit: <b>6/8 (75.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0043</b><span>+25,537</span><em>130分 / weak</em></li><li><b>0057</b><span>+19,655</span><em>30分,60分 / weak</em></li><li><b>0150</b><span>+17,241</span><em>hitなし / weak</em></li><li><b>0064</b><span>+13,621</span><em>hitなし / weak</em></li><li><b>0060</b><span>+12,586</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0043</b><span>+25,537</span><em>hitなし / weak</em></li><li><b>0057</b><span>+19,655</span><em>hitなし / weak</em></li><li><b>0150</b><span>+17,241</span><em>hitなし / weak</em></li><li><b>0064</b><span>+13,621</span><em>hitなし / weak</em></li><li><b>0060</b><span>+12,586</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1169,15 +1188,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>56.8%</b><small>21/37</small></div>
     <div><span>差</span><b class="neg">-8.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>52.9%</b><small>36/68</small></div>
-    <div><span>日中hit全体</span><b>68.4%</b><small>13/19</small></div>
-    <div><span>周期-陽線</span><b>21台</b><small>うちhit 8台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>21台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/6 (83.3%)</b></p>
-    <p>周期-×hit: <b>8/13 (61.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0151</b><span>+77,419</span><em>hitなし / weak</em></li><li><b>0046</b><span>+30,993</span><em>40分 / weak</em></li><li><b>0073</b><span>+29,871</span><em>80分 / weak</em></li><li><b>0148</b><span>+28,212</span><em>hitなし / weak</em></li><li><b>0076</b><span>+23,147</span><em>20分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0151</b><span>+77,419</span><em>hitなし / weak</em></li><li><b>0046</b><span>+30,993</span><em>hitなし / weak</em></li><li><b>0073</b><span>+29,871</span><em>hitなし / weak</em></li><li><b>0148</b><span>+28,212</span><em>hitなし / weak</em></li><li><b>0076</b><span>+23,147</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1188,15 +1207,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>47.1%</b><small>16/34</small></div>
     <div><span>差</span><b class="neg">-5.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>44.1%</b><small>30/68</small></div>
-    <div><span>日中hit全体</span><b>72.7%</b><small>8/11</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/6 (66.7%)</b></p>
-    <p>周期-×hit: <b>4/5 (80.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0075</b><span>+24,854</span><em>hitなし / weak</em></li><li><b>0065</b><span>+21,464</span><em>60分,80分 / weak</em></li><li><b>0050</b><span>+18,253</span><em>hitなし / weak</em></li><li><b>0069</b><span>+18,253</span><em>80分,130分 / weak</em></li><li><b>0150</b><span>+17,293</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0075</b><span>+24,854</span><em>hitなし / weak</em></li><li><b>0065</b><span>+21,464</span><em>hitなし / weak</em></li><li><b>0050</b><span>+18,253</span><em>hitなし / weak</em></li><li><b>0069</b><span>+18,253</span><em>hitなし / weak</em></li><li><b>0150</b><span>+17,293</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1207,15 +1226,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>46.9%</b><small>15/32</small></div>
     <div><span>差</span><b class="pos">+0.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>47.1%</b><small>32/68</small></div>
-    <div><span>日中hit全体</span><b>85.7%</b><small>12/14</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/7 (85.7%)</b></p>
-    <p>周期-×hit: <b>6/7 (85.7%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0064</b><span>+32,783</span><em>80分 / weak</em></li><li><b>0148</b><span>+23,914</span><em>hitなし / weak</em></li><li><b>0076</b><span>+23,752</span><em>hitなし / weak</em></li><li><b>0048</b><span>+16,972</span><em>hitなし / weak</em></li><li><b>0072</b><span>+11,626</span><em>30分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0064</b><span>+32,783</span><em>hitなし / weak</em></li><li><b>0148</b><span>+23,914</span><em>hitなし / weak</em></li><li><b>0076</b><span>+23,752</span><em>hitなし / weak</em></li><li><b>0048</b><span>+16,972</span><em>hitなし / weak</em></li><li><b>0072</b><span>+11,626</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1226,15 +1245,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>50.0%</b><small>19/38</small></div>
     <div><span>差</span><b class="neg">-10.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>45.6%</b><small>31/68</small></div>
-    <div><span>日中hit全体</span><b>59.1%</b><small>13/22</small></div>
-    <div><span>周期-陽線</span><b>19台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>19台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/13 (61.5%)</b></p>
-    <p>周期-×hit: <b>5/9 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0052</b><span>+25,422</span><em>hitなし / weak</em></li><li><b>0076</b><span>+22,783</span><em>100分 / weak</em></li><li><b>0064</b><span>+14,692</span><em>80分,30分 / weak</em></li><li><b>0157</b><span>+14,355</span><em>hitなし / neutral</em></li><li><b>0150</b><span>+14,131</span><em>100分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0052</b><span>+25,422</span><em>hitなし / weak</em></li><li><b>0076</b><span>+22,783</span><em>hitなし / weak</em></li><li><b>0064</b><span>+14,692</span><em>hitなし / weak</em></li><li><b>0157</b><span>+14,355</span><em>hitなし / neutral</em></li><li><b>0150</b><span>+14,131</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1245,15 +1264,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>60.0%</b><small>15/25</small></div>
     <div><span>差</span><b class="neg">-5.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>57.1%</b><small>32/56</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>12/24</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/15 (53.3%)</b></p>
-    <p>周期-×hit: <b>4/9 (44.4%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0070</b><span>+29,714</span><em>60分 / weak</em></li><li><b>0151</b><span>+21,729</span><em>hitなし / weak</em></li><li><b>0047</b><span>+19,940</span><em>hitなし / weak</em></li><li><b>0148</b><span>+16,727</span><em>hitなし / weak</em></li><li><b>0050</b><span>+12,909</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0070</b><span>+29,714</span><em>hitなし / weak</em></li><li><b>0151</b><span>+21,729</span><em>hitなし / weak</em></li><li><b>0047</b><span>+19,940</span><em>hitなし / weak</em></li><li><b>0148</b><span>+16,727</span><em>hitなし / weak</em></li><li><b>0050</b><span>+12,909</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1264,15 +1283,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>42.9%</b><small>15/35</small></div>
     <div><span>差</span><b class="neg">-0.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>42.6%</b><small>29/68</small></div>
-    <div><span>日中hit全体</span><b>66.7%</b><small>4/6</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
-    <p>周期-×hit: <b>2/2 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0123</b><span>+25,844</span><em>hitなし / weak</em></li><li><b>0042</b><span>+21,994</span><em>hitなし / weak</em></li><li><b>0058</b><span>+19,560</span><em>hitなし / weak</em></li><li><b>0064</b><span>+19,358</span><em>80分 / weak</em></li><li><b>0052</b><span>+17,536</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0123</b><span>+25,844</span><em>hitなし / weak</em></li><li><b>0042</b><span>+21,994</span><em>hitなし / weak</em></li><li><b>0058</b><span>+19,560</span><em>hitなし / weak</em></li><li><b>0064</b><span>+19,358</span><em>hitなし / weak</em></li><li><b>0052</b><span>+17,536</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1283,12 +1302,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>38.5%</b><small>15/39</small></div>
     <div><span>差</span><b class="neg">-0.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>38.2%</b><small>26/68</small></div>
-    <div><span>日中hit全体</span><b>62.5%</b><small>5/8</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/4 (75.0%)</b></p>
-    <p>周期-×hit: <b>2/4 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0053</b><span>+29,426</span><em>hitなし / weak</em></li><li><b>0120</b><span>+26,048</span><em>hitなし / weak</em></li><li><b>0123</b><span>+22,398</span><em>hitなし / weak</em></li><li><b>0122</b><span>+17,128</span><em>hitなし / neutral</em></li><li><b>0038</b><span>+15,446</span><em>hitなし / weak</em></li></ul>
@@ -1302,15 +1321,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>36.4%</b><small>12/33</small></div>
     <div><span>差</span><b class="pos">+9.4pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>41.2%</b><small>28/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>3/6</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 1台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
-    <p>周期-×hit: <b>1/2 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0154</b><span>+27,669</span><em>hitなし / neutral</em></li><li><b>0050</b><span>+19,156</span><em>hitなし / weak</em></li><li><b>0070</b><span>+18,344</span><em>140分 / weak</em></li><li><b>0044</b><span>+12,746</span><em>hitなし / weak</em></li><li><b>0155</b><span>+12,464</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0154</b><span>+27,669</span><em>hitなし / neutral</em></li><li><b>0050</b><span>+19,156</span><em>hitなし / weak</em></li><li><b>0070</b><span>+18,344</span><em>hitなし / weak</em></li><li><b>0044</b><span>+12,746</span><em>hitなし / weak</em></li><li><b>0155</b><span>+12,464</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1321,15 +1340,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.5%</b><small>17/41</small></div>
     <div><span>差</span><b class="neg">-0.7pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>41.2%</b><small>28/68</small></div>
-    <div><span>日中hit全体</span><b>57.1%</b><small>8/14</small></div>
-    <div><span>周期-陽線</span><b>17台</b><small>うちhit 6台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>17台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/4 (50.0%)</b></p>
-    <p>周期-×hit: <b>6/10 (60.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0118</b><span>+62,038</span><em>hitなし / weak</em></li><li><b>0073</b><span>+24,831</span><em>80分 / weak</em></li><li><b>0065</b><span>+19,156</span><em>60分 / weak</em></li><li><b>0076</b><span>+17,536</span><em>30分 / weak</em></li><li><b>0063</b><span>+16,408</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0118</b><span>+62,038</span><em>hitなし / weak</em></li><li><b>0073</b><span>+24,831</span><em>hitなし / weak</em></li><li><b>0065</b><span>+19,156</span><em>hitなし / weak</em></li><li><b>0076</b><span>+17,536</span><em>hitなし / weak</em></li><li><b>0063</b><span>+16,408</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1340,15 +1359,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>47.1%</b><small>16/34</small></div>
     <div><span>差</span><b class="neg">-17.6pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>38.2%</b><small>26/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>7/14</small></div>
-    <div><span>周期-陽線</span><b>16台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>16台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/8 (50.0%)</b></p>
-    <p>周期-×hit: <b>3/6 (50.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0050</b><span>+24,223</span><em>hitなし / weak</em></li><li><b>0036</b><span>+16,174</span><em>hitなし / weak</em></li><li><b>0066</b><span>+16,171</span><em>70分 / weak</em></li><li><b>0121</b><span>+14,860</span><em>hitなし / neutral</em></li><li><b>0043</b><span>+11,478</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0050</b><span>+24,223</span><em>hitなし / weak</em></li><li><b>0036</b><span>+16,174</span><em>hitなし / weak</em></li><li><b>0066</b><span>+16,171</span><em>hitなし / weak</em></li><li><b>0121</b><span>+14,860</span><em>hitなし / neutral</em></li><li><b>0043</b><span>+11,478</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1359,12 +1378,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>29.4%</b><small>10/34</small></div>
     <div><span>差</span><b class="pos">+0.0pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>29.4%</b><small>20/68</small></div>
-    <div><span>日中hit全体</span><b>50.0%</b><small>5/10</small></div>
-    <div><span>周期-陽線</span><b>10台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>10台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/8 (37.5%)</b></p>
-    <p>周期-×hit: <b>2/2 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
   <ul class="reverse-list"><li><b>0044</b><span>+18,344</span><em>hitなし / weak</em></li><li><b>0057</b><span>+16,926</span><em>hitなし / weak</em></li><li><b>0066</b><span>+10,939</span><em>hitなし / weak</em></li><li><b>0157</b><span>+8,345</span><em>hitなし / neutral</em></li><li><b>0068</b><span>+7,559</span><em>hitなし / weak</em></li></ul>
@@ -1378,15 +1397,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>21.6%</b><small>8/37</small></div>
     <div><span>差</span><b class="pos">+17.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>29.4%</b><small>20/68</small></div>
-    <div><span>日中hit全体</span><b>35.3%</b><small>6/17</small></div>
-    <div><span>周期-陽線</span><b>8台</b><small>うちhit 1台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>8台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>5/9 (55.6%)</b></p>
-    <p>周期-×hit: <b>1/8 (12.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0062</b><span>+40,806</span><em>80分,90分 / weak</em></li><li><b>0157</b><span>+21,790</span><em>hitなし / neutral</em></li><li><b>0060</b><span>+8,380</span><em>hitなし / weak</em></li><li><b>0045</b><span>+7,536</span><em>hitなし / weak</em></li><li><b>0058</b><span>+5,845</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0062</b><span>+40,806</span><em>hitなし / weak</em></li><li><b>0157</b><span>+21,790</span><em>hitなし / neutral</em></li><li><b>0060</b><span>+8,380</span><em>hitなし / weak</em></li><li><b>0045</b><span>+7,536</span><em>hitなし / weak</em></li><li><b>0058</b><span>+5,845</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1397,15 +1416,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>21.1%</b><small>8/38</small></div>
     <div><span>差</span><b class="pos">+12.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>26.5%</b><small>18/68</small></div>
-    <div><span>日中hit全体</span><b>35.7%</b><small>5/14</small></div>
-    <div><span>周期-陽線</span><b>8台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>8台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>3/7 (42.9%)</b></p>
-    <p>周期-×hit: <b>2/7 (28.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0154</b><span>+36,444</span><em>hitなし / weak</em></li><li><b>0048</b><span>+7,254</span><em>hitなし / weak</em></li><li><b>0053</b><span>+6,232</span><em>hitなし / weak</em></li><li><b>0060</b><span>+6,126</span><em>60分,130分 / weak</em></li><li><b>0058</b><span>+5,000</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0154</b><span>+36,444</span><em>hitなし / weak</em></li><li><b>0048</b><span>+7,254</span><em>hitなし / weak</em></li><li><b>0053</b><span>+6,232</span><em>hitなし / weak</em></li><li><b>0060</b><span>+6,126</span><em>hitなし / weak</em></li><li><b>0058</b><span>+5,000</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1416,15 +1435,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>41.7%</b><small>15/36</small></div>
     <div><span>差</span><b class="pos">+2.1pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>42.6%</b><small>29/68</small></div>
-    <div><span>日中hit全体</span><b>53.3%</b><small>8/15</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/8 (50.0%)</b></p>
-    <p>周期-×hit: <b>4/7 (57.1%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0076</b><span>+32,512</span><em>hitなし / weak</em></li><li><b>0149</b><span>+30,052</span><em>hitなし / weak</em></li><li><b>0050</b><span>+27,180</span><em>140分 / weak</em></li><li><b>0041</b><span>+20,169</span><em>140分 / weak</em></li><li><b>0153</b><span>+17,128</span><em>hitなし / good</em></li></ul>
+  <ul class="reverse-list"><li><b>0076</b><span>+32,512</span><em>hitなし / weak</em></li><li><b>0149</b><span>+30,052</span><em>hitなし / weak</em></li><li><b>0050</b><span>+27,180</span><em>hitなし / weak</em></li><li><b>0041</b><span>+20,169</span><em>hitなし / weak</em></li><li><b>0153</b><span>+17,128</span><em>hitなし / good</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1435,15 +1454,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>17.1%</b><small>6/35</small></div>
     <div><span>差</span><b class="pos">+16.2pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>25.0%</b><small>17/68</small></div>
-    <div><span>日中hit全体</span><b>40.0%</b><small>4/10</small></div>
-    <div><span>周期-陽線</span><b>6台</b><small>うちhit 2台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>6台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>2/5 (40.0%)</b></p>
-    <p>周期-×hit: <b>2/5 (40.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0060</b><span>+24,020</span><em>60分,110分 / weak</em></li><li><b>0048</b><span>+8,522</span><em>110分 / weak</em></li><li><b>1173</b><span>+7,388</span><em>hitなし / weak</em></li><li><b>1179</b><span>+4,942</span><em>hitなし / weak</em></li><li><b>1177</b><span>+3,583</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0060</b><span>+24,020</span><em>hitなし / weak</em></li><li><b>0048</b><span>+8,522</span><em>hitなし / weak</em></li><li><b>1173</b><span>+7,388</span><em>hitなし / weak</em></li><li><b>1179</b><span>+4,942</span><em>hitなし / weak</em></li><li><b>1177</b><span>+3,583</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1454,15 +1473,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>45.5%</b><small>15/33</small></div>
     <div><span>差</span><b class="neg">-16.9pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>36.8%</b><small>25/68</small></div>
-    <div><span>日中hit全体</span><b>76.9%</b><small>10/13</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 4台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>6/9 (66.7%)</b></p>
-    <p>周期-×hit: <b>4/4 (100.0%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0063</b><span>+26,452</span><em>hitなし / weak</em></li><li><b>0119</b><span>+26,250</span><em>hitなし / weak</em></li><li><b>0039</b><span>+26,191</span><em>hitなし / weak</em></li><li><b>0077</b><span>+21,385</span><em>180分 / weak</em></li><li><b>0148</b><span>+21,182</span><em>hitなし / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0063</b><span>+26,452</span><em>hitなし / weak</em></li><li><b>0119</b><span>+26,250</span><em>hitなし / weak</em></li><li><b>0039</b><span>+26,191</span><em>hitなし / weak</em></li><li><b>0077</b><span>+21,385</span><em>hitなし / weak</em></li><li><b>0148</b><span>+21,182</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1473,15 +1492,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>40.6%</b><small>13/32</small></div>
     <div><span>差</span><b class="pos">+3.8pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>42.6%</b><small>29/68</small></div>
-    <div><span>日中hit全体</span><b>52.9%</b><small>9/17</small></div>
-    <div><span>周期-陽線</span><b>13台</b><small>うちhit 5台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>13台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/8 (50.0%)</b></p>
-    <p>周期-×hit: <b>5/9 (55.6%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0055</b><span>+36,206</span><em>hitなし / weak</em></li><li><b>0043</b><span>+22,398</span><em>hitなし / weak</em></li><li><b>0069</b><span>+22,196</span><em>140分 / weak</em></li><li><b>0051</b><span>+8,802</span><em>hitなし / weak</em></li><li><b>0044</b><span>+8,662</span><em>180分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0055</b><span>+36,206</span><em>hitなし / weak</em></li><li><b>0043</b><span>+22,398</span><em>hitなし / weak</em></li><li><b>0069</b><span>+22,196</span><em>hitなし / weak</em></li><li><b>0051</b><span>+8,802</span><em>hitなし / weak</em></li><li><b>0044</b><span>+8,662</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1492,15 +1511,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>34.3%</b><small>12/35</small></div>
     <div><span>差</span><b class="pos">+26.3pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>47.1%</b><small>32/68</small></div>
-    <div><span>日中hit全体</span><b>58.3%</b><small>7/12</small></div>
-    <div><span>周期-陽線</span><b>12台</b><small>うちhit 3台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>12台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>4/4 (100.0%)</b></p>
-    <p>周期-×hit: <b>3/8 (37.5%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0120</b><span>+50,950</span><em>hitなし / weak</em></li><li><b>0058</b><span>+36,054</span><em>hitなし / weak</em></li><li><b>0050</b><span>+31,488</span><em>hitなし / weak</em></li><li><b>0041</b><span>+27,264</span><em>110分 / weak</em></li><li><b>0063</b><span>+18,545</span><em>60分,110分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0120</b><span>+50,950</span><em>hitなし / weak</em></li><li><b>0058</b><span>+36,054</span><em>hitなし / weak</em></li><li><b>0050</b><span>+31,488</span><em>hitなし / weak</em></li><li><b>0041</b><span>+27,264</span><em>hitなし / weak</em></li><li><b>0063</b><span>+18,545</span><em>hitなし / weak</em></li></ul>
 </section>
 <section class="day-card">
   <div class="day-head">
@@ -1511,15 +1530,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1
     <div><span>周期-</span><b>40.5%</b><small>15/37</small></div>
     <div><span>差</span><b class="pos">+17.5pt</b><small>周期+ - 周期-</small></div>
     <div><span>全体</span><b>48.5%</b><small>33/68</small></div>
-    <div><span>日中hit全体</span><b>78.9%</b><small>15/19</small></div>
-    <div><span>周期-陽線</span><b>15台</b><small>うちhit 7台</small></div>
+    <div><span>日中hit全体</span><b>-</b><small>0/0</small></div>
+    <div><span>周期-陽線</span><b>15台</b><small>うちhit 0台</small></div>
   </div>
   <div class="mini-split">
-    <p>周期+×hit: <b>8/10 (80.0%)</b></p>
-    <p>周期-×hit: <b>7/9 (77.8%)</b></p>
+    <p>周期+×hit: <b>-</b></p>
+    <p>周期-×hit: <b>-</b></p>
   </div>
   <h4>周期マイナスから陽線化 上位</h4>
-  <ul class="reverse-list"><li><b>0061</b><span>+36,616</span><em>80分 / weak</em></li><li><b>0050</b><span>+34,154</span><em>140分 / weak</em></li><li><b>0064</b><span>+23,615</span><em>hitなし / weak</em></li><li><b>0043</b><span>+14,155</span><em>130分 / weak</em></li><li><b>0044</b><span>+13,333</span><em>180分 / weak</em></li></ul>
+  <ul class="reverse-list"><li><b>0061</b><span>+36,616</span><em>hitなし / weak</em></li><li><b>0050</b><span>+34,154</span><em>hitなし / weak</em></li><li><b>0064</b><span>+23,615</span><em>hitなし / weak</em></li><li><b>0043</b><span>+14,155</span><em>hitなし / weak</em></li><li><b>0044</b><span>+13,333</span><em>hitなし / weak</em></li></ul>
 </section></div>
   </section>
   <section class="panel note">
