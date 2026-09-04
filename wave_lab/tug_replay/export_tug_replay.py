@@ -95,5 +95,35 @@ def export(date:str,group:str,state_date:str|None=None):
     index.write_text(json.dumps({"datasets":datasets},ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps({"date":date,"group":group,"machines":[m[-3:] for m in machines],"points":len(total),"final_values":finals},ensure_ascii=False,indent=2))
 
+def export_all(date:str):
+    """Build the all-group view from the already-exported group totals."""
+    datasets=[]
+    for group in sorted(GROUPS):
+        path=OUT/date/f"{group}.json"
+        if not path.exists(): raise FileNotFoundError(path)
+        datasets.append((group,json.loads(path.read_text(encoding="utf-8"))))
+    timeline=datasets[0][1]["time_points"]
+    if any(d["time_points"] != timeline for _,d in datasets[1:]):
+        raise ValueError("group timelines are not identical")
+    series=[]
+    for group,d in datasets:
+        values=[{"time":v["time"],"minute":v["minute"],"value":v["value"]} for v in d["group_total"]]
+        series.append({"group":group,"label":f"{group}total","values":values})
+    end_values={s["group"]:s["values"][-1]["value"] for s in series}
+    obj={"date":date,"group":"all","mode":"all","series":series,
+         "time_range":datasets[0][1]["time_range"],"time_points":timeline,
+         "events":[],"validation":{"source":"existing Tug Replay group_total series",
+         "causal_previous_value_hold":True,"future_interpolation":False,
+         "group_final_values":end_values}}
+    dest=OUT/date;dest.mkdir(parents=True,exist_ok=True)
+    (dest/"all.json").write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding="utf-8")
+    index=OUT/"index.json"
+    existing=json.loads(index.read_text(encoding="utf-8")) if index.exists() else {"datasets":[]}
+    datasets=[d for d in existing.get("datasets",[]) if not (d.get("date")==date and d.get("group")=="all")]
+    datasets.append({"date":date,"group":"all","path":f"data/{date}/all.json","series":[f"{g}total" for g in sorted(GROUPS)]})
+    datasets.sort(key=lambda d:(d.get("date", ""), 0 if d.get("group")=="all" else 1, d.get("group", "")))
+    index.write_text(json.dumps({"datasets":datasets},ensure_ascii=False,indent=2),encoding="utf-8")
+    print(json.dumps({"date":date,"group":"all","series":len(series),"points":len(timeline),"final_values":end_values},ensure_ascii=False,indent=2))
+
 if __name__=="__main__":
-    ap=argparse.ArgumentParser();ap.add_argument("--date",required=True);ap.add_argument("--group",required=True,choices=sorted(GROUPS));ap.add_argument("--state-date",default=None);a=ap.parse_args();export(a.date,a.group,a.state_date)
+    ap=argparse.ArgumentParser();ap.add_argument("--date",required=True);ap.add_argument("--group",required=True,choices=["all"]+sorted(GROUPS));ap.add_argument("--state-date",default=None);a=ap.parse_args();export_all(a.date) if a.group=="all" else export(a.date,a.group,a.state_date)
