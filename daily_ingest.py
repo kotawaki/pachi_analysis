@@ -34,6 +34,7 @@ import subprocess
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
+import build_snapshots
 
 ROOT = Path(__file__).parent
 ANALYZE_DIR = ROOT / "csv" / "analyze"
@@ -63,8 +64,35 @@ def find_snapshot_dates():
         return set()
     return {p.stem.replace("_snapshot", "") for p in SNAP_DIR.glob("*_snapshot.json")}
 
-def ensure_snapshots(verbose=True):
-    """analyze にあって snapshot に無い日があれば build_snapshots を実行"""
+def ensure_snapshots(target_date=None, verbose=True):
+    """日付指定時は対象日のみ、それ以外は従来どおりsnapshotを同期する。"""
+    if target_date:
+        if target_date == "20260827":
+            if verbose:
+                print("📸 20260827 は休業日のためsnapshot生成をスキップ")
+            return
+        day_dir = ANALYZE_DIR / target_date
+        candidates = sorted(day_dir.glob(f"{target_date}_analyze.csv"))
+        if not candidates:
+            if verbose:
+                print(f"📸 {target_date}: analyze CSVがないためsnapshot生成をスキップ")
+            return
+        out_path = SNAP_DIR / f"{target_date}_snapshot.json"
+        if out_path.exists():
+            if verbose:
+                print(f"📸 {target_date}: スナップショットは最新です")
+            return
+        SNAP_DIR.mkdir(parents=True, exist_ok=True)
+        data = build_snapshots.process_day(candidates[0], build_snapshots.load_master())
+        if data is None:
+            if verbose:
+                print(f"📸 {target_date}: データなしのためsnapshot生成をスキップ")
+            return
+        with out_path.open("w", encoding="utf-8") as handle:
+            json.dump(data, handle, ensure_ascii=False, separators=(",", ":"))
+        if verbose:
+            print(f"📸 {target_date}: snapshot生成完了")
+        return
     analyze_dates = set(find_analyze_dates())
     snap_dates = find_snapshot_dates()
     missing = analyze_dates - snap_dates
@@ -254,6 +282,7 @@ def main():
     ap.add_argument("--min-total-count", type=int, default=8, help="ランキング対象の最小累計count")
     ap.add_argument("--rebuild", action="store_true", help="履歴を破棄して全日再構築")
     ap.add_argument("--summary", action="store_true", help="取込せず履歴サマリのみ")
+    ap.add_argument("--date", help="処理対象日をYYYYMMDDで限定")
     args = ap.parse_args()
 
     if args.summary:
@@ -267,7 +296,7 @@ def main():
     print("="*72)
 
     # 1. snapshot 同期
-    ensure_snapshots()
+    ensure_snapshots(args.date)
 
     # 2. 履歴ロード
     if args.rebuild and HISTORY_PATH.exists():
@@ -280,7 +309,11 @@ def main():
     }
 
     # 3. 未取込の日を処理
-    snap_dates = sorted(find_snapshot_dates())
+    snap_dates = (
+        [args.date] if args.date else sorted(find_snapshot_dates())
+    )
+    if args.date and not (SNAP_DIR / f"{args.date}_snapshot.json").exists():
+        snap_dates = []
     ingested = set(hist["meta"]["ingested_dates"])
     todo = [d for d in snap_dates if d not in ingested]
     if not todo:

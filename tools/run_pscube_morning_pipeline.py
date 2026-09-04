@@ -154,29 +154,49 @@ def main() -> int:
 
         run_step("ohlc_chart", ["ohlc_chart.py"])
 
+        legacy_prediction_status: dict[str, object] = {"status": "not_run"}
+        prediction_output = ""
         locked_prediction = ROOT / "docs" / f"prediction_{target_date}.html"
         if not locked_prediction.exists():
             previous_prediction = ROOT / "docs" / f"prediction_{previous_date}.html"
             if not previous_prediction.exists():
-                raise FileNotFoundError(f"prediction lock missing: {locked_prediction}")
-            run_step(
-                "prediction_lock",
+                missing = [str(previous_prediction), str(locked_prediction)]
+                legacy_prediction_status = {
+                    "status": "skipped_missing_html",
+                    "missing_files": missing,
+                    "reason": "legacy prediction HTML is optional for current Forward/Pachi Agents flow",
+                }
+                print(f"legacy_prediction_status=skipped_missing_html missing_files={missing}")
+            else:
+                run_step(
+                    "prediction_lock",
+                    [
+                        "prediction_daily.py",
+                        "--actual-date", previous_date,
+                        "--prediction-date", target_date,
+                    ],
+                )
+                prediction_output = run_step(
+                    "prediction",
+                    [
+                        "prediction_daily.py",
+                        "--actual-date", target_date,
+                        "--prediction-date", next_date,
+                    ],
+                )
+                legacy_prediction_status = {"status": "completed"}
+        else:
+            prediction_output = run_step(
+                "prediction",
                 [
                     "prediction_daily.py",
-                    "--actual-date", previous_date,
-                    "--prediction-date", target_date,
+                    "--actual-date", target_date,
+                    "--prediction-date", next_date,
                 ],
             )
-        prediction_output = run_step(
-            "prediction",
-            [
-                "prediction_daily.py",
-                "--actual-date", target_date,
-                "--prediction-date", next_date,
-            ],
-        )
+            legacy_prediction_status = {"status": "completed"}
 
-        run_step("daily_ingest", ["daily_ingest.py"])
+        run_step("daily_ingest", ["daily_ingest.py", "--date", target_date])
         run_step(
             "propagation_lookup",
             ["propagation_lookup_html.py", "--daytime-date", next_date],
@@ -262,6 +282,7 @@ def main() -> int:
                 "overlays": len(list((analyze_dir / "overlay").glob("*.png"))),
             },
             "prediction": prediction_summary(prediction_output),
+            "legacy_prediction": legacy_prediction_status,
             "propagation": propagation_summary(next_date),
             "intraday_regime": {
                 "date": latest_regime["date"],
