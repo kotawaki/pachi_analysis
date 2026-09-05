@@ -1,7 +1,7 @@
 {
   "research_only": true,
   "candidate_samples": 4,
-  "forward_days": 7,
+  "forward_days": 9,
   "ma_definition_source": "chart_signal_positive.calc_ma: rolling average of daily Close",
   "slope_definition": "current MA minus previous business-day MA",
   "distance_definition": "(Close - MA) / abs(MA)",
@@ -204,13 +204,13 @@
       "target_close": 23058,
       "target_bullish": true,
       "target_status": "AVAILABLE",
-      "plus1_date": "",
-      "plus1_open": "",
-      "plus1_high": "",
-      "plus1_low": "",
-      "plus1_close": "",
-      "plus1_bullish": "",
-      "plus1_status": "PENDING",
+      "plus1_date": "20260905",
+      "plus1_open": 0,
+      "plus1_high": 8103,
+      "plus1_low": -9956,
+      "plus1_close": 5603,
+      "plus1_bullish": true,
+      "plus1_status": "AVAILABLE",
       "plus2_date": "",
       "plus2_open": "",
       "plus2_high": "",
@@ -281,6 +281,22 @@
       "target_date": "20260904",
       "candidate_machine": "074",
       "no_candidate": false,
+      "target_status": "AVAILABLE"
+    },
+    {
+      "forward_number": 8,
+      "signal_date": "20260904",
+      "target_date": "20260905",
+      "candidate_machine": "",
+      "no_candidate": true,
+      "target_status": "AVAILABLE"
+    },
+    {
+      "forward_number": 9,
+      "signal_date": "20260905",
+      "target_date": "20260906",
+      "candidate_machine": "",
+      "no_candidate": true,
       "target_status": "PENDING"
     }
   ]

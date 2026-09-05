@@ -123,7 +123,10 @@ def main() -> int:
     with SUMMARY.open(encoding="utf-8") as handle:
         summary = json.load(handle)
     summary["evaluation_status"] = "evaluated"
-    summary["actual_source"] = "csv/daily_ohlc/20260829/20260829_daily_ohlc.csv"
+    summary["actual_source"] = (
+        f"csv/daily_ohlc/{TARGET_DATE.replace('-', '')}/"
+        f"{TARGET_DATE.replace('-', '')}_daily_ohlc.csv"
+    )
     summary["evaluation"] = stats(evaluated)
     for strong_group in summary.get("strong_groups", []):
         strong_group["evaluation_status"] = "evaluated"
