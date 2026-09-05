@@ -151,12 +151,20 @@ def _history_dom(page: Any) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         })"""
     )
     rows = []
+    parse_errors = 0
     for row in raw["rows"]:
-        if len(row) < 4 or row[0] == "回数":
+        if row[0] == "回数":
+            continue
+        if len(row) < 4:
+            parse_errors += 1
             continue
         if not re.fullmatch(r"\d+", row[0]) or not re.fullmatch(r"\d{1,2}:\d{2}", row[1]) or not re.fullmatch(r"\d+", row[2]):
+            parse_errors += 1
             continue
         rows.append({"bonus_id": int(row[0]), "time": row[1], "start": int(row[2]), "status": row[3]})
+    raw["history_dom_raw_rows"] = len(raw["rows"])
+    raw["history_parsed_rows"] = len(rows)
+    raw["history_parse_errors"] = parse_errors
     return rows, raw
 
 
@@ -180,6 +188,7 @@ def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = N
         "moreClicks": 0,
         "history_complete": True,
         "history_missing_bonus_ids": [],
+        "history_sequence_warning": False,
         "history_error": None,
     }
     if expand_more:
@@ -228,10 +237,18 @@ def extract_history(page: Any, expand_more: bool = False, abort_checker: Any = N
             meta["history_complete"] = False
             meta["history_error"] = "history more button remains visible"
     meta["afterRows"] = len(rows)
+    meta["history_dom_raw_rows"] = raw.get("history_dom_raw_rows", len(rows))
+    meta["history_parsed_rows"] = len(rows)
+    meta["history_parse_errors"] = raw.get("history_parse_errors", 0)
+    if meta["history_parse_errors"]:
+        meta["history_complete"] = False
+        meta["history_error"] = "history DOM rows could not be parsed"
     meta["history_missing_bonus_ids"] = _history_missing_bonus_ids(rows)
     if meta["history_missing_bonus_ids"]:
-        meta["history_complete"] = False
-        meta["history_error"] = "bonus_id sequence has missing values"
+        # A source can legitimately omit a bonus_id. Keep the diagnostic, but
+        # do not classify the capture as incomplete unless collection/parsing
+        # itself reported an error above.
+        meta["history_sequence_warning"] = True
     return rows, meta
 
 
@@ -594,10 +611,14 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
         "history_rows": len(rows),
         "history_more_clicks": history_meta["moreClicks"],
         "history_complete": history_meta["history_complete"],
+        "history_sequence_warning": history_meta["history_sequence_warning"],
         "history_missing_bonus_ids": history_meta["history_missing_bonus_ids"],
         "history_more_available": bool(history_meta["moreExists"] and history_meta["moreVisible"] and not history_meta["moreDisabled"]),
         "history_before_rows": history_meta["beforeRows"],
         "history_after_rows": history_meta["afterRows"],
+        "history_dom_raw_rows": history_meta["history_dom_raw_rows"],
+        "history_parsed_rows": history_meta["history_parsed_rows"],
+        "history_parse_errors": history_meta["history_parse_errors"],
     })
     if history_meta["history_error"]:
         result["history_error"] = history_meta["history_error"]
