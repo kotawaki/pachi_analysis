@@ -256,6 +256,20 @@ def write_report(hist, date, window_steps, lift_threshold,
     return report_path, ranked, target_pairs
 
 
+def update_wave_weak_ma_report(report_path, date):
+    """Append the optional research-only Wave + Weak MA observation summary."""
+    try:
+        from wave_lab.cross_machine_analysis.export_wave_weak_ma import report_section, update
+        summary = update(date)
+        from wave_lab.cross_machine_analysis.export_wave_weak_ma_web import update as update_web
+        update_web()
+        with report_path.open("a", encoding="utf-8") as handle:
+            handle.write(report_section(summary))
+        print(f"🔬 Wave + Weak MA observation: {summary['total_samples']} samples")
+    except Exception as exc:
+        print(f"⚠ Wave + Weak MA observation skipped: {exc}")
+
+
 def print_summary(hist, min_days, min_total_count, lift_threshold):
     pairs = list(hist["pairs"].values())
     ranked = [p for p in pairs if p["days_seen"] >= min_days and p["total_count"] >= min_total_count]
@@ -336,6 +350,7 @@ def main():
         report_path, ranked, target_pairs = write_report(
             hist, latest, args.window, args.lift_threshold,
             args.min_days, args.min_total_count)
+        update_wave_weak_ma_report(report_path, latest)
         print(f"📄 {report_path}")
 
     # 6. サマリ表示
