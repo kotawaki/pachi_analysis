@@ -477,5 +477,10 @@ def analyze_date() -> dict:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=DATE, choices=[DATE])
+    parser.add_argument("--date", default=DATE)
+    args = parser.parse_args()
+    DATE = args.date
+    CAPTURE = ROOT / "data" / "local_capture" / DATE / "morning"
+    OHLC = ROOT / "csv" / "daily_ohlc" / DATE / f"{DATE}_daily_ohlc.csv"
+    OUT = ROOT / "wave_lab" / "group_flow" / "output" / DATE
     analyze_date()

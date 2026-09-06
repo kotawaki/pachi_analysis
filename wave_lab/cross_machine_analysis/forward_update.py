@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 import sys
 import argparse
+import os
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -55,6 +57,55 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def write_json_atomic(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(name, path)
+    except Exception:
+        try:
+            os.unlink(name)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def lock_forward(signal_date: str, target_date: str, *, root: Path = ROOT) -> dict[str, object]:
+    """Safely lock one date; existing files are never overwritten."""
+    signal_date = signal_date.replace("-", "")
+    target_date = target_date.replace("-", "")
+    if signal_date == "20260827" or target_date == "20260827":
+        return {"status": "error", "reason": "holiday_20260827_forbidden"}
+    path = root / "docs" / "wave_lab" / "data" / "forward" / f"{signal_date}.json"
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            return {"status": "error", "reason": f"existing_forward_unreadable:{error}"}
+        if existing.get("signal_date") != signal_date or existing.get("target_date") != target_date:
+            return {"status": "error", "reason": "existing_forward_date_mismatch", "path": str(path)}
+        return {"status": "skipped", "reason": "signal_date_forward_exists", "path": str(path), "overwrite": False}
+    forward_dir = path.parent
+    for other in forward_dir.glob("20*.json"):
+        if other == path or other.name in {"latest.json", "history.json"}:
+            continue
+        try:
+            data = json.loads(other.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("target_date") == target_date:
+            return {"status": "error", "reason": "target_date_already_locked", "path": str(other)}
+    if not (root / "csv" / "analyze" / signal_date / f"{signal_date}_analyze.csv").exists():
+        return {"status": "skipped", "reason": "signal_date_input_missing", "overwrite": False}
+    # Reuse the established machine/group calculation below through the CLI path.
+    return {"status": "ready", "path": str(path), "overwrite": False}
 
 
 def machine_signal(machine: str, signal_date: str | None = None, target_date: str | None = None) -> dict:
@@ -103,8 +154,15 @@ def main() -> int:
     parser.add_argument("--signal-date", default=SIGNAL_DATE)
     parser.add_argument("--target-date", default=TARGET_DATE)
     parser.add_argument("--append", action="store_true")
+    parser.add_argument("--lock-json", action="store_true",
+                        help="also atomically create the date-keyed locked Forward JSON")
     args = parser.parse_args()
     signal_date, target_date = args.signal_date, args.target_date
+    if args.lock_json:
+        check = lock_forward(signal_date, target_date, root=ROOT)
+        if check["status"] != "ready":
+            print(json.dumps(check, ensure_ascii=False))
+            return 0 if check["status"] == "skipped" else 2
     TRACK.mkdir(parents=True, exist_ok=True)
     machines = [machine_signal(machine, signal_date, target_date) for machine in MACHINES]
 
@@ -227,6 +285,27 @@ def main() -> int:
     summary_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    if args.lock_json:
+        forward_path = ROOT / "docs" / "wave_lab" / "data" / "forward" / f"{signal_date.replace('-', '')}.json"
+        payload = {
+            **summary,
+            "machine_signals": machines,
+            "group_signals": ranked,
+            "signal_candidates": {
+                "ALL_3": [r["machine"] for r in machines if r["ALL_3"]],
+                "UP_UP_UP": [r["machine"] for r in machines if r["UP_UP_UP"]],
+                "RIGHT": [r["machine"] for r in machines if r["RIGHT"]],
+                "LOW_CONVERGENCE_RIGHT": [r["machine"] for r in machines if r["LOW_CONVERGENCE_RIGHT"]],
+            },
+            "group_top3": ranked[:3],
+            "future_outcome": {
+                "actual_open": None, "actual_high": None, "actual_low": None, "actual_close": None,
+                "bullish": None, "close_ge_5000": None, "close_ge_10000": None,
+                "close_ge_20000": None,
+            },
+        }
+        write_json_atomic(forward_path, payload)
+        print(json.dumps({"status": "locked", "path": str(forward_path), "overwrite": False}, ensure_ascii=False))
     print(json.dumps(summary, ensure_ascii=False))
     return 0
 

@@ -189,6 +189,15 @@ def load_prediction_rows(start_date, end_date, backfill=False, backfill_mode="as
     return rows
 
 
+def missing_prediction_html_dates(start_date, end_date):
+    """Display-only list; never recreates or infers historical predictions."""
+    if end_date not in csv_dates():
+        return []
+    if (DOCS_DIR / f"prediction_{end_date}.html").exists():
+        return []
+    return [end_date] if start_date <= end_date else []
+
+
 def load_intraday_periods(path):
     periods = {}
     if not path.exists():
@@ -686,7 +695,7 @@ def make_daytime_candidate_panel(args):
   </section>"""
 
 
-def make_html(rows, args):
+def make_html(rows, args, unavailable_prediction_dates=None):
     all_s = summarize(rows)
     plus = [row for row in rows if row["cycle_plus"]]
     minus = [row for row in rows if not row["cycle_plus"]]
@@ -806,6 +815,16 @@ def make_html(rows, args):
   <ul class="reverse-list">{reverse_html}</ul>
 </section>""")
 
+    for date in sorted(unavailable_prediction_dates or [], reverse=True):
+        label = "特日" if int(date[6:8]) in SPECIAL_DAYS else "通常日"
+        daily_cards.append(f"""
+<section class="day-card">
+  <div class="day-head">
+    <h3>{date}</h3><span class="badge {'special' if label == '特日' else ''}">{label}</span>
+  </div>
+  <p class="note">旧prediction HTMLなし。prediction unavailable のため、履歴predictionは補完せず、この日付のカードのみ表示しています。</p>
+</section>""")
+
     html = f"""<!doctype html>
 <html lang="ja">
 <head>
@@ -893,7 +912,8 @@ def main():
     out.write_text(make_report(rows, args), encoding="utf-8")
     html_out = Path(args.html_out)
     html_out.parent.mkdir(parents=True, exist_ok=True)
-    html_out.write_text(make_html(rows, args), encoding="utf-8")
+    unavailable = missing_prediction_html_dates(args.start, args.end) if not args.backfill else []
+    html_out.write_text(make_html(rows, args, unavailable), encoding="utf-8")
     print(out)
     print(html_out)
     print(f"rows={len(rows)} dates={min(row['date'] for row in rows)}..{max(row['date'] for row in rows)}")
