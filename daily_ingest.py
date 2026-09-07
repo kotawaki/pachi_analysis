@@ -297,6 +297,7 @@ def main():
     ap.add_argument("--rebuild", action="store_true", help="履歴を破棄して全日再構築")
     ap.add_argument("--summary", action="store_true", help="取込せず履歴サマリのみ")
     ap.add_argument("--date", help="処理対象日をYYYYMMDDで限定")
+    ap.add_argument("--skip-wave-weak-ma", action="store_true", help="Wave + Weak MA exportを呼ばず、後段で実行")
     args = ap.parse_args()
 
     if args.summary:
@@ -350,7 +351,8 @@ def main():
         report_path, ranked, target_pairs = write_report(
             hist, latest, args.window, args.lift_threshold,
             args.min_days, args.min_total_count)
-        update_wave_weak_ma_report(report_path, latest)
+        if not args.skip_wave_weak_ma:
+            update_wave_weak_ma_report(report_path, latest)
         print(f"📄 {report_path}")
 
     # 6. サマリ表示

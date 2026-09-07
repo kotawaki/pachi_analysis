@@ -238,6 +238,14 @@ def parse_args() -> argparse.Namespace:
         help="Explicitly skip the default Pachi Agents step.",
     )
     parser.add_argument(
+        "--pachi-agents-external", action="store_true",
+        help="Run Pachi Agents through the repo-root Python module entry point.",
+    )
+    parser.add_argument(
+        "--defer-wave-weak-ma", action="store_true",
+        help="Defer the Wave + Weak MA export to the post-Wave runner stage.",
+    )
+    parser.add_argument(
         "--allow-missing-html",
         action="store_true",
         help="Run chart-only analysis for captures where HTML was intentionally omitted.",
@@ -332,7 +340,10 @@ def main() -> int:
             )
             legacy_prediction_status = {"status": "completed"}
 
-        run_step("daily_ingest", ["daily_ingest.py", "--date", target_date])
+        daily_ingest_args = ["daily_ingest.py", "--date", target_date]
+        if args.defer_wave_weak_ma:
+            daily_ingest_args.append("--skip-wave-weak-ma")
+        run_step("daily_ingest", daily_ingest_args)
         wave = wave_forward_plan(target_date, previous_date, next_date)
         if not wave["previous_forward_valid"]:
             raise RuntimeError("previous Forward is missing or date-mismatched")
@@ -393,13 +404,24 @@ def main() -> int:
         pachi_agents_report: dict[str, object] | None = None
         if not args.skip_pachi_agents or args.pachi_agents or args.pachi_agents_dry_run:
             try:
-                from pachi_agents.daily_run import run_daily
+                if args.pachi_agents_external:
+                    pachi_output = run_step(
+                        "pachi_agents",
+                        ["-m", "pachi_agents.daily_run", "--base-date", target_date],
+                    )
+                    pachi_agents_report = {
+                        "status": "ok",
+                        "command": ["python", "-m", "pachi_agents.daily_run", "--base-date", target_date],
+                        "output": pachi_output,
+                    }
+                else:
+                    from pachi_agents.daily_run import run_daily
 
-                pachi_agents_report = run_daily(
-                    ROOT,
-                    base_date=target_date,
-                    dry_run=args.pachi_agents_dry_run,
-                )
+                    pachi_agents_report = run_daily(
+                        ROOT,
+                        base_date=target_date,
+                        dry_run=args.pachi_agents_dry_run,
+                    )
             except Exception as error:
                 # Pachi Agents is an optional post-processing step. Keep the
                 # completed pachi_analyze outputs intact and expose the error
