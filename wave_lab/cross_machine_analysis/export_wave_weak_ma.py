@@ -104,6 +104,22 @@ def load_existing() -> list[dict[str, Any]]:
         return list(csv.DictReader(handle))
 
 
+def load_forward_evaluations(signal_date: str) -> dict[str, dict[str, Any]]:
+    """Read evaluation fields from the locked Forward for this signal date."""
+    path = ROOT / "docs/wave_lab/data/forward" / f"{signal_date}.json"
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if str(payload.get("evaluation_status", "")).lower() != "evaluated":
+        return {}
+    if str(payload.get("signal_date")) != str(signal_date):
+        return {}
+    return {
+        machine_id(row.get("machine")): row
+        for row in payload.get("machine_signals", [])
+    }
+
+
 def update(target_date: str, bootstrap: bool = True) -> dict[str, Any]:
     payload = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     snapshots = [r for r in payload.get("records", []) if machine_id(r.get("machine")) in UNIVERSE]
@@ -115,7 +131,16 @@ def update(target_date: str, bootstrap: bool = True) -> dict[str, Any]:
     evaluated_before = sum(1 for record in existing.values() if str(record.get("evaluation_status")).lower() == "evaluated")
     for key, record in list(existing.items()):
         if key in by_key:
-            existing[key] = apply_evaluation(record, by_key[key])
+            forward_row = load_forward_evaluations(key[0]).get(key[1])
+            if forward_row:
+                existing[key] = apply_evaluation(record, {
+                    "evaluation_status": "evaluated",
+                    "actual_open": forward_row.get("actual_open"),
+                    "actual_high": forward_row.get("actual_high"),
+                    "actual_low": forward_row.get("actual_low"),
+                    "actual_close": forward_row.get("actual_close"),
+                    "actual_bullish": forward_row.get("actual_bullish"),
+                })
     for source in snapshots:
         # A new prospective record is allowed only from the current pending
         # Forward.  If its target was already evaluated, do not backfill it.

@@ -1,8 +1,8 @@
 {
-  "total_samples": 2,
-  "evaluated_samples": 1,
+  "total_samples": 3,
+  "evaluated_samples": 2,
   "pending_samples": 1,
-  "bullish_count": 1,
+  "bullish_count": 2,
   "bullish_rate": 1.0,
   "signal_stats": {
     "UP_UP_UP": {
@@ -11,17 +11,17 @@
       "bullish_rate": null
     },
     "RIGHT": {
-      "samples": 1,
-      "bullish_count": 1,
+      "samples": 2,
+      "bullish_count": 2,
       "bullish_rate": 1.0
     },
     "LOW_CONVERGENCE_RIGHT": {
-      "samples": 1,
-      "bullish_count": 1,
+      "samples": 2,
+      "bullish_count": 2,
       "bullish_rate": 1.0
     }
   },
-  "generated_at": "2026-09-07T06:28:01",
+  "generated_at": "2026-09-07T11:26:59",
   "research_only": true,
   "prediction_use": false,
   "prospective_start_date": "20260828",
@@ -29,8 +29,8 @@
   "historical_backfill_used": false,
   "target_data_used_for_new_sample": false,
   "processed_signal_date": "20260906",
-  "evaluated_this_run": 0,
-  "new_pending": 0,
+  "evaluated_this_run": 1,
+  "new_pending": 1,
   "records": [
     {
       "signal_date": "20260904",
@@ -92,17 +92,53 @@
       "close_vs_ma20": "BELOW",
       "close_vs_ma75": "BELOW",
       "alignment": "BEARISH_ALIGNMENT",
-      "evaluation_status": "pending",
-      "actual_open": "",
-      "actual_high": "",
-      "actual_low": "",
-      "actual_close": "",
-      "actual_bullish": "",
+      "evaluation_status": "evaluated",
+      "actual_open": "0",
+      "actual_high": "3966",
+      "actual_low": "-10844",
+      "actual_close": "2759",
+      "actual_bullish": true,
       "max_input_date": "20260905",
       "future_data_used": "False",
       "prediction_use": "False",
       "source_snapshot": "docs/wave_lab/data/forward/20260905.json",
       "prospective_record": "True"
+    },
+    {
+      "signal_date": "20260906",
+      "target_date": "20260907",
+      "machine": "045",
+      "group": "g9",
+      "UP_UP_UP": true,
+      "RIGHT": false,
+      "LOW_CONVERGENCE_RIGHT": false,
+      "ALL_3": false,
+      "score": 1,
+      "wave_direction_pattern": "UP-UP-UP",
+      "region": "TOP",
+      "convergence_score": 0.34250820696888873,
+      "signal_close": -253256,
+      "ma5": -234836.2,
+      "ma20": -214536.45,
+      "ma75": -230700.64,
+      "ma5_direction": "DOWN",
+      "ma20_direction": "DOWN",
+      "ma75_direction": "DOWN",
+      "close_vs_ma5": "BELOW",
+      "close_vs_ma20": "BELOW",
+      "close_vs_ma75": "BELOW",
+      "alignment": "MIXED_ALIGNMENT",
+      "evaluation_status": "pending",
+      "actual_open": null,
+      "actual_high": null,
+      "actual_low": null,
+      "actual_close": null,
+      "actual_bullish": null,
+      "max_input_date": "20260906",
+      "future_data_used": false,
+      "prediction_use": false,
+      "source_snapshot": "docs/wave_lab/data/forward/20260906.json",
+      "prospective_record": true
     }
   ]
 }
