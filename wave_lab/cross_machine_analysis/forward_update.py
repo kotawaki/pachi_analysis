@@ -17,12 +17,13 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from wave_lab.fft_reconstruct import analyze, load_machine_rows, phase_convergence_analysis
+from wave_lab.universe import machines_for_signal_date
 
 
 TRACK = Path(__file__).resolve().parent / "tracking"
 SIGNAL_DATE = "2026-08-28"
 TARGET_DATE = "2026-08-29"
-MACHINES = [f"{n:03d}" for n in range(39, 78)]
+MACHINES = list(machines_for_signal_date("20260828"))
 GROUPS = {
     "g1": ["046", "055", "064", "073"],
     "g2": ["047", "056", "065", "074"],
@@ -164,7 +165,8 @@ def main() -> int:
             print(json.dumps(check, ensure_ascii=False))
             return 0 if check["status"] == "skipped" else 2
     TRACK.mkdir(parents=True, exist_ok=True)
-    machines = [machine_signal(machine, signal_date, target_date) for machine in MACHINES]
+    machines = [machine_signal(machine, signal_date, target_date)
+                for machine in machines_for_signal_date(signal_date)]
 
     machine_fields = [
         "signal_date", "target_date", "machine", "group",

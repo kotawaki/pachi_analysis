@@ -25,6 +25,7 @@ MACHINES = {f"{n:03d}" for n in range(39, 78)}
 
 sys.path.insert(0, str(ROOT))
 from chart_signal_positive import calc_ma, load_daily_ohlc  # noqa: E402
+from wave_lab.universe import machines_for_signal_date  # noqa: E402
 
 
 def compact(value: Any) -> str:
@@ -177,16 +178,19 @@ def main() -> None:
     forwards = load_forward_files()
     if not forwards:
         raise SystemExit("no eligible Forward JSON")
-    loaded, _ = load_daily_ohlc(MACHINES)
+    max_signal_date = max(compact(data.get("signal_date")) for data in forwards)
+    all_machines = set().union(*(set(machines_for_signal_date(compact(data.get("signal_date")))) for data in forwards))
+    loaded, _ = load_daily_ohlc(all_machines)
     series_by_machine = {f"{int(key):03d}": value for key, value in loaded.items()}
     rows = []
     for data in forwards:
         signal_date = compact(data.get("signal_date"))
         signals = {str(row.get("machine", "")).zfill(3): row for row in data.get("machine_signals", [])}
-        missing = sorted(MACHINES - set(signals))
+        date_machines = set(machines_for_signal_date(signal_date))
+        missing = sorted(date_machines - set(signals))
         if missing:
             raise ValueError(f"{signal_date}: missing Forward machines {missing}")
-        for machine in sorted(MACHINES):
+        for machine in sorted(date_machines):
             rows.append(build_snapshot(signal_date, data, signals[machine], series_by_machine[machine]))
     evaluated_dates = sorted({row["signal_date"] for row in rows if row["evaluation_status"] == "evaluated"})
     pending_dates = sorted({row["signal_date"] for row in rows if row["evaluation_status"] != "evaluated"})
@@ -197,7 +201,7 @@ def main() -> None:
             "signal_recalculation_used": False,
             "historical_backfill_used": False,
             "prediction_use": False,
-            "machines_per_date": len(MACHINES),
+            "machines_per_date": len(machines_for_signal_date(max_signal_date)),
             "dates": sorted({row["signal_date"] for row in rows}),
             "evaluated_dates": evaluated_dates,
             "pending_dates": pending_dates,

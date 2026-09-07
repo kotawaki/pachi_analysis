@@ -5,17 +5,20 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from wave_lab.universe import machines_for_signal_date  # noqa: E402
 SNAPSHOT_PATH = ROOT / "docs/wave_lab/data/forward/prospective_state_snapshots.json"
 OUTPUT_DIR = ROOT / "wave_lab/cross_machine_analysis/tracking"
 CSV_PATH = OUTPUT_DIR / "wave_weak_ma_prospective.csv"
 JSON_PATH = OUTPUT_DIR / "wave_weak_ma_summary.json"
 START_DATE = "20260828"
-UNIVERSE = {f"{n:03d}" for n in range(39, 78)}
+UNIVERSE = set(machines_for_signal_date("20260828"))
 SIGNALS = ("UP_UP_UP", "RIGHT", "LOW_CONVERGENCE_RIGHT")
 FIELDNAMES = [
     "signal_date", "target_date", "machine", "group", "UP_UP_UP", "RIGHT",
@@ -122,7 +125,10 @@ def load_forward_evaluations(signal_date: str) -> dict[str, dict[str, Any]]:
 
 def update(target_date: str, bootstrap: bool = True) -> dict[str, Any]:
     payload = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
-    snapshots = [r for r in payload.get("records", []) if machine_id(r.get("machine")) in UNIVERSE]
+    snapshots = [
+        r for r in payload.get("records", [])
+        if machine_id(r.get("machine")) in set(machines_for_signal_date(str(r.get("signal_date", ""))))
+    ]
     by_key = {(str(r.get("signal_date")), machine_id(r.get("machine"))): r for r in snapshots}
     existing = {(str(r.get("signal_date")), machine_id(r.get("machine"))): r for r in load_existing()}
     # Explicitly authorized initial prospective sample; all other additions are current-date only.
