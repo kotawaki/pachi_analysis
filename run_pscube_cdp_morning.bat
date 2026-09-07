@@ -13,11 +13,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo ========================================
-echo PSCUBE CDP morning batch - 71 machines
-echo ========================================
-echo Press ESC during capture to stop safely.
-echo.
 if not exist "%ROOT%\config" mkdir "%ROOT%\config"
 set "LAST_DATE="
 if exist "%LAST_DATE_FILE%" set /p "LAST_DATE="<"%LAST_DATE_FILE%"
@@ -36,9 +31,22 @@ if errorlevel 1 (
 )
 >"%LAST_DATE_FILE%" echo %TARGET_DATE%
 
+for /f %%C in ('python -c "from tools.pscube_cdp_preflight import expected_count_for_date; print(expected_count_for_date(\"%TARGET_DATE%\"))"') do set "EXPECTED_COUNT=%%C"
+if not defined EXPECTED_COUNT (
+  echo ERROR: Could not determine target count for %TARGET_DATE%.
+  pause
+  exit /b 2
+)
+
+echo ========================================
+echo PSCUBE CDP morning batch - %EXPECTED_COUNT% machines
+echo ========================================
+echo Press ESC during capture to stop safely.
+echo.
+
 echo.
 echo Running preflight checks...
-python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%"
+python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%"
 if errorlevel 1 (
   echo.
   echo Preflight FAILED. Capture will not start.
@@ -55,7 +63,7 @@ if "%DRY_RUN%"=="1" (
 )
 
 echo Starting PSCUBE morning capture...
-python tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count 71 --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
+python tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
 set "RESULT=%ERRORLEVEL%"
 
 echo.

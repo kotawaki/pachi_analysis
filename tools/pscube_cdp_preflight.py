@@ -10,16 +10,25 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+CURRENT_UNIVERSE_START = "20260907"
+LEGACY_EXPECTED_COUNT = 71
+CURRENT_EXPECTED_COUNT = 66
+
 
 def fetch_json(url: str) -> object:
     with urllib.request.urlopen(url, timeout=3) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
-def enabled_machines(path: Path) -> list[str]:
+def enabled_machines(path: Path, business_date: str | None = None) -> list[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
-    machines = [str(machine).zfill(4) for target in data.get("targets", []) if target.get("enabled") for machine in target.get("machines", [])]
+    target_date = (business_date or "").replace("-", "")
+    machines = [str(machine).zfill(4) for target in data.get("targets", []) if target.get("enabled") if (not target.get("active_from") or target_date >= str(target["active_from"]).replace("-", "")) if (not target.get("active_until") or target_date <= str(target["active_until"]).replace("-", "")) for machine in target.get("machines", [])]
     return list(dict.fromkeys(machines))
+
+
+def expected_count_for_date(business_date: str) -> int:
+    return CURRENT_EXPECTED_COUNT if business_date.replace("-", "") >= CURRENT_UNIVERSE_START else LEGACY_EXPECTED_COUNT
 
 
 def normalize_requested(values: list[str]) -> list[str]:
@@ -35,7 +44,7 @@ def normalize_requested(values: list[str]) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--targets-file", type=Path, required=True)
-    parser.add_argument("--expected-count", type=int, default=71)
+    parser.add_argument("--expected-count", type=int)
     parser.add_argument("--machines", nargs="+", help="validate only these enabled machines")
     parser.add_argument("--date")
     parser.add_argument("--cdp-url", default="http://127.0.0.1:9222")
@@ -64,7 +73,7 @@ def main() -> int:
         return 4
 
     try:
-        machines = enabled_machines(args.targets_file)
+        machines = enabled_machines(args.targets_file, args.date)
     except (OSError, json.JSONDecodeError, KeyError) as error:
         print(f"ERROR: Cannot read targets file: {args.targets_file} ({error})", file=sys.stderr)
         return 5
@@ -80,9 +89,11 @@ def main() -> int:
             print(f"ERROR: Requested machines are not enabled targets: {unknown}", file=sys.stderr)
             return 6
         machines = requested
-    expected_count = args.expected_count if not args.machines else len(machines)
+    expected_count = args.expected_count if args.expected_count is not None else expected_count_for_date(args.date)
+    if args.machines:
+        expected_count = len(machines)
     if len(machines) != expected_count:
-        print(f"ERROR: Target count mismatch: expected={args.expected_count}, actual={len(machines)}", file=sys.stderr)
+        print(f"ERROR: Target count mismatch: expected={expected_count}, actual={len(machines)}", file=sys.stderr)
         print(f"Targets file: {args.targets_file}", file=sys.stderr)
         print("Capture will not start. Check the targets file; no machine will be guessed.", file=sys.stderr)
         return 6
