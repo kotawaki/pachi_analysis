@@ -52,10 +52,13 @@ def main() -> int:
     machines = list(args.machines or [])
     if args.targets_file:
         data = json.loads(Path(args.targets_file).read_text(encoding="utf-8"))
+        target_date = args.date.replace("-", "")
         machines.extend(
             str(machine).zfill(4)
             for target in data.get("targets", [])
             if target.get("enabled")
+            if (not target.get("active_from") or target_date >= str(target["active_from"]).replace("-", ""))
+            if (not target.get("active_until") or target_date <= str(target["active_until"]).replace("-", ""))
             for machine in target.get("machines", [])
         )
     if args.machines_file:

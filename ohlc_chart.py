@@ -1,6 +1,6 @@
 """
 日足OHLCチャート生成 (HTML / GitHub Pages 対応)
-MA5/20/75 + フィボナッチ + ゴールデンクロス(MA5が75→20の順) + スイングH/L + R/R
+ロウソク足 + MA5/20/75 + 全期間Fib + 手動部分Fib
 """
 
 import csv, os, glob, json
@@ -13,13 +13,13 @@ OUT_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs')
 OUT_FILE  = os.path.join(OUT_DIR, 'ohlc.html')
 
 RANGES = [
+    {'id':'r008_012', 'label':'008〜012番', 'machines':list(range(8,13)), 'start':'20260907'},
+    {'id':'r018_019', 'label':'018〜019番', 'machines':list(range(18,20)), 'start':'20260907'},
     {'id':'r35_38',   'label':'35〜38番',  'machines':list(range(35,39)),   'start':'20250604'},
     {'id':'r39_77',   'label':'39〜77番',  'machines':list(range(39,78)),   'start':'20250517'},
-    {'id':'r118_123', 'label':'118〜123番','machines':list(range(118,124)), 'start':'20251210'},
-    {'id':'r148_153', 'label':'148〜153番','machines':list(range(148,154)), 'start':'20251114'},
-    {'id':'r154_158', 'label':'154〜158番','machines':list(range(154,159)), 'start':'20260428'},
-    {'id':'r1173_1180','label':'1173〜1180番','machines':list(range(1173,1181)),'start':'20260301'},
-    {'id':'r1015_1018','label':'1015〜1018番','machines':list(range(1015,1019)),'start':'20260706'},
+    {'id':'r118_121', 'label':'118〜121番','machines':list(range(118,122)), 'start':'20251210'},
+    {'id':'r148_153', 'label':'eF.ブルーロックMZ (148〜153番)','machines':list(range(148,154)), 'start':'20251114'},
+    {'id':'r154_159', 'label':'入替後台 154〜159番','machines':list(range(154,160)), 'start':'20260428'},
 ]
 
 def machine_id(value):
@@ -216,12 +216,13 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
 </head>
 <body>
 <div id="header">
-  <h1><a href="index.html" style="color:#8b949e;text-decoration:none">🏠 トップ</a> &nbsp;｜&nbsp; <a href="groups.html" style="color:#58a6ff;text-decoration:none">🏆 グループ強さランキング</a> &nbsp;｜&nbsp; 🎰 差玉チャート &nbsp;/&nbsp; 日足OHLC &nbsp;/&nbsp; MA5・20・75 &nbsp;/&nbsp; Fibonacci &nbsp;/&nbsp; Golden Cross (75→20) &nbsp;/&nbsp; Swing H/L &nbsp;/&nbsp; R/R</h1>
+  <h1><a href="index.html" style="color:#8b949e;text-decoration:none">🏠 トップ</a> &nbsp;｜&nbsp; <a href="groups.html" style="color:#58a6ff;text-decoration:none">🏆 グループ強さランキング</a> &nbsp;｜&nbsp; 🎰 差玉チャート &nbsp;/&nbsp; 日足OHLC &nbsp;/&nbsp; MA5・20・75 &nbsp;/&nbsp; Fibonacci</h1>
 </div>
 <div id="tabs"></div>
 <div id="sub-tabs"></div>
 <div id="analysis-controls">
-  <label class="analysis-toggle"><input id="fib-local-toggle" type="checkbox"><span id="fib-local-label">SL2→SH2</span></label>
+  <label class="analysis-toggle"><input id="fib-partial-toggle" type="checkbox"><span>部分Fib</span></label>
+  <button id="fib-partial-clear" type="button">部分Fib Clear</button>
   <label class="analysis-toggle"><input id="fib-global-toggle" type="checkbox"><span>全期間フィボ</span></label>
 </div>
 <div id="fourier-controls"></div>
@@ -229,34 +230,17 @@ body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif;f
   <div id="chart-container"></div>
   <div id="info-panel">
     <div class="sec">
-      <div class="sec-title">Swing High / Low</div>
-      <div class="row"><span class="lbl" style="color:#ef5350">▲ SH1</span><span class="val" id="sh1">-</span></div>
-      <div class="row"><span class="lbl" style="color:#ef535099">▲ SH2</span><span class="val" id="sh2">-</span></div>
-      <div class="row"><span class="lbl" style="color:#26a69a">▼ SL1</span><span class="val" id="sl1">-</span></div>
-      <div class="row"><span class="lbl" style="color:#26a69a99">▼ SL2</span><span class="val" id="sl2">-</span></div>
-    </div>
-    <div class="sec">
-      <div class="sec-title">Risk / Reward</div>
-      <div class="row"><span class="lbl">エントリー</span><span class="val" id="rr-entry">-</span></div>
-      <div class="row"><span class="lbl">ストップ(SL2)</span><span class="val" id="rr-stop">-</span></div>
-      <div class="row"><span class="lbl">目標(Fib1.618)</span><span class="val" id="rr-target">-</span></div>
-      <div class="row"><span class="lbl">R/R 比率</span><span class="val" id="rr-ratio">-</span></div>
-    </div>
-    <div class="sec">
       <div class="sec-title">Fibonacci</div>
       <div id="fib-panel"><span class="flbl">上昇構造の成立時に表示</span></div>
+      <div class="row"><span class="lbl">部分Fib</span><span class="val" id="partial-fib-status">OFF</span></div>
+      <div class="row"><span class="lbl">始点</span><span class="val" id="partial-fib-start">-</span></div>
+      <div class="row"><span class="lbl">終点</span><span class="val" id="partial-fib-end">-</span></div>
     </div>
     <div class="sec">
       <div class="sec-title">MA 最新値</div>
       <div class="row"><span class="lbl ma5c">■ MA5</span><span class="val" id="ma5v">-</span></div>
       <div class="row"><span class="lbl ma20c">■ MA20</span><span class="val" id="ma20v">-</span></div>
       <div class="row"><span class="lbl ma75c">■ MA75</span><span class="val" id="ma75v">-</span></div>
-    </div>
-    <div class="sec">
-      <div class="sec-title">Golden Cross</div>
-      <div id="gc-badge" class="badge gc-off" style="margin-bottom:5px">未検出</div>
-      <div class="row"><span class="lbl">確定日</span><span class="val" id="gc-date">-</span></div>
-      <div class="row"><span class="lbl">総検出回数</span><span class="val" id="gc-count">-</span></div>
     </div>
   </div>
 </div>
@@ -573,58 +557,19 @@ function swFmt(s) {
   return fmt(s.price) + ' (' + s.time.slice(5).replace('-','/') + ')';
 }
 
-function updatePanel(data, ma5, ma20, ma75, gcEvents, swHigh, swLow, structure) {
+function updatePanel(data, ma5, ma20, ma75, partial) {
   // MA最新値
   const lv5 = lastVal(ma5), lv20 = lastVal(ma20), lv75 = lastVal(ma75);
   document.getElementById('ma5v').textContent  = lv5  != null ? fmt(lv5)  : '-';
   document.getElementById('ma20v').textContent = lv20 != null ? fmt(lv20) : '-';
   document.getElementById('ma75v').textContent = lv75 != null ? fmt(lv75) : '-';
 
-  // スイング
-  const sh = swHigh.slice(-2), sl = swLow.slice(-2);
-  document.getElementById('sh1').textContent = swFmt(structure?.sh1 || sh[sh.length-2]);
-  document.getElementById('sh2').textContent = swFmt(structure?.sh2 || sh[sh.length-1]);
-  document.getElementById('sl1').textContent = swFmt(structure?.sl1 || sl[sl.length-2]);
-  document.getElementById('sl2').textContent = swFmt(structure?.sl2 || sl[sl.length-1]);
-
-  // GC
-  const badge  = document.getElementById('gc-badge');
-  const gcDate = document.getElementById('gc-date');
-  const gcCnt  = document.getElementById('gc-count');
-  gcCnt.textContent = gcEvents.length;
-
-  if (gcEvents.length > 0) {
-    const lastGC = gcEvents[gcEvents.length-1];
-    badge.className   = 'badge gc-on';
-    badge.textContent = '✓ GC検出済み';
-    gcDate.textContent = lastGC.time;
-
-  } else {
-    badge.className   = 'badge gc-off';
-    badge.textContent = '未検出';
-    gcDate.textContent = '-';
-  }
-
-  const fp = document.getElementById('fib-panel');
-  const rrEl = document.getElementById('rr-ratio');
-  if (structure) {
-    const entry = data[data.length-1].close;
-    const stop = structure.sl2.price;
-    const fibs = calcFibs(stop,structure.sh2.price);
-    const target = fibs.find(f=>f.level===1.618).price;
-    const risk = entry-stop, reward=target-entry;
-    const rr = risk>0 ? reward/risk : 0;
-    document.getElementById('rr-entry').textContent=fmt(entry);
-    document.getElementById('rr-stop').textContent=fmt(stop);
-    document.getElementById('rr-target').textContent=fmt(target);
-    rrEl.textContent=risk>0 ? rr.toFixed(2)+':1' : '算出不可';
-    rrEl.className='val '+(rr>=2?'rr-g':rr>=1?'rr-y':'rr-r');
-    fp.innerHTML=(structure.provisional?'<div class="badge gc-on" style="margin-bottom:5px">暫定構造</div>':'')+fibs.map(f=>`<div class="frow"><span class="${f.ext?'fext':'flbl'}">${f.label}</span><span class="fval">${fmt(f.price)}</span></div>`).join('');
-  } else {
-    ['rr-entry','rr-stop','rr-target'].forEach(id=>document.getElementById(id).textContent='-');
-    rrEl.textContent='-'; rrEl.className='val';
-    fp.innerHTML='<span class="flbl">上昇構造の成立時に表示</span>';
-  }
+  const start = partial?.start;
+  const end = partial?.end;
+  document.getElementById('partial-fib-start').textContent = start ? `${start.time} / ${fmt(start.price)}` : '-';
+  document.getElementById('partial-fib-end').textContent = end ? `${end.time} / ${fmt(end.price)}` : '-';
+  document.getElementById('partial-fib-status').textContent = !partial?.enabled ? 'OFF' : end ? '表示中' : start ? '終点を選択' : '始点を選択';
+  document.getElementById('fib-panel').innerHTML = partial?.layers?.length ? partial.layers.map(f => `<div class="frow"><span class="flbl">${f.label}</span><span class="fval">${fmt(f.price)} (${signedFmt(f.distance)})</span></div>`).join('') : '<span class="flbl">部分FibをONにして2点を選択</span>';
 }
 
 // =====================================================
@@ -644,16 +589,12 @@ function renderChart(seriesData) {
   if (!seriesData || seriesData.length === 0) {
     document.getElementById('fourier-controls').innerHTML = '<span class="fourier-empty">Fourier: データなし</span>';
     container.innerHTML = '<div class="no-data"><span>📭 データなし</span><small style="color:#6e7681">このレンジはまだ取込済みCSVがありません</small></div>';
-    ['ma5v','ma20v','ma75v','sh1','sh2','sl1','sl2','gc-date','gc-count','rr-entry','rr-stop','rr-target','rr-ratio'].forEach(id => {
+    ['ma5v','ma20v','ma75v','partial-fib-status','partial-fib-start','partial-fib-end'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = '-';
     });
-    document.getElementById('gc-badge').className   = 'badge gc-off';
-    document.getElementById('gc-badge').textContent = '未検出';
-    document.getElementById('gc-count').textContent = '-';
     document.getElementById('fib-panel').innerHTML  = '<span class="flbl">上昇構造の成立時に表示</span>';
-    document.getElementById('fib-local-toggle').checked = false;
-    document.getElementById('fib-local-toggle').disabled = true;
+    document.getElementById('fib-partial-toggle').checked = false;
     document.getElementById('fib-global-toggle').checked = false;
     return;
   }
@@ -722,51 +663,7 @@ function renderChart(seriesData) {
   addLine(ma20, '#42a5f5', 1, 'MA20');
   addLine(ma75, '#ff7043', 2, 'MA75');
 
-  // GC 検出
-  const gcEvents = detectGC(ma5, ma20, ma75);
-
-  // スイング検出
-  const {highs: swHigh, lows: swLow} = detectSwings(seriesData, 5);
-  const structureState = latestBullStructure(seriesData, 5);
-  const confirmedStructure = structureState.confirmed;
-  const provisionalStructure = structureState.provisional;
-  const structure = structureState.active;
-
-  // マーカー
-  const markers = [];
-  gcEvents.forEach(gc => {
-    markers.push({time:gc.cross75Time, position:'belowBar', color:'#ffd700', shape:'arrowUp',   text:'GC①×MA75', size:1});
-    markers.push({time:gc.time,        position:'belowBar', color:'#00e676', shape:'arrowUp',   text:'◎GC②×MA20', size:2});
-  });
-  if (structure) {
-    const suffix=structure.provisional?'?':'';
-    markers.push({time:structure.sl1.time,position:'belowBar',color:'#26a69a',shape:'arrowUp',text:`SL1${suffix}`,size:1});
-    markers.push({time:structure.sh1.time,position:'aboveBar',color:'#ef5350',shape:'arrowDown',text:`SH1${suffix}`,size:1});
-    markers.push({time:structure.sl2.time,position:'belowBar',color:structure.provisional?'#7ee787':'#00e676',shape:'arrowUp',text:`SL2${suffix}`,size:2});
-    markers.push({time:structure.sh2.time,position:'aboveBar',color:structure.provisional?'#7ee787':'#ff5252',shape:'arrowDown',text:`SH2${suffix}`,size:2});
-  }
-  markers.sort((a,b) => a.time<b.time ? -1 : a.time>b.time ? 1 : 0);
-  candle.setMarkers(markers);
-
-  if (provisionalStructure && confirmedStructure) {
-    const oldLeg1=chart.addLineSeries({color:'#bc8cff66',lineWidth:1,lineStyle:2,title:'確定 SL1→SH1',lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false});
-    oldLeg1.setData([{time:confirmedStructure.sl1.time,value:confirmedStructure.sl1.price},{time:confirmedStructure.sh1.time,value:confirmedStructure.sh1.price}]);
-    const oldLeg2=chart.addLineSeries({color:'#ff8b3d66',lineWidth:1,lineStyle:2,title:'確定 SL2→SH2',lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false});
-    oldLeg2.setData([{time:confirmedStructure.sl2.time,value:confirmedStructure.sl2.price},{time:confirmedStructure.sh2.time,value:confirmedStructure.sh2.price}]);
-  }
-  if (structure) {
-    const legColor=structure.provisional?'#7ee787':'#bc8cff';
-    const legStyle=structure.provisional?2:0;
-    const leg1=chart.addLineSeries({color:legColor,lineWidth:3,lineStyle:legStyle,title:structure.provisional?'暫定 SL1→SH1':'SL1→SH1',lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false});
-    leg1.setData([{time:structure.sl1.time,value:structure.sl1.price},{time:structure.sh1.time,value:structure.sh1.price}]);
-    const leg2=chart.addLineSeries({color:structure.provisional?'#56d364':'#ff8b3d',lineWidth:3,lineStyle:legStyle,title:structure.provisional?'暫定 SL2→SH2':'SL2→SH2',lastValueVisible:false,priceLineVisible:false,crosshairMarkerVisible:false});
-    leg2.setData([{time:structure.sl2.time,value:structure.sl2.price},{time:structure.sh2.time,value:structure.sh2.price}]);
-    const entry=seriesData[seriesData.length-1].close;
-    const target=calcFibs(structure.sl2.price,structure.sh2.price).find(f=>f.level===1.618).price;
-    candle.createPriceLine({price:entry,color:'#ffd33d',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'Entry'});
-    candle.createPriceLine({price:structure.sl2.price,color:'#00e676',lineWidth:2,lineStyle:0,axisLabelVisible:true,title:'Stop SL2'});
-    candle.createPriceLine({price:target,color:'#f2cc60',lineWidth:2,lineStyle:2,axisLabelVisible:true,title:'Target 1.618'});
-  }
+  candle.setMarkers([]);
 
   const fibColors=['#d2a8ff','#bc8cff','#a371f7','#8957e5','#6e40c9','#553098','#d2a8ff','#f778ba','#ff7b72'];
   const currentPrice=seriesData[seriesData.length-1].close;
@@ -804,23 +701,46 @@ function renderChart(seriesData) {
     });
     requestAnimationFrame(()=>positionFibLabels(layers));
   };
-  const localFibLayers=structure ? makeFibLayers(calcFibs(structure.sl2.price,structure.sh2.price),structure.sl2.time,'Local Fib') : [];
-  setFibVisibility(localFibLayers,true);
+  let partial = {enabled:false,start:null,end:null,layers:[]};
+  const partialToggle=document.getElementById('fib-partial-toggle');
+  const partialClear=document.getElementById('fib-partial-clear');
+  const partialLayers=[];
+  const rebuildPartial=()=>{
+    partialLayers.splice(0).forEach(layer=>{ try{layer.series.setData([]);}catch(e){} layer.label.remove(); });
+    partial.layers=[];
+    if (partial.start && partial.end) {
+      const low=Math.min(partial.start.price,partial.end.price), high=Math.max(partial.start.price,partial.end.price);
+      const layers=makeFibLayers(calcFibs(low,high),partial.start.time,'Partial Fib');
+      partialLayers.push(...layers); partial.layers=layers; setFibVisibility(layers,true);
+    }
+    updatePanel(seriesData,ma5,ma20,ma75,partial);
+  };
+  partialToggle.onchange=()=>{
+    partial.enabled=partialToggle.checked;
+    setFibVisibility(partialLayers, partial.enabled && !!partial.end);
+    updatePanel(seriesData,ma5,ma20,ma75,partial);
+  };
+  partialClear.onclick=()=>{ partial.start=null; partial.end=null; rebuildPartial(); };
+  chart.subscribeClick(param=>{
+    if (!partial.enabled || !param.point || !param.time) return;
+    const price=candle.coordinateToPrice(param.point.y);
+    if (price==null) return;
+    const point={time:String(param.time),price:Number(price)};
+    if (!partial.start || partial.end) { partial.start=point; partial.end=null; }
+    else partial.end=point;
+    rebuildPartial();
+  });
   const globalLow=Math.min(...seriesData.map(d=>d.low)), globalHigh=Math.max(...seriesData.map(d=>d.high));
   const globalFibLayers=makeFibLayers(calcFibs(globalLow,globalHigh),seriesData[0].time,'All Fib');
   setFibVisibility(globalFibLayers,false);
-  const localToggle=document.getElementById('fib-local-toggle');
   const globalToggle=document.getElementById('fib-global-toggle');
-  document.getElementById('fib-local-label').textContent=structure?.provisional?'暫定 SL2→SH2':'SL2→SH2';
-  localToggle.checked=!!structure; localToggle.disabled=!structure;
   globalToggle.checked=false; globalToggle.disabled=false;
-  localToggle.onchange=()=>setFibVisibility(localFibLayers,localToggle.checked);
   globalToggle.onchange=()=>setFibVisibility(globalFibLayers,globalToggle.checked);
 
-  updatePanel(seriesData, ma5, ma20, ma75, gcEvents, swHigh, swLow, structure);
+  updatePanel(seriesData, ma5, ma20, ma75, partial);
   chart.timeScale().fitContent();
   chart.timeScale().applyOptions({rightOffset:4});
-  const allFibLayers=[...localFibLayers,...globalFibLayers];
+  const allFibLayers=[...partialLayers,...globalFibLayers];
   const refreshFibLabels=()=>requestAnimationFrame(()=>positionFibLabels(allFibLayers));
   chart.timeScale().subscribeVisibleLogicalRangeChange(refreshFibLabels);
   new ResizeObserver(refreshFibLabels).observe(container);
@@ -855,12 +775,8 @@ function selectRange(rid) {
 
   const addSub = (key, label, isFirst) => {
     const t = document.createElement('div');
-    const machineSeries = key==='aggregate' ? null : d.machines[key.replace('m_','')];
-    const structureState = machineSeries ? latestBullStructure(machineSeries,5) : {active:null,provisional:null};
-    const structure = structureState.active;
-    const positionClass = machineSeries ? fibPositionClass(machineSeries,structure) : '';
-    t.className   = 'sub-tab' + (structureState.provisional ? ' provisional' : positionClass ? ' '+positionClass:'') + (isFirst ? ' active':'');
-    t.title = structureState.provisional ? '暫定上昇構造（左右4日スイング、5日確定待ち）' : positionClass==='fib-green' ? 'SH2（0%）を上抜け' : positionClass==='fib-blue' ? '0%〜38.2%' : positionClass==='fib-yellow' ? '38.2%〜61.8%' : positionClass==='fib-red' ? '61.8%〜100%' : structure ? 'SL2（100%）を下抜け：上昇構造失敗' : '';
+    t.className   = 'sub-tab' + (isFirst ? ' active':'');
+    t.title = '';
     t.textContent = label;
     t.dataset.key = key;
     t.addEventListener('click', () => {
@@ -914,8 +830,5 @@ print(f"  ブラウザで開く : {os.path.abspath(OUT_FILE)}")
 print(f"  GitHub Pages  : charts/ohlc_chart.html をリポジトリにプッシュ → GitHub Pages で公開")
 print(f"\n【機能】")
 print(f"  ローソク足 + MA5(黄)/MA20(青)/MA75(橙)")
-print(f"  GC: MA5がMA75→MA20の順にゴールデンクロス → ◎マーカー")
-print(f"  上昇構造: SL1→SH1→SL2→SH2（高値・安値切り上げ）を自動検出")
-print(f"  局所フィボナッチ: 構造成立時に SL2〜SH2 ベースで自動描画")
 print(f"  全期間フィボナッチ: 各系列の High / Low をチェック操作で描画")
-print(f"  R/R: エントリー=最終終値 / ストップ=SL2 / 目標=Fib1.618")
+print(f"  部分フィボナッチ: チャート上で始点・終点を選択して描画")

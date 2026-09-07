@@ -1,11 +1,27 @@
 {
   "store_uid": "c713848",
-  "updated": "2026-08-01",
+  "updated": "2026-09-07",
   "notes": [
     "朝の結果取得と日中監視の対象台。移動・撤去・機種替えがあればこのファイルだけ更新する。",
     "enabled=false にすると一時的に取得対象から外す。"
   ],
   "targets": [
+    {
+      "category": "pachinko",
+      "name": "対象台 008-012",
+      "range": "008-012",
+      "machines": ["0008", "0009", "0010", "0011", "0012"],
+      "active_from": "20260907",
+      "enabled": true
+    },
+    {
+      "category": "pachinko",
+      "name": "対象台 018-019",
+      "range": "018-019",
+      "machines": ["0018", "0019"],
+      "active_from": "20260907",
+      "enabled": true
+    },
     {
       "category": "pachinko",
       "name": "PAわんわんセレブレーションAGBD",
@@ -51,14 +67,16 @@
       "name": "Lミリオンゴッド神々の軌跡",
       "range": "1173-1180",
       "machines": ["1173", "1174", "1175", "1176", "1177", "1178", "1179", "1180"],
-      "enabled": true
+      "enabled": true,
+      "active_until": "20260906"
     },
     {
       "category": "slot",
       "name": "追加台 1015-1018",
       "range": "1015-1018",
       "machines": ["1015", "1016", "1017", "1018"],
-      "enabled": true
+      "enabled": true,
+      "active_until": "20260906"
     }
   ]
 }

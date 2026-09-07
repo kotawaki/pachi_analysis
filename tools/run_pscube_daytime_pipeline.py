@@ -13,12 +13,14 @@ def machine_key(value: str) -> str:
     return text if len(text) >= 4 else text.zfill(4)
 
 
-def enabled_machines() -> list[str]:
+def enabled_machines(processing_date: str | None = None) -> list[str]:
     payload = json.loads((ROOT / "pscube_targets.json").read_text(encoding="utf-8"))
     machines = [
         machine_key(machine)
         for target in payload.get("targets", [])
         if target.get("enabled", True)
+        if (not target.get("active_from") or not processing_date or processing_date >= str(target["active_from"]).replace("-", ""))
+        if (not target.get("active_until") or not processing_date or processing_date <= str(target["active_until"]).replace("-", ""))
         for machine in target.get("machines", [])
     ]
     return list(dict.fromkeys(machines))
@@ -44,7 +46,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     capture_root = args.capture_root.resolve()
-    expected = enabled_machines()
+    expected = enabled_machines(args.date.replace("-", ""))
     html_dir = capture_root / "html"
     available = {
         path.stem.split("_", 1)[1]
