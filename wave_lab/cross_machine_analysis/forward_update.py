@@ -23,6 +23,7 @@ from wave_lab.universe import machines_for_signal_date
 TRACK = Path(__file__).resolve().parent / "tracking"
 SIGNAL_DATE = "2026-08-28"
 TARGET_DATE = "2026-08-29"
+MIN_ANALYSIS_ROWS = 4
 MACHINES = list(machines_for_signal_date("20260828"))
 GROUPS = {
     "g1": ["046", "055", "064", "073"],
@@ -113,8 +114,18 @@ def machine_signal(machine: str, signal_date: str | None = None, target_date: st
     signal_date = signal_date or SIGNAL_DATE
     target_date = target_date or TARGET_DATE
     rows = load_machine_rows(machine, signal_date)
-    if not rows:
-        raise ValueError(f"no OHLC rows for {machine}")
+    if len(rows) < MIN_ANALYSIS_ROWS:
+        return {
+            "signal_date": signal_date, "target_date": target_date, "machine": machine,
+            "group": MACHINE_GROUP.get(machine), "machine_status": "insufficient_history",
+            "history_rows": len(rows), "history_required": MIN_ANALYSIS_ROWS,
+            "analysis_error": "FFT解析には4件以上のOHLC履歴が必要です",
+            "wave_direction_pattern": None, "region": None, "convergence_score": None,
+            "UP_UP_UP": None, "RIGHT": None, "LOW_CONVERGENCE_RIGHT": None,
+            "DOWN_DOWN_DOWN": None, "ALL_3": None, "score": None,
+            "evaluation_status": "not_ready", "actual_bullish": "",
+            "actual_open": "", "actual_high": "", "actual_low": "", "actual_close": "",
+        }
     components, daily, _centered, _comparison = analyze(rows)
     convergence_rows, _threshold = phase_convergence_analysis(daily, components)
     current_daily = daily[-1]
@@ -131,7 +142,9 @@ def machine_signal(machine: str, signal_date: str | None = None, target_date: st
         "signal_date": signal_date,
         "target_date": target_date,
         "machine": machine,
-        "group": MACHINE_GROUP[machine],
+        "group": MACHINE_GROUP.get(machine),
+        "machine_status": "ready", "history_rows": len(rows),
+        "history_required": MIN_ANALYSIS_ROWS, "analysis_error": "",
         "wave_direction_pattern": pattern,
         "region": region,
         "convergence_score": convergence,
@@ -170,26 +183,28 @@ def main() -> int:
 
     machine_fields = [
         "signal_date", "target_date", "machine", "group",
+        "machine_status", "history_rows", "history_required", "analysis_error",
         "wave_direction_pattern", "region", "convergence_score",
         "UP_UP_UP", "RIGHT", "LOW_CONVERGENCE_RIGHT", "DOWN_DOWN_DOWN",
         "ALL_3", "score", "evaluation_status", "actual_bullish",
         "actual_open", "actual_high", "actual_low", "actual_close",
     ]
     machine_path = TRACK / "forward_machine_signal_tracking.csv"
-    new_machine_rows = [{field: row[field] for field in machine_fields} for row in machines]
+    new_machine_rows = [{field: row.get(field, "") for field in machine_fields} for row in machines]
     if args.append and machine_path.exists():
         with machine_path.open(encoding="utf-8-sig", newline="") as handle:
             old = list(csv.DictReader(handle))
         new_machine_rows = [row for row in old if row.get("signal_date") != signal_date] + new_machine_rows
     write_csv(machine_path, new_machine_rows)
 
+    ready_machines = [row for row in machines if row.get("machine_status") == "ready"]
     counts = {
-        "UP_UP_UP_count": sum(row["UP_UP_UP"] for row in machines),
-        "RIGHT_count": sum(row["RIGHT"] for row in machines),
-        "LOW_CONVERGENCE_RIGHT_count": sum(row["LOW_CONVERGENCE_RIGHT"] for row in machines),
-        "ANY_SIGNAL_count": sum(row["score"] > 0 for row in machines),
-        "ALL_3_count": sum(row["ALL_3"] for row in machines),
-        "DOWN_DOWN_DOWN_count": sum(row["DOWN_DOWN_DOWN"] for row in machines),
+        "UP_UP_UP_count": sum(bool(row.get("UP_UP_UP")) for row in ready_machines),
+        "RIGHT_count": sum(bool(row.get("RIGHT")) for row in ready_machines),
+        "LOW_CONVERGENCE_RIGHT_count": sum(bool(row.get("LOW_CONVERGENCE_RIGHT")) for row in ready_machines),
+        "ANY_SIGNAL_count": sum((row.get("score") or 0) > 0 for row in ready_machines),
+        "ALL_3_count": sum(bool(row.get("ALL_3")) for row in ready_machines),
+        "DOWN_DOWN_DOWN_count": sum(bool(row.get("DOWN_DOWN_DOWN")) for row in ready_machines),
     }
     daily = {
         "signal_date": signal_date,
@@ -279,7 +294,9 @@ def main() -> int:
         "groups": len(groups),
         "machine_counts": counts,
         "direction_balance": daily["direction_balance"],
-        "score_distribution": {str(score): sum(row["score"] == score for row in machines) for score in range(4)},
+        "score_distribution": {str(score): sum(row.get("score") == score for row in ready_machines) for score in range(4)},
+        "ready_machines": len(ready_machines),
+        "insufficient_history_machines": [row["machine"] for row in machines if row.get("machine_status") == "insufficient_history"],
         "strong_groups": strong,
         "evaluation_status": "pending",
     }
