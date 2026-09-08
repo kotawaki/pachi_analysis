@@ -1,0 +1,69 @@
+{
+  "signal_date": "20260906",
+  "target_date": "20260907",
+  "previous_business_day": "20260906",
+  "wavelab_source": "C:\\kota\\pachi_analysis\\docs\\wave_lab\\data\\forward\\20260906.json",
+  "group_flow_source": "C:\\kota\\pachi_analysis\\wave_lab\\group_flow\\output\\20260907",
+  "recalculated_wavelab": false,
+  "peak_time": "14:40",
+  "peak_density": {
+    "initial_30m": "11",
+    "continuation_30m": "34",
+    "total_30m": "45"
+  },
+  "top3": {
+    "WaveLab": [
+      "g2",
+      "g4",
+      "g5"
+    ],
+    "Morning": [
+      "g4",
+      "g3",
+      "g5"
+    ],
+    "ActivityStart": [
+      "g4",
+      "g3",
+      "g5"
+    ],
+    "PeakActivity": [
+      "g2",
+      "g9",
+      "g4"
+    ],
+    "PeakDelta": [
+      "g5",
+      "g1",
+      "g9"
+    ],
+    "Final": [
+      "g9",
+      "g7",
+      "g3"
+    ]
+  },
+  "spearman": [
+    {
+      "stage": "morning",
+      "spearman_vs_previous_wavelab": -0.2167
+    },
+    {
+      "stage": "activity_start",
+      "spearman_vs_previous_wavelab": -0.2167
+    },
+    {
+      "stage": "peak_activity",
+      "spearman_vs_previous_wavelab": 0.2167
+    },
+    {
+      "stage": "peak_delta",
+      "spearman_vs_previous_wavelab": 0.0333
+    },
+    {
+      "stage": "final",
+      "spearman_vs_previous_wavelab": -0.1833
+    }
+  ],
+  "exploratory_label": "single-day stage comparison; no formal transition class"
+}
