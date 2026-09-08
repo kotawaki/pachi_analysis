@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 
@@ -33,7 +34,11 @@ class DailyRunnerTest(unittest.TestCase):
         self.assertEqual(add_days("20260906", 1), "20260907")
 
     def test_current_09_validation_has_no_stale_evaluated_pending(self):
-        ok, message = validate_weak_ma("20260906")
+        summary_path = ROOT / "wave_lab/cross_machine_analysis/tracking/wave_weak_ma_summary.json"
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        processed_date = summary.get("processed_signal_date")
+        self.assertIsInstance(processed_date, str)
+        ok, message = validate_weak_ma(processed_date)
         self.assertTrue(ok, message)
 
 
