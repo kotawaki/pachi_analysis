@@ -99,7 +99,7 @@ async function renderForward(){
 }
 const normalizeDate = value => String(value ?? '').replace(/-/g, '').slice(0, 8);
 const displayDate = value => { const d = normalizeDate(value); return d.length === 8 ? `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}` : d; };
-const signalDefinitions = [['UP-UP-UP','UP_UP_UP'],['RIGHT','RIGHT'],['LOW CONV + RIGHT','LOW_CONVERGENCE_RIGHT'],['ALL_2','ALL_2'],['ALL_3','ALL_3'],['DOWN-DOWN-DOWN','DOWN_DOWN_DOWN']];
+const signalDefinitions = [['LATEST_RESULT','__LATEST_RESULT__'],['UP-UP-UP','UP_UP_UP'],['RIGHT','RIGHT'],['LOW CONV + RIGHT','LOW_CONVERGENCE_RIGHT'],['ALL_2','ALL_2'],['ALL_3','ALL_3'],['DOWN-DOWN-DOWN','DOWN_DOWN_DOWN']];
 const exactCombination = row => {
   const up = boolValue(row.UP_UP_UP), right = boolValue(row.RIGHT), low = boolValue(row.LOW_CONVERGENCE_RIGHT);
   if(up && right && low) return 'ALL_3';
@@ -122,14 +122,23 @@ async function renderForward(selectedDate) {
   for(let i=0;i<responses.length;i++) if(responses[i].ok) datasets[dateKeys[i]] = await responses[i].json();
   const currentKey = normalizeDate(selectedDate) || dateKeys[0]; const data = datasets[currentKey] || latest; const machines = data.machine_signals || [];
   const evaluated = String(data.evaluation_status || '').toLowerCase() === 'evaluated';
+  const latestEvaluatedDate = dateKeys.find(date => String(datasets[date]?.evaluation_status || '').toLowerCase() === 'evaluated');
+  const latestEvaluated = latestEvaluatedDate ? datasets[latestEvaluatedDate] : null;
+  const latestEvaluatedHistory = latestEvaluatedDate ? (history.rows || []).find(row => normalizeDate(row.signal_date) === latestEvaluatedDate) : null;
+  const latestCandidateMachine = latestEvaluatedHistory?.candidate && latestEvaluatedHistory.candidate !== '—' ? String(latestEvaluatedHistory.candidate).padStart(3, '0') : '';
+  const latestCandidate = latestCandidateMachine ? (latestEvaluated.machine_signals || []).find(row => String(row.machine).padStart(3, '0') === latestCandidateMachine) : null;
+  const latestActual = latestCandidate ? `${valueOrPending(latestCandidate.actual_open)} / ${valueOrPending(latestCandidate.actual_high)} / ${valueOrPending(latestCandidate.actual_low)} / ${valueOrPending(latestCandidate.actual_close)}` : '—';
+  const latestBullish = latestCandidate ? resultMark(latestCandidate) : '—';
+  const latestAnswer = latestEvaluated && latestEvaluatedHistory ? `<section class="latest-answer"><h3 class="section-title">最新の答え合わせ</h3><div class="summary-grid">${metric('Result Date',displayDate(latestEvaluated.target_date))}${metric('Signal Date',displayDate(latestEvaluated.signal_date))}${metric('Status',String(latestEvaluated.evaluation_status || 'evaluated').toUpperCase())}${metric('Candidate',latestCandidateMachine || 'なし')}${metric('Strong Group',latestEvaluatedHistory.strong_group && latestEvaluatedHistory.strong_group !== '—' ? latestEvaluatedHistory.strong_group : 'なし')}</div><div class="latest-answer-detail"><b>Candidate actual:</b> ${latestActual}　<b>Bullish:</b> ${latestBullish}<br><b>Evaluation:</b> ${latestEvaluated.evaluation?.actual_bullish_count ?? '—'} / ${latestEvaluated.machine_signals?.length ?? '—'} bullish · ${latestEvaluated.evaluation?.actual_bullish_rate == null ? '—' : (latestEvaluated.evaluation.actual_bullish_rate * 100).toFixed(1) + '%'}</div></section>` : '';
   const signalCard = ([label,key]) => {
+    if(key === '__LATEST_RESULT__') return latestAnswer;
     const rows = rowsForSignal(machines,key);
     const hits = rows.filter(row => boolValue(row.actual_bullish)).length;
     const summary = evaluated ? `${hits} / ${rows.length} · ${rows.length ? (hits / rows.length * 100).toFixed(1) : '—'}%` : `${rows.length}台 · PENDING`;
     return `<article><h4>${label}</h4><div class="signal-today">${summary}</div><details><summary>Machines</summary><div class="machine-list">${compactMachineList(rows)}</div></details></article>`;
   };
   const groupRows = (data.group_signals || []).map(row => `<tr class="${row.STRONG_GROUP ? 'strong-row' : ''}"><td>${esc(row.group)}</td><td>${esc(row.group_signal_rank)}</td><td>${Number(row.group_signal_score).toFixed(2)}</td><td>${row.direction_balance > 0 ? '+' : ''}${esc(row.direction_balance)}</td><td>${esc(row.ALL_3_count)}</td><td>${flag(row.A_rank_top3)}</td><td>${flag(row.B_all3_ge1)}</td><td>${flag(row.C_direction_positive)}</td><td>${flag(row.STRONG_GROUP)}</td></tr>`).join('');
-  const historyHtml = dateKeys.map(date => { const row=(history.rows || []).find(item => normalizeDate(item.signal_date)===date) || {}; const selected = date === normalizeDate(data.signal_date); return `<button class="history-row${selected ? ' selected' : ''}" type="button" data-signal-date="${date}"><span>${displayDate(date)} → ${displayDate(row.target_date || datasets[date]?.target_date)}</span><small>${String(row.evaluation_status || datasets[date]?.evaluation_status || 'pending').toUpperCase()}</small></button>`; }).join('');
+  const historyHtml = dateKeys.map(date => { const row=(history.rows || []).find(item => normalizeDate(item.signal_date)===date) || {}; const selected = date === normalizeDate(data.signal_date); return `<button class="history-row${selected ? ' selected' : ''}" type="button" data-signal-date="${date}"><span>Result ${displayDate(row.target_date || datasets[date]?.target_date)} ← Signal ${displayDate(date)}</span><small>${String(row.evaluation_status || datasets[date]?.evaluation_status || 'pending').toUpperCase()}</small></button>`; }).join('');
   const stats = reliability.global_signal_stats || {};
   const reliabilityHtml = [['UP-UP-UP','UP_UP_UP'],['RIGHT','RIGHT'],['LOW CONV + RIGHT','LOW_CONVERGENCE_RIGHT'],['ALL_3','ALL_3'],['DOWN-DOWN-DOWN','DOWN_DOWN_DOWN']].map(([label,key]) => { const stat=stats[key] || {}; return `<div>${label}: ${stat.bullish_hits ?? 0}/${stat.samples ?? 0} · ${stat.bullish_rate == null ? '—' : (stat.bullish_rate*100).toFixed(1)+'%'}</div>`; }).join('');
   const exactHtml = ['ALL_3','ALL_2_UP_RIGHT','ALL_2_UP_LOWCONV_RIGHT','ALL_2_RIGHT_LOWCONV_RIGHT','ALL_2_TOTAL'].map(key => { const stat=(reliability.exact_combination_stats || {})[key] || {}; return `<div>${key}: ${stat.bullish_hits ?? 0}/${stat.samples ?? 0} · ${stat.bullish_rate == null ? '—' : (stat.bullish_rate*100).toFixed(1)+'%'}</div>`; }).join('');
