@@ -18,11 +18,12 @@ import time
 from pathlib import Path
 from typing import Any
 
-from wave_lab.universe import machines_for_signal_date
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from wave_lab.universe import machines_for_signal_date
+
 HOLIDAYS = {"20260827"}
 
 
