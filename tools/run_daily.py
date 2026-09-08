@@ -8,6 +8,7 @@ stage result, and performs the final source-to-web validation.
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime as dt
 import json
 import os
@@ -16,6 +17,8 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
+
+from wave_lab.universe import machines_for_signal_date
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -85,6 +88,110 @@ def load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _business_date(value: str, days: int) -> str:
+    candidate = dt.datetime.strptime(value, "%Y%m%d").date()
+    step = 1 if days >= 0 else -1
+    remaining = abs(days)
+    while remaining:
+        candidate += dt.timedelta(days=step)
+        compact = candidate.strftime("%Y%m%d")
+        if compact not in HOLIDAYS:
+            remaining -= 1
+    return candidate.strftime("%Y%m%d")
+
+
+def _number(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _bool_value(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if value is None or value == "":
+        return None
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1"}:
+            return True
+        if lowered in {"false", "0"}:
+            return False
+    return bool(value)
+
+
+def _load_ohlc(date: str) -> dict[str, dict[str, float]]:
+    path = ROOT / "csv" / "daily_ohlc" / date / f"{date}_daily_ohlc.csv"
+    if not path.exists():
+        return {}
+    result: dict[str, dict[str, float]] = {}
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            values = {key: _number(row.get(key)) for key in ("Open", "High", "Low", "Close")}
+            if all(value is not None for value in values.values()):
+                result[str(int(row.get("Machine", "0"))).zfill(3)] = values  # type: ignore[assignment]
+    return result
+
+
+def validate_wave_forward(date: str) -> tuple[bool, str]:
+    """Validate the previous evaluated Forward and the current locked Forward."""
+    previous = _business_date(date, -1)
+    next_date = _business_date(date, 1)
+    previous_path = ROOT / "docs/wave_lab/data/forward" / f"{previous}.json"
+    current_path = ROOT / "docs/wave_lab/data/forward" / f"{date}.json"
+    previous_forward = load_json(previous_path)
+    current_forward = load_json(current_path)
+    if not previous_forward or not current_forward:
+        return False, "07 Forward JSON missing"
+    if (previous_forward.get("signal_date"), previous_forward.get("target_date")) != (previous, date):
+        return False, "07 previous Forward date mismatch"
+    if str(previous_forward.get("evaluation_status", "")).lower() != "evaluated":
+        return False, "07 previous Forward is not evaluated"
+    if previous_forward.get("future_data_used") is not False:
+        return False, "07 previous Forward future_data_used is not false"
+    expected_source = f"csv/daily_ohlc/{date}/{date}_daily_ohlc.csv"
+    if previous_forward.get("actual_source") != expected_source:
+        return False, "07 previous Forward actual_source mismatch"
+    ohlc = _load_ohlc(date)
+    if not ohlc:
+        return False, "07 canonical OHLC missing"
+    previous_rows = {str(row.get("machine", "")).zfill(3): row for row in previous_forward.get("machine_signals", [])}
+    if set(previous_rows) != set(machines_for_signal_date(previous)):
+        return False, "07 previous machine universe mismatch"
+    for machine, row in previous_rows.items():
+        if str(row.get("evaluation_status", "")).lower() != "evaluated":
+            return False, f"07 previous machine not evaluated: {machine}"
+        actual = {key: _number(row.get(f"actual_{key.lower()}")) for key in ("Open", "High", "Low", "Close")}
+        expected = ohlc.get(machine)
+        if expected is None or any(actual[key] is None or actual[key] != expected[key] for key in actual):
+            return False, f"07 previous actual OHLC mismatch: {machine}"
+        actual_bullish = row.get("actual_bullish")
+        if _bool_value(actual_bullish) is None or _bool_value(actual_bullish) != (expected["Close"] > expected["Open"]):
+            return False, f"07 previous actual bullish mismatch: {machine}"
+    history = load_json(ROOT / "docs/wave_lab/data/forward/history.json")
+    history_row = next((row for row in history.get("rows", []) if row.get("signal_date") == previous and row.get("target_date") == date), None)
+    if not history_row or str(history_row.get("evaluation_status", "")).lower() != "evaluated":
+        return False, "07 previous evaluated record missing from history"
+    index_path = ROOT / "docs/wave_lab/index.html"
+    index_text = index_path.read_text(encoding="utf-8", errors="ignore") if index_path.exists() else ""
+    if "./data/forward/${date}.json" not in index_text:
+        return False, "07 previous Forward is not Web-addressable"
+    if (current_forward.get("signal_date"), current_forward.get("target_date")) != (date, next_date):
+        return False, "07 current Forward date mismatch"
+    if current_forward.get("future_data_used") is not False or current_forward.get("max_input_date") > date:
+        return False, "07 current Forward future-data guard mismatch"
+    current_rows = {str(row.get("machine", "")).zfill(3): row for row in current_forward.get("machine_signals", [])}
+    if set(current_rows) != set(machines_for_signal_date(date)):
+        return False, "07 current machine universe mismatch"
+    for machine, row in current_rows.items():
+        if row.get("machine_status") == "insufficient_history" and str(row.get("evaluation_status", "")).lower() != "not_ready":
+            return False, f"07 insufficient-history status mismatch: {machine}"
+    return True, "07 previous evaluation and current Forward verified"
 
 
 def weak_ma_needs_refresh(date: str) -> bool:
@@ -290,6 +397,9 @@ def main() -> int:
             checks = validate_web_outputs(args.date)
         except Exception as exc:
             checks = {"runner_validation": False, "error": str(exc)}
+        wave_ok, wave_message = validate_wave_forward(args.date)
+        checks["07_wave_lab"] = bool(checks.get("07_wave_lab")) and wave_ok
+        checks["07_detail"] = wave_message
         weak_ok, weak_message = validate_weak_ma(args.date)
         checks["09_wave_weak_ma"] = bool(checks.get("09_wave_weak_ma")) and weak_ok
         checks["09_detail"] = weak_message
@@ -299,9 +409,9 @@ def main() -> int:
         checks["06_detail"] = pachi_message
         checks["08_tug_replay"] = bool(checks.get("08_tug_replay")) and tug_ok
         checks["08_detail"] = tug_message
-        check_values = [value for key, value in checks.items() if key not in {"06_detail", "08_detail", "09_detail", "error"}]
+        check_values = [value for key, value in checks.items() if key not in {"06_detail", "07_detail", "08_detail", "09_detail", "error"}]
         daily_complete = not pachi_failed and all(check_values)
-        stages[-1].update(status="OK" if daily_complete else "ERROR", elapsed_seconds=round(time.perf_counter() - started, 3), error="" if daily_complete else "; ".join(message for message in (pachi_message, tug_message, weak_message) if message))
+        stages[-1].update(status="OK" if daily_complete else "ERROR", elapsed_seconds=round(time.perf_counter() - started, 3), error="" if daily_complete else "; ".join(message for message in (wave_message, pachi_message, tug_message, weak_message) if message))
 
     report = {
         "processing_date": args.date,
