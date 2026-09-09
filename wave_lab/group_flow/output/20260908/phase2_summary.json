@@ -1,0 +1,197 @@
+{
+  "date": "20260908",
+  "machines": 39,
+  "history_files": 39,
+  "status_values": {
+    "初当り": 152,
+    "継続": 376
+  },
+  "initial_definition": "source_status=初当り -> INITIAL",
+  "continuation_definition": "source_status=継続 -> CONTINUATION",
+  "ambiguity": "status is separated exactly as labeled; the label alone does not establish physical causality",
+  "initial_total": 152,
+  "continuation_total": 376,
+  "total_hit_activity": 528,
+  "machines_with_initial": 39,
+  "machines_with_continuation": 38,
+  "timeline": {
+    "start": "09:00",
+    "end": "23:20",
+    "step_minutes": 5,
+    "points": 174,
+    "interpolation": "previous-value hold"
+  },
+  "density_maxima": {
+    "initial": {
+      "5": {
+        "max": 4,
+        "times": [
+          "14:05",
+          "16:05",
+          "16:35",
+          "17:40"
+        ]
+      },
+      "10": {
+        "max": 7,
+        "times": [
+          "16:05",
+          "16:30"
+        ]
+      },
+      "30": {
+        "max": 15,
+        "times": [
+          "16:05",
+          "16:10"
+        ]
+      }
+    },
+    "continuation": {
+      "5": {
+        "max": 11,
+        "times": [
+          "15:35"
+        ]
+      },
+      "10": {
+        "max": 20,
+        "times": [
+          "17:55"
+        ]
+      },
+      "30": {
+        "max": 42,
+        "times": [
+          "16:10",
+          "17:45"
+        ]
+      }
+    },
+    "total": {
+      "5": {
+        "max": 13,
+        "times": [
+          "16:10",
+          "16:35"
+        ]
+      },
+      "10": {
+        "max": 22,
+        "times": [
+          "15:30",
+          "16:05",
+          "16:10",
+          "16:35",
+          "17:50",
+          "17:55"
+        ]
+      },
+      "30": {
+        "max": 57,
+        "times": [
+          "16:10"
+        ]
+      }
+    }
+  },
+  "phase1_high_density_comparison": {
+    "11:00": {
+      "time": "11:00",
+      "minute": 660,
+      "initial_5m": 0,
+      "continuation_5m": 0,
+      "total_5m": 0,
+      "initial_10m": 0,
+      "continuation_10m": 1,
+      "total_10m": 1,
+      "initial_30m": 0,
+      "continuation_30m": 5,
+      "total_30m": 5
+    },
+    "12:30": {
+      "time": "12:30",
+      "minute": 750,
+      "initial_5m": 3,
+      "continuation_5m": 3,
+      "total_5m": 6,
+      "initial_10m": 3,
+      "continuation_10m": 8,
+      "total_10m": 11,
+      "initial_30m": 7,
+      "continuation_30m": 17,
+      "total_30m": 24
+    },
+    "13:30": {
+      "time": "13:30",
+      "minute": 810,
+      "initial_5m": 3,
+      "continuation_5m": 3,
+      "total_5m": 6,
+      "initial_10m": 4,
+      "continuation_10m": 4,
+      "total_10m": 8,
+      "initial_30m": 6,
+      "continuation_30m": 14,
+      "total_30m": 20
+    },
+    "14:00": {
+      "time": "14:00",
+      "minute": 840,
+      "initial_5m": 2,
+      "continuation_5m": 3,
+      "total_5m": 5,
+      "initial_10m": 6,
+      "continuation_10m": 8,
+      "total_10m": 14,
+      "initial_30m": 10,
+      "continuation_30m": 25,
+      "total_30m": 35
+    },
+    "14:30": {
+      "time": "14:30",
+      "minute": 870,
+      "initial_5m": 3,
+      "continuation_5m": 1,
+      "total_5m": 4,
+      "initial_10m": 5,
+      "continuation_10m": 5,
+      "total_10m": 10,
+      "initial_30m": 6,
+      "continuation_30m": 20,
+      "total_30m": 26
+    },
+    "19:00": {
+      "time": "19:00",
+      "minute": 1140,
+      "initial_5m": 0,
+      "continuation_5m": 4,
+      "total_5m": 4,
+      "initial_10m": 1,
+      "continuation_10m": 7,
+      "total_10m": 8,
+      "initial_30m": 4,
+      "continuation_30m": 16,
+      "total_30m": 20
+    }
+  },
+  "phase1_match": {
+    "initial_count": 152,
+    "group_initial_counts": true,
+    "group_final_close": true,
+    "all39_final": 78973
+  },
+  "group_final_close": {
+    "g1": 10455,
+    "g2": -14256,
+    "g3": 25962,
+    "g4": -10109,
+    "g5": 62867,
+    "g6": 20542,
+    "g7": -902,
+    "g8": 3006,
+    "g9": -18592
+  },
+  "all39_final": 78973,
+  "sum_group_equals_all39": true
+}

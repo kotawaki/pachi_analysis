@@ -10,7 +10,8 @@
     "20260904",
     "20260905",
     "20260906",
-    "20260907"
+    "20260907",
+    "20260908"
   ],
   "analyzed_dates": [
     "20260829",
@@ -22,7 +23,8 @@
     "20260904",
     "20260905",
     "20260906",
-    "20260907"
+    "20260907",
+    "20260908"
   ],
   "skipped_dates": [
     {
@@ -31,7 +33,7 @@
       "reason": "previous business-day Wave Lab forward JSON missing; existing transition output missing: transition_group_summary.csv; existing transition output missing: transition_rank_matrix.csv; existing transition output missing: transition_top3_overlap.csv; existing transition output missing: transition_rank_correlation.csv"
     }
   ],
-  "analyzed_day_count": 10,
+  "analyzed_day_count": 11,
   "skipped_day_count": 1,
   "random_top3_baseline": {
     "group_count": 9,
@@ -44,11 +46,11 @@
   },
   "final_overlap_direction_counts": {
     "FINAL_OVERLAP_UP": 4,
-    "FINAL_OVERLAP_SAME": 3,
+    "FINAL_OVERLAP_SAME": 4,
     "FINAL_OVERLAP_DOWN": 3
   },
   "rank1_same_all_stages_days": 0,
-  "rank1_changed_days": 10,
+  "rank1_changed_days": 11,
   "definition_source": "20260829 analyze_transition.py and existing transition artifacts",
   "definition_changed": false,
   "threshold_optimized": false,

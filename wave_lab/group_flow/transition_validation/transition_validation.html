@@ -10,7 +10,8 @@
     &quot;20260904&quot;,
     &quot;20260905&quot;,
     &quot;20260906&quot;,
-    &quot;20260907&quot;
+    &quot;20260907&quot;,
+    &quot;20260908&quot;
   ],
   &quot;analyzed_dates&quot;: [
     &quot;20260829&quot;,
@@ -22,7 +23,8 @@
     &quot;20260904&quot;,
     &quot;20260905&quot;,
     &quot;20260906&quot;,
-    &quot;20260907&quot;
+    &quot;20260907&quot;,
+    &quot;20260908&quot;
   ],
   &quot;skipped_dates&quot;: [
     {
@@ -31,7 +33,7 @@
       &quot;reason&quot;: &quot;previous business-day Wave Lab forward JSON missing; existing transition output missing: transition_group_summary.csv; existing transition output missing: transition_rank_matrix.csv; existing transition output missing: transition_top3_overlap.csv; existing transition output missing: transition_rank_correlation.csv&quot;
     }
   ],
-  &quot;analyzed_day_count&quot;: 10,
+  &quot;analyzed_day_count&quot;: 11,
   &quot;skipped_day_count&quot;: 1,
   &quot;random_top3_baseline&quot;: {
     &quot;group_count&quot;: 9,
@@ -44,13 +46,13 @@
   },
   &quot;final_overlap_direction_counts&quot;: {
     &quot;FINAL_OVERLAP_UP&quot;: 4,
-    &quot;FINAL_OVERLAP_SAME&quot;: 3,
+    &quot;FINAL_OVERLAP_SAME&quot;: 4,
     &quot;FINAL_OVERLAP_DOWN&quot;: 3
   },
   &quot;rank1_same_all_stages_days&quot;: 0,
-  &quot;rank1_changed_days&quot;: 10,
+  &quot;rank1_changed_days&quot;: 11,
   &quot;definition_source&quot;: &quot;20260829 analyze_transition.py and existing transition artifacts&quot;,
   &quot;definition_changed&quot;: false,
   &quot;threshold_optimized&quot;: false,
   &quot;20260829_reference_included&quot;: true
-}</pre><h2>Stage Top3 Overlap</h2><table><tr><th>stage</th><th>days</th><th>mean</th><th>median</th><th>>=1</th><th>>=2</th><th>=3</th></tr><tr><td>Morning</td><td>10</td><td>0.8</td><td>1.0</td><td>0.6</td><td>0.2</td><td>0.0</td></tr><tr><td>Activity Start</td><td>10</td><td>0.8</td><td>1.0</td><td>0.6</td><td>0.2</td><td>0.0</td></tr><tr><td>Peak Activity</td><td>10</td><td>1.6</td><td>2.0</td><td>0.9</td><td>0.6</td><td>0.1</td></tr><tr><td>Peak Delta</td><td>10</td><td>0.9</td><td>1.0</td><td>0.7</td><td>0.2</td><td>0.0</td></tr><tr><td>Final</td><td>10</td><td>0.8</td><td>1.0</td><td>0.7</td><td>0.1</td><td>0.0</td></tr></table><h2>Spearman</h2><table><tr><th>stage</th><th>days</th><th>mean</th><th>median</th><th>positive</th><th>negative</th><th>zero</th></tr><tr><td>Morning</td><td>10</td><td>-0.11</td><td>-0.1333</td><td>3</td><td>7</td><td>0</td></tr><tr><td>Activity Start</td><td>10</td><td>-0.1067</td><td>-0.1333</td><td>3</td><td>6</td><td>1</td></tr><tr><td>Peak Activity</td><td>10</td><td>0.08</td><td>0.0917</td><td>7</td><td>3</td><td>0</td></tr><tr><td>Peak Delta</td><td>10</td><td>-0.05</td><td>-0.0833</td><td>4</td><td>6</td><td>0</td></tr><tr><td>Final</td><td>10</td><td>0.0233</td><td>0.1</td><td>6</td><td>4</td><td>0</td></tr></table><h2>WaveLab Rank → Final Rank</h2><table><tr><th>rank</th><th>samples</th><th>mean final</th><th>median final</th><th>final top3</th></tr><tr><td>1</td><td>10</td><td>5.7</td><td>5.5</td><td>0.1</td></tr><tr><td>2</td><td>10</td><td>4.3</td><td>4.0</td><td>0.4</td></tr><tr><td>3</td><td>10</td><td>5.2</td><td>5.5</td><td>0.3</td></tr><tr><td>4</td><td>10</td><td>5.0</td><td>5.5</td><td>0.3</td></tr><tr><td>5</td><td>10</td><td>4.8</td><td>4.0</td><td>0.4</td></tr><tr><td>6</td><td>10</td><td>4.5</td><td>4.0</td><td>0.4</td></tr><tr><td>7</td><td>10</td><td>4.4</td><td>4.0</td><td>0.5</td></tr><tr><td>8</td><td>10</td><td>5.2</td><td>5.0</td><td>0.4</td></tr><tr><td>9</td><td>10</td><td>5.9</td><td>6.5</td><td>0.2</td></tr></table><h2>Daily Transition</h2><table><tr><th>date</th><th>WaveLab Top3</th><th>Morning</th><th>Peak Activity</th><th>Peak Delta</th><th>Final</th></tr><tr><td>20260829</td><td>g1,g8,g7</td><td>g5,g3,g1</td><td>g3,g1,g4</td><td>g9,g5,g4</td><td>g7,g8,g9</td></tr><tr><td>20260830</td><td>g2,g1,g4</td><td>g6,g7,g3</td><td>g2,g8,g4</td><td>g6,g2,g3</td><td>g4,g3,g7</td></tr><tr><td>20260831</td><td>g3,g1,g2</td><td>g5,g7,g8</td><td>g5,g2,g3</td><td>g2,g9,g1</td><td>g5,g2,g8</td></tr><tr><td>20260901</td><td>g2,g8,g7</td><td>g4,g9,g1</td><td>g9,g3,g2</td><td>g9,g6,g3</td><td>g3,g9,g6</td></tr><tr><td>20260902</td><td>g2,g7,g3</td><td>g2,g1,g4</td><td>g4,g6,g8</td><td>g5,g7,g8</td><td>g7,g8,g6</td></tr><tr><td>20260903</td><td>g3,g1,g2</td><td>g2,g3,g5</td><td>g1,g3,g2</td><td>g7,g1,g4</td><td>g7,g1,g9</td></tr><tr><td>20260904</td><td>g2,g7,g3</td><td>g5,g4,g6</td><td>g2,g5,g3</td><td>g8,g7,g3</td><td>g5,g1,g2</td></tr><tr><td>20260905</td><td>g9,g5,g2</td><td>g7,g2,g3</td><td>g3,g1,g2</td><td>g3,g1,g7</td><td>g3,g7,g5</td></tr><tr><td>20260906</td><td>g6,g9,g3</td><td>g2,g4,g3</td><td>g9,g3,g5</td><td>g1,g8,g9</td><td>g4,g8,g1</td></tr><tr><td>20260907</td><td>g2,g4,g5</td><td>g4,g3,g5</td><td>g2,g9,g4</td><td>g5,g1,g9</td><td>g9,g7,g3</td></tr></table></body></html>
+}</pre><h2>Stage Top3 Overlap</h2><table><tr><th>stage</th><th>days</th><th>mean</th><th>median</th><th>>=1</th><th>>=2</th><th>=3</th></tr><tr><td>Morning</td><td>11</td><td>0.9091</td><td>1</td><td>0.6364</td><td>0.2727</td><td>0.0</td></tr><tr><td>Activity Start</td><td>11</td><td>0.9091</td><td>1</td><td>0.6364</td><td>0.2727</td><td>0.0</td></tr><tr><td>Peak Activity</td><td>11</td><td>1.6364</td><td>2</td><td>0.9091</td><td>0.6364</td><td>0.0909</td></tr><tr><td>Peak Delta</td><td>11</td><td>1.0</td><td>1</td><td>0.7273</td><td>0.2727</td><td>0.0</td></tr><tr><td>Final</td><td>11</td><td>0.9091</td><td>1</td><td>0.7273</td><td>0.1818</td><td>0.0</td></tr></table><h2>Spearman</h2><table><tr><th>stage</th><th>days</th><th>mean</th><th>median</th><th>positive</th><th>negative</th><th>zero</th></tr><tr><td>Morning</td><td>11</td><td>-0.0576</td><td>-0.05</td><td>4</td><td>7</td><td>0</td></tr><tr><td>Activity Start</td><td>11</td><td>-0.0545</td><td>-0.05</td><td>4</td><td>6</td><td>1</td></tr><tr><td>Peak Activity</td><td>11</td><td>0.1424</td><td>0.1167</td><td>8</td><td>3</td><td>0</td></tr><tr><td>Peak Delta</td><td>11</td><td>-0.0303</td><td>-0.0167</td><td>5</td><td>6</td><td>0</td></tr><tr><td>Final</td><td>11</td><td>0.0333</td><td>0.1333</td><td>7</td><td>4</td><td>0</td></tr></table><h2>WaveLab Rank → Final Rank</h2><table><tr><th>rank</th><th>samples</th><th>mean final</th><th>median final</th><th>final top3</th></tr><tr><td>1</td><td>11</td><td>5.3636</td><td>5</td><td>0.1818</td></tr><tr><td>2</td><td>11</td><td>4.6364</td><td>4</td><td>0.3636</td></tr><tr><td>3</td><td>11</td><td>5.0</td><td>5</td><td>0.3636</td></tr><tr><td>4</td><td>11</td><td>5.0909</td><td>6</td><td>0.2727</td></tr><tr><td>5</td><td>11</td><td>5.1818</td><td>4</td><td>0.3636</td></tr><tr><td>6</td><td>11</td><td>4.1818</td><td>4</td><td>0.4545</td></tr><tr><td>7</td><td>11</td><td>4.3636</td><td>4</td><td>0.4545</td></tr><tr><td>8</td><td>11</td><td>5.1818</td><td>5</td><td>0.3636</td></tr><tr><td>9</td><td>11</td><td>6.0</td><td>7</td><td>0.1818</td></tr></table><h2>Daily Transition</h2><table><tr><th>date</th><th>WaveLab Top3</th><th>Morning</th><th>Peak Activity</th><th>Peak Delta</th><th>Final</th></tr><tr><td>20260829</td><td>g1,g8,g7</td><td>g5,g3,g1</td><td>g3,g1,g4</td><td>g9,g5,g4</td><td>g7,g8,g9</td></tr><tr><td>20260830</td><td>g2,g1,g4</td><td>g6,g7,g3</td><td>g2,g8,g4</td><td>g6,g2,g3</td><td>g4,g3,g7</td></tr><tr><td>20260831</td><td>g3,g1,g2</td><td>g5,g7,g8</td><td>g5,g2,g3</td><td>g2,g9,g1</td><td>g5,g2,g8</td></tr><tr><td>20260901</td><td>g2,g8,g7</td><td>g4,g9,g1</td><td>g9,g3,g2</td><td>g9,g6,g3</td><td>g3,g9,g6</td></tr><tr><td>20260902</td><td>g2,g7,g3</td><td>g2,g1,g4</td><td>g4,g6,g8</td><td>g5,g7,g8</td><td>g7,g8,g6</td></tr><tr><td>20260903</td><td>g3,g1,g2</td><td>g2,g3,g5</td><td>g1,g3,g2</td><td>g7,g1,g4</td><td>g7,g1,g9</td></tr><tr><td>20260904</td><td>g2,g7,g3</td><td>g5,g4,g6</td><td>g2,g5,g3</td><td>g8,g7,g3</td><td>g5,g1,g2</td></tr><tr><td>20260905</td><td>g9,g5,g2</td><td>g7,g2,g3</td><td>g3,g1,g2</td><td>g3,g1,g7</td><td>g3,g7,g5</td></tr><tr><td>20260906</td><td>g6,g9,g3</td><td>g2,g4,g3</td><td>g9,g3,g5</td><td>g1,g8,g9</td><td>g4,g8,g1</td></tr><tr><td>20260907</td><td>g2,g4,g5</td><td>g4,g3,g5</td><td>g2,g9,g4</td><td>g5,g1,g9</td><td>g9,g7,g3</td></tr><tr><td>20260908</td><td>g3,g2,g6</td><td>g6,g5,g3</td><td>g2,g7,g6</td><td>g2,g3,g5</td><td>g5,g3,g6</td></tr></table></body></html>
