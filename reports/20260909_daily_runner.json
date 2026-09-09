@@ -1,0 +1,224 @@
+{
+  "processing_date": "20260909",
+  "repo_root": "C:\\kota\\pachi_analysis",
+  "capture_root": "C:\\kota\\pachi_analysis\\data\\local_capture\\20260909\\morning",
+  "stages": [
+    {
+      "name": "01_analyze",
+      "command": [
+        "analyze_pscube.py",
+        "<capture-root>"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 201.839,
+      "error": ""
+    },
+    {
+      "name": "02_canonical_ohlc",
+      "command": [
+        "copy analyze OHLC to csv/daily_ohlc/<date>"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "error": ""
+    },
+    {
+      "name": "03_ohlc_web",
+      "command": [
+        "ohlc_chart.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 49.403,
+      "error": ""
+    },
+    {
+      "name": "04_daily_ingest",
+      "command": [
+        "daily_ingest.py",
+        "--date",
+        "20260909",
+        "--skip-wave-weak-ma"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 5.134,
+      "error": ""
+    },
+    {
+      "name": "05_pachi_agents",
+      "command": [
+        "python",
+        "-m",
+        "pachi_agents.daily_run",
+        "--base-date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 18.038,
+      "error": ""
+    },
+    {
+      "name": "06_propagation",
+      "command": [
+        "propagation_lookup_html.py",
+        "--daytime-date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 59.779,
+      "error": ""
+    },
+    {
+      "name": "07_cycle_daytime",
+      "command": [
+        "cycle_watch.py / cycle_after_hit_analysis.py / intraday_hit_regime_analysis.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1895.757,
+      "error": ""
+    },
+    {
+      "name": "08_combined_signal",
+      "command": [
+        "combined_signal_analysis.py",
+        "--end",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 231.21,
+      "error": ""
+    },
+    {
+      "name": "09_group_ranking",
+      "command": [
+        "group_ranking.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 57.393,
+      "error": ""
+    },
+    {
+      "name": "10_wave_forward",
+      "command": [
+        "forward_evaluate.py / forward_update.py",
+        "20260908",
+        "20260909",
+        "20260910"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 5.245,
+      "error": ""
+    },
+    {
+      "name": "11_signal_reliability",
+      "command": [
+        "export_signal_reliability.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.471,
+      "error": ""
+    },
+    {
+      "name": "12_state_snapshots",
+      "command": [
+        "export_state_snapshots.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 2.861,
+      "error": ""
+    },
+    {
+      "name": "13_group_flow",
+      "command": [
+        "analyze_group_flow.py",
+        "--date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1.811,
+      "error": ""
+    },
+    {
+      "name": "14_transition",
+      "command": [
+        "analyze_transition.py",
+        "--date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.534,
+      "error": ""
+    },
+    {
+      "name": "15_transition_validation",
+      "command": [
+        "transition_validation.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 2.401,
+      "error": ""
+    },
+    {
+      "name": "16_ma_position_research",
+      "command": [
+        "track_ma_position.py",
+        "--max-signal-date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 2.091,
+      "error": ""
+    },
+    {
+      "name": "17_tug_replay",
+      "command": [
+        "export_tug_replay.py",
+        "--date",
+        "20260909",
+        "g1..g9/all"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 12.61,
+      "error": ""
+    },
+    {
+      "name": "18_wave_weak_ma",
+      "command": [
+        "export_wave_weak_ma.py",
+        "--date",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.344,
+      "error": ""
+    },
+    {
+      "name": "final_validation",
+      "command": [
+        "validate_web_outputs",
+        "20260909"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 2553.745,
+      "error": ""
+    }
+  ],
+  "web_validation": {
+    "01_ohlc": true,
+    "02_propagation": true,
+    "03_combined": true,
+    "04_groups": true,
+    "05_cycle": true,
+    "06_pachi_agents": true,
+    "07_wave_lab": true,
+    "08_tug_replay": true,
+    "09_wave_weak_ma": true,
+    "07_detail": "07 previous evaluation and current Forward verified",
+    "09_detail": "09 evaluated actuals and current pending sample verified",
+    "06_detail": "06 prediction/result/reflection source and Web dates verified",
+    "08_detail": "08 g1 final values verified (4 machines)"
+  },
+  "warnings": [],
+  "errors": [],
+  "daily_status": "DAILY COMPLETE",
+  "total_elapsed_seconds": 2553.745
+}
