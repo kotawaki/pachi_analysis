@@ -289,6 +289,8 @@ def analyze(rows: list[dict]) -> tuple[list[dict], list[dict], list[dict], list[
         direction_series(values, component["amplitude"])
         for values, component in zip(all_wave_values, components)
     ]
+    while len(all_directions) < TOP_COMPONENTS:
+        all_directions.append(["falling"] * n)
 
     daily = []
     for index, row in enumerate(rows):
@@ -507,9 +509,10 @@ def quantile(values: list[float], probability: float) -> float:
 
 def phase_convergence_analysis(daily: list[dict], components: list[dict]) -> tuple[list[dict], float]:
     """Calculate exploratory convergence metrics from the existing Phase Space coordinates."""
+    phase_components = components + [{"amplitude": 0.0}] * (TOP_COMPONENTS - len(components))
     result = []
     for row in daily:
-        points = [phase_space_point(row, wave, components[wave - 1]) for wave in (1, 2, 3)]
+        points = [phase_space_point(row, wave, phase_components[wave - 1]) for wave in (1, 2, 3)]
         distances = {
             "distance_long_mid": math.dist(points[0], points[1]),
             "distance_mid_short": math.dist(points[1], points[2]),
