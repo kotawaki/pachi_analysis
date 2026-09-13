@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cycle Watch 20260912</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',Meiryo,sans-serif}
+header,main{max-width:1180px;margin:auto}header{padding:22px 18px 12px}main{padding:0 18px 36px}
+a{color:#58a6ff}h1{margin:0 0 6px;color:#58a6ff;font-size:24px}.meta{color:#8b949e;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.priority,.watch-list{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-top:14px;overflow:auto}.priority h2,.watch-list h2{font-size:18px;margin:0 0 10px;color:#f0f6fc}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #30363d;padding:9px 8px;text-align:left;vertical-align:top}th{color:#8b949e;white-space:nowrap}td:first-child{font-weight:700;color:#3fb950;white-space:nowrap}tr.hit-match{background:#12351f}tr.hit{background:#332909}tr.watch{background:#10263c}b{color:#3fb950}.path{color:#8b949e;font-family:Consolas,monospace;font-size:12px;margin:4px 0 10px;overflow-wrap:anywhere}
+.cmd{background:#010409;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-top:12px;color:#8b949e;font-family:Consolas,monospace;font-size:12px;overflow:auto}
+@media (max-width: 720px){
+  header{padding:14px 12px 6px}main{padding:0 10px 24px}h1{font-size:21px}.meta{font-size:12px}.cmd{font-size:11px;padding:8px 10px}
+  .priority,.watch-list{padding:10px;margin-top:10px;overflow:visible}.priority h2,.watch-list h2{font-size:16px}
+  table,tbody,tr,td{display:block;width:100%}thead{display:none}table{font-size:12px;border-collapse:separate;border-spacing:0}
+  tr{border:1px solid #30363d;border-radius:8px;margin:0 0 10px;padding:8px 10px;background:#0d1117}
+  tr.hit-match{background:#12351f}tr.hit{background:#332909}tr.watch{background:#10263c}
+  tr::before{content:attr(data-title);display:block;color:#3fb950;font-weight:700;font-size:18px;padding-bottom:6px;border-bottom:1px solid #30363d;margin-bottom:4px}
+  td{border-bottom:0;padding:5px 0;display:grid;grid-template-columns:86px minmax(0,1fr);column-gap:8px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}
+  td::before{content:attr(data-label);color:#8b949e;font-weight:600;white-space:nowrap}
+  td:first-child{color:#c9d1d9;font-size:12px;white-space:normal;font-weight:400}
+  td:first-child::before{content:attr(data-label)}
+}
+</style></head><body>
+<header>
+  <a href="cycle_watch_top.html">← Cycle Watch Top</a>
+  <h1>Cycle Watch 20260912</h1>
+  <div class="meta">日足周期で監視対象を絞り、手入力した当たり開始時刻から日中周期hitを判定します。generated 2026-09-12 06:27</div>
+  <div class="meta">スクショ対象フォルダ: <span class="path">C:\kota\BU_Sdrive\2026\09\12\cyclewatch</span></div>
+  <div class="cmd">python cycle_watch.py add 39 1241<br>python cycle_watch.py review 39 --outcome ○ --result "終日+3000" --review "形状通りに伸びた"<br>python cycle_watch.py show --date 20260912</div>
+</header>
+<main>
+<section class="watch-list">
+  <h2>スクショ対象(日足候補・台番順)</h2>
+  <div class="path">リネーム先: C:\kota\BU_Sdrive\2026\09\12\cyclewatch</div>
+  <table>
+    <thead><tr><th>台</th><th>評価</th><th>状態</th><th>日中周期</th><th>期待/中央値</th><th>OCR現在</th><th>形状</th><th>入力</th><th>差分</th><th>次見る時間</th><th>立ち回り</th><th>結果/レビュー</th></tr></thead>
+    <tbody>
+<tr class="watch" data-title="40番">
+  <td data-label="台">40番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">110/80/40分</td>
+  <td data-label="期待/中央値">75.0% / 49.1%<br>+4,992 / +0</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="51番">
+  <td data-label="台">51番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">100/90/60分</td>
+  <td data-label="期待/中央値">73.5% / 42.1%<br>+7,729 / -1,312</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="52番">
+  <td data-label="台">52番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">70/20/130分</td>
+  <td data-label="期待/中央値">68.2% / 32.8%<br>+5,457 / -2,446</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="53番">
+  <td data-label="台">53番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">150/100/80分</td>
+  <td data-label="期待/中央値">69.2% / 34.6%<br>+4,260 / -4,683</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="57番">
+  <td data-label="台">57番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">110/30/60分</td>
+  <td data-label="期待/中央値">66.7% / 35.6%<br>+4,138 / -3,617</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="60番">
+  <td data-label="台">60番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">60/170/130分</td>
+  <td data-label="期待/中央値">78.6% / 48.4%<br>+7,834 / -455</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="64番">
+  <td data-label="台">64番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">30/80/130分</td>
+  <td data-label="期待/中央値">80.8% / 54.1%<br>+9,562 / +345</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="70番">
+  <td data-label="台">70番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">150/50/140分</td>
+  <td data-label="期待/中央値">78.6% / 38.7%<br>+5,539 / -3,213</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="75番">
+  <td data-label="台">75番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">80/70/20分</td>
+  <td data-label="期待/中央値">70.4% / 34.4%<br>+3,621 / -4,314</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="76番">
+  <td data-label="台">76番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">30/100/180分</td>
+  <td data-label="期待/中央値">64.0% / 34.8%<br>+2,414 / -4,444</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="77番">
+  <td data-label="台">77番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">180/60/110分</td>
+  <td data-label="期待/中央値">71.4% / 36.6%<br>+6,183 / -4,122</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="122番">
+  <td data-label="台">122番</td>
+  <td data-label="評価">B</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">60/80/180分</td>
+  <td data-label="期待/中央値">62.5% / 20.0%<br>+3,741 / -5,354</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr>
+<tr class="watch" data-title="149番">
+  <td data-label="台">149番</td>
+  <td data-label="評価">A</td>
+  <td data-label="状態">日足一致</td>
+  <td data-label="日中周期">90/60/30分</td>
+  <td data-label="期待/中央値">83.3% / 32.9%<br>+8,276 / -3,454</td>
+  <td data-label="OCR現在">未OCR</td>
+  <td data-label="形状">未OCR<br>形状未判定</td>
+  <td data-label="入力">未入力</td>
+  <td data-label="差分">当たり2回目から判定</td>
+  <td data-label="次見る時間">次回当たり待ち</td>
+  <td data-label="立ち回り">日中hit待ち。初当たり時刻を追加して判定。</td>
+  <td data-label="結果/レビュー">-</td>
+</tr></tbody>
+  </table>
+</section></main>
+</body></html>
