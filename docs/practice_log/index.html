@@ -15,7 +15,7 @@
 </main>
 <div id="editModal" class="modal hidden"><div><h2>ログを訂正</h2><label>回転数<input id="editSpins" inputmode="numeric" type="number" min="0"></label><label style="margin-top:8px">アクション<select id="editName"></select></label><div class="row" style="margin-top:10px"><input id="editJitan" type="checkbox"><label for="editJitan">時短中</label></div><label style="margin-top:8px">メモ<input id="editMemo" maxlength="80"></label><div class="modal-actions"><button id="editCancel" class="muted">キャンセル</button><button id="editSave" class="primary">保存</button></div></div></div>
 <script>
-const ACTIONS=['チャンス目','ブーン','SIGMA目','チャンス目1','チャンス目2','チャンス目3','リーチチャンス目','339','441','774','枠外999','枠外ハズレ','初当たり'];let session=null,editing=null;const $=id=>document.getElementById(id);const localDate=()=>new Date().toLocaleDateString('sv-SE');
+const ACTIONS=['チャンス目','ブーン','SIGMA目','チャンス目1','チャンス目2','チャンス目3','リーチチャンス目','339','441','774','枠外999','枠外ハズレ','初当たり'];let session=null,editing=null;const $=id=>document.getElementById(id);function localDate(){const d=new Date(),pad=n=>('0'+n).slice(-2);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 async function api(path,opt={}){const r=await fetch(path,{headers:{'Content-Type':'application/json'},...opt});const j=await r.json();if(!r.ok)throw Error(j.error||'保存に失敗しました');return j}
 function status(id,t,bad=false){$(id).textContent=t;$(id).className='status'+(bad?' error':'')}
 function show(s){session=s;$('setup').classList.add('hidden');$('active').classList.remove('hidden');$('activeDate').textContent=s.date;$('activeMachine').textContent=s.machine+'番台・実戦中';localStorage.setItem('practice_log_session',s.session_id);render()}
