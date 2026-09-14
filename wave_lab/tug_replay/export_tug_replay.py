@@ -52,10 +52,18 @@ def load_canonical(date:str):
 
 def export(date:str,group:str,state_date:str|None=None):
     machines=GROUPS[group]; states=load_state(state_date or date); canonical=load_canonical(date)
-    tracks=[]; finals=[]; common=[]
+    tracks=[]; finals=[]; common=[]; ready_machines=[]; skipped_machines=[]
     for m in machines:
         path=CAPTURE/date/"morning"/"svg"/f"{m}.svg"
-        axes,points=build_axes_and_points_from_svg(path,date); mapper,labels=time_mapper(path,axes)
+        try:
+            axes,points=build_axes_and_points_from_svg(path,date); mapper,labels=time_mapper(path,axes)
+        except (FileNotFoundError, ValueError) as error:
+            reason=str(error)
+            if isinstance(error, FileNotFoundError) or reason in {"insufficient value axis labels","insufficient time axis labels","SVG time labels are insufficient","chart points not found"}:
+                skipped_machines.append({"machine":m[-3:],"status":"skipped","reason":"empty_or_invalid_svg","detail":reason})
+                continue
+            raise
+        ready_machines.append(m)
         source=[]
         for x,y in points:
             source.append({"minute":max(0,round(mapper(x))),"value":analyze.px_to_val(y,axes),"x_px":x,"y_px":y})
@@ -80,20 +88,22 @@ def export(date:str,group:str,state_date:str|None=None):
             while j+1<len(source) and source[j+1]["minute"]<=minute: j+=1; current=source[j]["value"]
             normalized.append({"time":f"{minute//60:02d}:{minute%60:02d}","minute":minute,"value":current})
         track["values"]=normalized
-    lookup={m:{v["minute"]:v["value"] for v in x["values"]} for m,x in zip(machines,tracks)}
+    if not ready_machines:
+        raise RuntimeError(f"no usable SVG data for {group} on {date}")
+    lookup={m:{v["minute"]:v["value"] for v in x["values"]} for m,x in zip(ready_machines,tracks)}
     # All machine series now share the same timeline; last point may be the SVG endpoint.
     total=[]
     for minute in timeline:
-        total.append({"time":f"{minute//60:02d}:{minute%60:02d}","minute":minute,"value":sum(lookup[m].get(minute,0) for m in machines)})
-    obj={"date":date,"group":group,"machines":tracks,"time_range":{"start":min(t["minute"] for t in total),"end":max(t["minute"] for t in total),"start_time":total[0]["time"],"end_time":total[-1]["time"],"step_minutes":5,"interpolation":"previous-value hold (causal; no future value is used for an earlier point)"},"time_points":[{"time":t["time"],"minute":t["minute"]} for t in total],"group_total":total,"events":[],"validation":{"final_values":finals,"source":"SVG path coordinates via existing analyze_pscube.py + analyze.py px_to_val","canonical_ohlc":str(ROOT/"csv"/"daily_ohlc"/date/f"{date}_daily_ohlc.csv")}}
+        total.append({"time":f"{minute//60:02d}:{minute%60:02d}","minute":minute,"value":sum(lookup[m].get(minute,0) for m in ready_machines)})
+    obj={"date":date,"group":group,"machines":tracks,"skipped_machines":skipped_machines,"time_range":{"start":min(t["minute"] for t in total),"end":max(t["minute"] for t in total),"start_time":total[0]["time"],"end_time":total[-1]["time"],"step_minutes":5,"interpolation":"previous-value hold (causal; no future value is used for an earlier point)"},"time_points":[{"time":t["time"],"minute":t["minute"]} for t in total],"group_total":total,"events":[],"validation":{"final_values":finals,"source":"SVG path coordinates via existing analyze_pscube.py + analyze.py px_to_val","canonical_ohlc":str(ROOT/"csv"/"daily_ohlc"/date/f"{date}_daily_ohlc.csv")}}
     dest=OUT/date;dest.mkdir(parents=True,exist_ok=True);(dest/f"{group}.json").write_text(json.dumps(obj,ensure_ascii=False,indent=2),encoding="utf-8")
     index=OUT/"index.json"
     existing=json.loads(index.read_text(encoding="utf-8")) if index.exists() else {"datasets":[]}
     datasets=[d for d in existing.get("datasets",[]) if not (d.get("date")==date and d.get("group")==group)]
-    datasets.append({"date":date,"group":group,"path":f"data/{date}/{group}.json","machines":[m[-3:] for m in machines]})
+    datasets.append({"date":date,"group":group,"path":f"data/{date}/{group}.json","machines":[m[-3:] for m in ready_machines],"skipped_machines":skipped_machines})
     datasets.sort(key=lambda d:(d.get("date", ""), d.get("group", "")))
     index.write_text(json.dumps({"datasets":datasets},ensure_ascii=False,indent=2),encoding="utf-8")
-    print(json.dumps({"date":date,"group":group,"machines":[m[-3:] for m in machines],"points":len(total),"final_values":finals},ensure_ascii=False,indent=2))
+    print(json.dumps({"date":date,"group":group,"machines":[m[-3:] for m in ready_machines],"skipped_machines":skipped_machines,"points":len(total),"final_values":finals},ensure_ascii=False,indent=2))
 
 def export_all(date:str):
     """Build the all-group view from the already-exported group totals."""

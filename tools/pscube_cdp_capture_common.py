@@ -557,6 +557,8 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
         directory.mkdir(parents=True, exist_ok=True)
     result.update(validate_machine(page, machine))
     result.update({"url": page.url, "title": page.title(), "challenge": is_challenge(page), "selected_ymd": page.locator("#YMD-ul li.selected").get_attribute("data-ymd") if page.locator("#YMD-ul li.selected").count() else None})
+    if result.get("selected_ymd") != date:
+        result["missing_items"].append("selected_date_mismatch")
     if result["challenge"]:
         raise ChallengeDetected("Cloudflare challenge detected")
     if is_rate_limited(page):
@@ -599,8 +601,11 @@ def capture_today(page: Any, machine: str, date: str, out: Path, include_png: bo
     result["svg_xml"] = svg_info["xml"]
     result["svg_bytes"] = svg_info["bytes"]
     result["svg_sha256"] = svg_info["sha256"]
+    result["svg_placeholder"] = is_placeholder_svg(svg_info)
     if not svg_info["bytes"]:
         result["missing_items"].append("svg")
+    elif result["svg_placeholder"]:
+        result["missing_items"].append("svg_empty_or_invalid")
 
     rows, history_meta = extract_history(page, expand_more=True, abort_checker=abort_checker, rate_limit_checker=rate_limit_checker)
     history_path = history_dir / f"{machine}_history.csv"

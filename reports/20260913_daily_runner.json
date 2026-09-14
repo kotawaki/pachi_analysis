@@ -1,0 +1,224 @@
+{
+  "processing_date": "20260913",
+  "repo_root": "C:\\kota\\pachi_analysis",
+  "stages": [
+    {
+      "name": "01_analyze",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "analyze_pscube.py",
+        "<capture-root>"
+      ],
+      "error": ""
+    },
+    {
+      "name": "02_canonical_ohlc",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "copy analyze OHLC to csv/daily_ohlc/<date>"
+      ],
+      "error": ""
+    },
+    {
+      "name": "03_ohlc_web",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "ohlc_chart.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "04_daily_ingest",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "daily_ingest.py",
+        "--date",
+        "20260913",
+        "--skip-wave-weak-ma"
+      ],
+      "error": ""
+    },
+    {
+      "name": "05_pachi_agents",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "python",
+        "-m",
+        "pachi_agents.daily_run",
+        "--base-date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "06_propagation",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "propagation_lookup_html.py",
+        "--daytime-date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "07_cycle_daytime",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "cycle_watch.py / cycle_after_hit_analysis.py / intraday_hit_regime_analysis.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "08_combined_signal",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "combined_signal_analysis.py",
+        "--end",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "09_group_ranking",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "group_ranking.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "10_wave_forward",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "forward_evaluate.py / forward_update.py",
+        "20260912",
+        "20260913",
+        "20260914"
+      ],
+      "error": ""
+    },
+    {
+      "name": "11_signal_reliability",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "export_signal_reliability.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "12_state_snapshots",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "export_state_snapshots.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "13_group_flow",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "analyze_group_flow.py",
+        "--date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "14_transition",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "analyze_transition.py",
+        "--date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "15_transition_validation",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "transition_validation.py"
+      ],
+      "error": ""
+    },
+    {
+      "name": "16_ma_position_research",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "track_ma_position.py",
+        "--max-signal-date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "17_tug_replay",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "export_tug_replay.py",
+        "--date",
+        "20260913",
+        "g1..g9/all"
+      ],
+      "error": ""
+    },
+    {
+      "name": "18_wave_weak_ma",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "export_wave_weak_ma.py / export_wave_weak_ma_web.py",
+        "--date",
+        "20260913"
+      ],
+      "error": ""
+    },
+    {
+      "name": "final_validation",
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "command": [
+        "validate_web_outputs",
+        "20260913"
+      ],
+      "error": ""
+    }
+  ],
+  "web_validation": {
+    "01_ohlc": true,
+    "02_propagation": true,
+    "03_combined": true,
+    "04_groups": true,
+    "05_cycle": true,
+    "06_pachi_agents": true,
+    "07_wave_lab": true,
+    "08_tug_replay": true,
+    "09_wave_weak_ma": true,
+    "07_detail": "07 previous evaluation and current Forward verified",
+    "08_detail": "08 g1 final values verified (4 machines)",
+    "09_detail": "09 evaluated actuals and current pending sample verified",
+    "06_detail": "06 prediction/result/reflection source and Web dates verified"
+  },
+  "warnings": [],
+  "errors": [],
+  "daily_status": "DAILY COMPLETE",
+  "total_elapsed_seconds": 0,
+  "resume_note": "Stages after 08_tug_replay_g5 were resumed individually; prior completed stages were not rerun."
+}
