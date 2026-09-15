@@ -9,6 +9,7 @@ from tools.run_daily import (
     add_days,
     daily_command,
     planned_stages,
+    validate_public_web_outputs,
     validate_wave_forward,
     validate_date,
     validate_weak_ma,
@@ -43,6 +44,24 @@ class DailyRunnerTest(unittest.TestCase):
         self.assertIsInstance(processed_date, str)
         ok, message = validate_weak_ma(processed_date)
         self.assertTrue(ok, message)
+
+    def test_public_output_check_20260914(self):
+        ok, detail = validate_public_web_outputs("20260914")
+        self.assertTrue(ok, detail)
+        self.assertEqual(detail["checks"]["05_cycle_public"]["latest_date"], "20260914")
+        self.assertEqual(detail["checks"]["07_wave_public"]["current"], "20260914->20260915")
+
+    def test_public_output_missing_fixture_is_incomplete(self):
+        original_root = daily_runner.ROOT
+        with tempfile.TemporaryDirectory() as temporary:
+            daily_runner.ROOT = Path(temporary)
+            try:
+                ok, detail = validate_public_web_outputs("20260914")
+                self.assertFalse(ok)
+                self.assertEqual(detail["checks"]["01_ohlc_public"]["status"], "INCOMPLETE")
+                self.assertEqual(detail["checks"]["05_cycle_public"]["status"], "INCOMPLETE")
+            finally:
+                daily_runner.ROOT = original_root
 
     def test_wave_forward_validation_previous_current_and_failures(self):
         with tempfile.TemporaryDirectory() as temporary:

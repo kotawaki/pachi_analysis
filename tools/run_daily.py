@@ -12,6 +12,7 @@ import csv
 import datetime as dt
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -89,6 +90,176 @@ def load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _embedded_json(path: Path, name: str) -> Any:
+    text = path.read_text(encoding="utf-8", errors="ignore") if path.exists() else ""
+    match = re.search(rf"const {name}\s*=\s*(\{{.*?\}});", text, re.S)
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return None
+
+
+def _json_contains_date(value: Any, date: str) -> bool:
+    iso = f"{date[:4]}-{date[4:6]}-{date[6:]}"
+    if isinstance(value, str):
+        return value == date or value == iso
+    if isinstance(value, dict):
+        return any(_json_contains_date(item, date) for item in value.values())
+    if isinstance(value, list):
+        return any(_json_contains_date(item, date) for item in value)
+    return False
+
+
+def validate_public_web_outputs(date: str) -> tuple[bool, dict[str, Any]]:
+    """Validate the files actually read by the published 01-09 pages."""
+    previous = _business_date(date, -1)
+    next_date = _business_date(date, 1)
+    required_files: list[str] = []
+    checks: dict[str, Any] = {}
+    warnings: list[str] = []
+
+    def required(path: Path) -> bool:
+        required_files.append(str(path.relative_to(ROOT)).replace("\\", "/"))
+        return path.exists()
+
+    print("========================================")
+    print(" PUBLIC WEB OUTPUT CHECK")
+    print(f" processing_date={date}")
+    print("========================================")
+
+    ohlc_path = ROOT / "docs/ohlc.html"
+    ohlc = _embedded_json(ohlc_path, "ALL_DATA") if required(ohlc_path) else None
+    ohlc_ok = bool(ohlc and _json_contains_date(ohlc, date))
+    checks["01_ohlc_public"] = {"latest_date": date if ohlc_ok else None, "expected": date, "status": "OK" if ohlc_ok else "INCOMPLETE"}
+
+    propagation_path = ROOT / "docs/propagation_lookup.html"
+    propagation = _embedded_json(propagation_path, "DATA") if required(propagation_path) else None
+    propagation_latest = propagation.get("meta", {}).get("to") if isinstance(propagation, dict) else None
+    propagation_ok = propagation_latest == date
+    checks["02_propagation_public"] = {"latest_date": propagation_latest, "expected": date, "status": "OK" if propagation_ok else "INCOMPLETE"}
+
+    combined_path = ROOT / "docs/combined_signal_analysis.html"
+    combined_text = combined_path.read_text(encoding="utf-8", errors="ignore") if required(combined_path) else ""
+    combined_ok = date in combined_text
+    checks["03_combined_public"] = {"latest_date": date if combined_ok else None, "expected": date, "status": "OK" if combined_ok else "INCOMPLETE"}
+
+    groups_path = ROOT / "docs/groups.html"
+    groups = _embedded_json(groups_path, "DATA") if required(groups_path) else None
+    iso = f"{date[:4]}-{date[4:6]}-{date[6:]}"
+    groups_ok = isinstance(groups, dict) and iso in groups.get("dates", [])
+    checks["04_groups_public"] = {"latest_date": date if groups_ok else None, "expected": date, "status": "OK" if groups_ok else "INCOMPLETE"}
+
+    cycle_path = ROOT / "docs/data/cycle_watch_config.json"
+    cycle = load_json(cycle_path) if required(cycle_path) else {}
+    cycle_latest = cycle.get("latest_data_date")
+    cycle_ok = cycle_latest == date
+    checks["05_cycle_public"] = {"latest_date": cycle_latest, "expected": date, "status": "OK" if cycle_ok else "INCOMPLETE"}
+
+    latest_prediction_path = ROOT / "docs/pachi_agents/data/latest_prediction.json"
+    pachi_history_path = ROOT / "docs/pachi_agents/data/history.json"
+    pachi_experience_path = ROOT / "docs/pachi_agents/data/experience.json"
+    latest_result_path = ROOT / "docs/pachi_agents/data/latest_result.json"
+    latest_reflection_path = ROOT / "docs/pachi_agents/data/latest_reflection.json"
+    for path in (latest_prediction_path, pachi_history_path, pachi_experience_path, latest_result_path, latest_reflection_path):
+        required(path)
+    latest_prediction = load_json(latest_prediction_path)
+    pachi_history = json.loads(pachi_history_path.read_text(encoding="utf-8")) if pachi_history_path.exists() else []
+    pachi_experience = load_json(pachi_experience_path)
+    pachi_next_ok = (
+        latest_prediction.get("prediction_date") == next_date
+        and latest_prediction.get("cutoff_date") == date
+        and latest_prediction.get("status") == "locked"
+    )
+    pachi_entry = next((row for row in pachi_history if row.get("prediction_date") == date), None) if isinstance(pachi_history, list) else None
+    pachi_next_entry = next((row for row in pachi_history if row.get("prediction_date") == next_date), None) if isinstance(pachi_history, list) else None
+    pachi_history_ok = bool(pachi_entry and pachi_entry.get("result") and pachi_entry.get("reflection") and pachi_next_entry)
+    pachi_experience_ok = date in pachi_experience.get("processed_prediction_dates", []) and date in pachi_experience.get("evaluated_result_dates", [])
+    latest_result = load_json(latest_result_path)
+    latest_reflection = load_json(latest_reflection_path)
+    latest_canonical_ok = all(
+        payload is None or payload.get("prediction_date") == date
+        for payload in (latest_result, latest_reflection)
+    )
+    pachi_ok = pachi_next_ok and pachi_history_ok and pachi_experience_ok and latest_canonical_ok
+    checks["06_pachi_public"] = {
+        "prediction_date": latest_prediction.get("prediction_date"),
+        "cutoff_date": latest_prediction.get("cutoff_date"),
+        "status": "OK" if pachi_ok else "INCOMPLETE",
+    }
+
+    forward_dir = ROOT / "docs/wave_lab/data/forward"
+    previous_path = forward_dir / f"{previous}.json"
+    current_path = forward_dir / f"{date}.json"
+    history_path = forward_dir / "history.json"
+    latest_path = forward_dir / "latest.json"
+    reliability_path = forward_dir / "signal_reliability.json"
+    for path in (previous_path, current_path, history_path, latest_path, reliability_path):
+        required(path)
+    previous_forward = load_json(previous_path)
+    current_forward = load_json(current_path)
+    forward_history = load_json(history_path)
+    latest_forward = load_json(latest_path)
+    rows = forward_history.get("rows", [])
+    previous_history_ok = any(row.get("signal_date") == previous and row.get("target_date") == date and str(row.get("evaluation_status", "")).lower() == "evaluated" for row in rows)
+    current_history_ok = any(row.get("signal_date") == date and row.get("target_date") == next_date and str(row.get("evaluation_status", "")).lower() == "pending" for row in rows)
+    wave_ok = (
+        previous_forward.get("signal_date") == previous
+        and previous_forward.get("target_date") == date
+        and str(previous_forward.get("evaluation_status", "")).lower() == "evaluated"
+        and current_forward.get("signal_date") == date
+        and current_forward.get("target_date") == next_date
+        and str(current_forward.get("evaluation_status", "")).lower() == "pending"
+        and latest_forward.get("signal_date") == date
+        and latest_forward.get("target_date") == next_date
+        and str(latest_forward.get("evaluation_status", "")).lower() == "pending"
+        and previous_history_ok
+        and current_history_ok
+        and current_forward.get("future_data_used") is False
+        and latest_forward.get("future_data_used") is False
+    )
+    checks["07_wave_public"] = {"previous": f"{previous}->{date}", "current": f"{date}->{next_date}", "status": "OK" if wave_ok else "INCOMPLETE"}
+
+    tug_index_path = ROOT / "docs/wave_lab/tug_replay/data/index.json"
+    tug_index = load_json(tug_index_path) if required(tug_index_path) else {}
+    tug_rows = [row for row in tug_index.get("datasets", []) if row.get("date") == date]
+    tug_groups = {row.get("group") for row in tug_rows}
+    expected_groups = {*(f"g{i}" for i in range(1, 10)), "all"}
+    tug_ok = tug_groups >= expected_groups
+    for group in sorted(expected_groups):
+        path = ROOT / "docs/wave_lab/tug_replay/data" / date / f"{group}.json"
+        required(path)
+        if not path.exists() or not load_json(path):
+            tug_ok = False
+    skipped = [row for row in tug_rows if row.get("skipped_machines")]
+    if skipped:
+        warnings.append("08 skipped_machines=" + ",".join(sorted({item.get("machine", "?") for row in skipped for item in row.get("skipped_machines", [])})))
+    checks["08_tug_public"] = {"latest_date": date if tug_ok else None, "groups": sorted(tug_groups), "skipped_machines": skipped, "status": "OK" if tug_ok else "INCOMPLETE"}
+
+    weak_html_path = ROOT / "docs/wave_weak_ma/index.html"
+    weak_summary_path = ROOT / "wave_lab/cross_machine_analysis/tracking/wave_weak_ma_summary.json"
+    weak_html = weak_html_path.read_text(encoding="utf-8", errors="ignore") if required(weak_html_path) else ""
+    weak_summary = load_json(weak_summary_path) if required(weak_summary_path) else {}
+    weak_ok = (
+        weak_summary.get("processed_signal_date") == date
+        and weak_summary.get("prediction_use") is False
+        and date in weak_html
+        and next_date in weak_html
+    )
+    checks["09_weak_ma_public"] = {"processed_signal_date": weak_summary.get("processed_signal_date"), "pending_target": next_date if next_date in weak_html else None, "status": "OK" if weak_ok else "INCOMPLETE"}
+
+    for key, value in checks.items():
+        if isinstance(value, dict):
+            print(f"{key}: {value.get('status', 'INFO')}")
+    print("PUBLIC_COMMIT_REQUIRED_FILES:")
+    for path in required_files:
+        print(path)
+    ok = all(value.get("status") == "OK" for value in checks.values() if isinstance(value, dict) and "status" in value)
+    print(f"PUBLIC_OUTPUT_STATUS={'ALL READY' if ok else 'INCOMPLETE'}")
+    return ok, {"checks": checks, "required_files": required_files, "warnings": warnings}
 
 
 def _business_date(value: str, days: int) -> str:
@@ -365,6 +536,8 @@ def main() -> int:
 
     started = time.perf_counter()
     stages = planned_stages(args.date)
+    warnings: list[str] = []
+    public_detail: dict[str, Any] = {}
     code, output, elapsed = run_command(command)
     child_summary = load_json(capture_root / "pipeline_summary.json")
     child_elapsed = child_summary.get("elapsed_seconds", {})
@@ -411,8 +584,15 @@ def main() -> int:
         checks["08_tug_replay"] = bool(checks.get("08_tug_replay")) and tug_ok
         checks["08_detail"] = tug_message
         check_values = [value for key, value in checks.items() if key not in {"06_detail", "07_detail", "08_detail", "09_detail", "error"}]
-        daily_complete = not pachi_failed and all(check_values)
-        stages[-1].update(status="OK" if daily_complete else "ERROR", elapsed_seconds=round(time.perf_counter() - started, 3), error="" if daily_complete else "; ".join(message for message in (wave_message, pachi_message, tug_message, weak_message) if message))
+        public_ok, public_detail = validate_public_web_outputs(args.date)
+        checks["public_output_status"] = "ALL READY" if public_ok else "INCOMPLETE"
+        checks["public_output_detail"] = public_detail
+        warnings = list(public_detail.get("warnings", []))
+        daily_complete = not pachi_failed and all(check_values) and public_ok
+        failure_messages = [message for message in (wave_message, pachi_message, tug_message, weak_message) if message]
+        if not public_ok:
+            failure_messages.append("PUBLIC_OUTPUT_INCOMPLETE")
+        stages[-1].update(status="OK" if daily_complete else "ERROR", elapsed_seconds=round(time.perf_counter() - started, 3), error="" if daily_complete else "; ".join(failure_messages))
 
     report = {
         "processing_date": args.date,
@@ -420,7 +600,8 @@ def main() -> int:
         "capture_root": str(capture_root),
         "stages": stages,
         "web_validation": checks if code == 0 else {},
-        "warnings": [],
+        "public_output_status": checks.get("public_output_status", "NOT RUN") if code == 0 else "NOT RUN",
+        "warnings": warnings,
         "errors": [] if code == 0 else [output[-2000:]],
         "daily_status": "DAILY COMPLETE" if daily_complete else "DAILY INCOMPLETE",
         "total_elapsed_seconds": round(time.perf_counter() - started, 3),
