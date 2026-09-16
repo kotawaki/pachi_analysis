@@ -1,0 +1,55 @@
+{
+  "signal_date": "20260916",
+  "target_date": "20260917",
+  "mode": "forward/prospective",
+  "max_input_date": "20260916",
+  "future_data_used": false,
+  "machines": 41,
+  "groups": 9,
+  "machine_counts": {
+    "UP_UP_UP_count": 4,
+    "RIGHT_count": 10,
+    "LOW_CONVERGENCE_RIGHT_count": 8,
+    "ANY_SIGNAL_count": 12,
+    "ALL_3_count": 2,
+    "DOWN_DOWN_DOWN_count": 5
+  },
+  "direction_balance": -1,
+  "score_distribution": {
+    "0": 29,
+    "1": 4,
+    "2": 6,
+    "3": 2
+  },
+  "ready_machines": 41,
+  "insufficient_history_machines": [],
+  "strong_groups": [
+    {
+      "signal_date": "20260916",
+      "target_date": "20260917",
+      "group": "g3",
+      "group_signal_rank": 1,
+      "group_signal_score": 1.0,
+      "direction_balance": 1,
+      "ALL_3_count": 1,
+      "ALL_3_machines": "075",
+      "single_ALL3_in_strong_group": true,
+      "candidate_machine": "075",
+      "evaluation_status": "pending"
+    },
+    {
+      "signal_date": "20260916",
+      "target_date": "20260917",
+      "group": "g8",
+      "group_signal_rank": 2,
+      "group_signal_score": 1.0,
+      "direction_balance": 2,
+      "ALL_3_count": 1,
+      "ALL_3_machines": "071",
+      "single_ALL3_in_strong_group": true,
+      "candidate_machine": "071",
+      "evaluation_status": "pending"
+    }
+  ],
+  "evaluation_status": "pending"
+}
