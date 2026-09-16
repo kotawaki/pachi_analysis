@@ -1,9 +1,10 @@
 @echo off
 setlocal
+set "PYTHON=C:\Users\kotaw\venvs\pachi\Scripts\python.exe"
 
 cd /d "%~dp0"
 
-for /f "usebackq delims=" %%D in (`python -c "import datetime; print(datetime.date.today().strftime('%%Y%%m%%d'))"`) do set "DEFAULT_DATE=%%D"
+for /f "usebackq delims=" %%D in (`^""%PYTHON%" -c "import datetime; print(datetime.date.today().strftime('%%Y%%m%%d'))"^"`) do set "DEFAULT_DATE=%%D"
 
 set "RUN_DATE="
 set /p "RUN_DATE=Business date [%DEFAULT_DATE%]: "
@@ -39,7 +40,7 @@ echo  Date: %RUN_DATE%
 echo ========================================
 echo.
 
-python tools/run_daily.py --date %RUN_DATE%
+"%PYTHON%" tools/run_daily.py --date %RUN_DATE%
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if "%EXIT_CODE%"=="0" (

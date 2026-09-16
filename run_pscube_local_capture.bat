@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set "PYTHON=C:\Users\kotaw\venvs\pachi\Scripts\python.exe"
 set "ROOT=C:\kota\pachi_analysis"
 cd /d "%ROOT%"
 
@@ -61,6 +62,6 @@ if not defined CHECK_DATE (
   pause
   goto menu
 )
-python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count 71 --date "%CHECK_DATE%"
+"%PYTHON%" tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count 71 --date "%CHECK_DATE%"
 pause
 goto menu

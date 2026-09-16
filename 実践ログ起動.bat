@@ -1,11 +1,11 @@
 @echo off
 setlocal
+set "PYTHON=C:\Users\kotaw\venvs\pachi\Scripts\python.exe"
 
 cd /d "%~dp0"
 
-where python >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Python was not found in PATH.
+if not exist "%PYTHON%" (
+    echo ERROR: Python not found: "%PYTHON%"
     pause
     exit /b 1
 )
@@ -36,7 +36,7 @@ echo.
 echo ====================================
 echo.
 
-python tools\practice_log_server.py --host 0.0.0.0 --port 8777
+"%PYTHON%" tools\practice_log_server.py --host 0.0.0.0 --port 8777
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if "%EXIT_CODE%"=="0" (

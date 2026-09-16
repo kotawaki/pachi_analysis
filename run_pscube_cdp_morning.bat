@@ -1,14 +1,14 @@
 @echo off
 setlocal
+set "PYTHON=C:\Users\kotaw\venvs\pachi\Scripts\python.exe"
 set "ROOT=C:\kota\pachi_analysis"
 set "LAST_DATE_FILE=%ROOT%\config\last_morning_date.txt"
 set "DRY_RUN=0"
 if /i "%~1"=="--dry-run" set "DRY_RUN=1"
 cd /d "%ROOT%"
 
-where python >nul 2>&1
-if errorlevel 1 (
-  echo ERROR: Python not found.
+if not exist "%PYTHON%" (
+  echo ERROR: Python not found: "%PYTHON%"
   pause
   exit /b 1
 )
@@ -31,7 +31,7 @@ if errorlevel 1 (
 )
 >"%LAST_DATE_FILE%" echo %TARGET_DATE%
 
-for /f %%C in ('python -c "from tools.pscube_cdp_preflight import expected_count_for_date; print(expected_count_for_date(\"%TARGET_DATE%\"))"') do set "EXPECTED_COUNT=%%C"
+for /f %%C in ('^""%PYTHON%" -c "from tools.pscube_cdp_preflight import expected_count_for_date; print(expected_count_for_date(\"%TARGET_DATE%\"))"^"') do set "EXPECTED_COUNT=%%C"
 if not defined EXPECTED_COUNT (
   echo ERROR: Could not determine target count for %TARGET_DATE%.
   pause
@@ -46,7 +46,7 @@ echo.
 
 echo.
 echo Running preflight checks...
-python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%"
+"%PYTHON%" tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%"
 if errorlevel 1 (
   echo.
   echo Preflight FAILED. Capture will not start.
@@ -63,7 +63,7 @@ if "%DRY_RUN%"=="1" (
 )
 
 echo Starting PSCUBE morning capture...
-python tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
+"%PYTHON%" tools\pscube_cdp_morning_capture.py --targets-file pscube_targets.json --expected-count %EXPECTED_COUNT% --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
 set "RESULT=%ERRORLEVEL%"
 
 echo.

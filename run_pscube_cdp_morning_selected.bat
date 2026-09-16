@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set "PYTHON=C:\Users\kotaw\venvs\pachi\Scripts\python.exe"
 set "ROOT=C:\kota\pachi_analysis"
 set "LAST_DATE_FILE=%ROOT%\config\last_morning_date.txt"
 cd /d "%ROOT%"
@@ -28,7 +29,7 @@ if not defined MACHINES (
   exit /b 2
 )
 echo Running selected-machine preflight...
-python tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --machines %MACHINES% --date "%TARGET_DATE%"
+"%PYTHON%" tools\pscube_cdp_preflight.py --targets-file pscube_targets.json --machines %MACHINES% --date "%TARGET_DATE%"
 if errorlevel 1 (
   echo Preflight FAILED. Capture will not start.
   pause
@@ -36,7 +37,7 @@ if errorlevel 1 (
 )
 echo Preflight OK.
 echo Press ESC during capture to stop safely.
-python tools\pscube_cdp_morning_capture.py --machine %MACHINES% --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
+"%PYTHON%" tools\pscube_cdp_morning_capture.py --machine %MACHINES% --date "%TARGET_DATE%" --retries 2 --delay-min 5 --delay-max 8
 set "RESULT=%ERRORLEVEL%"
 echo Selected capture finished: exit=%RESULT%.
 pause
