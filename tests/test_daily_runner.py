@@ -17,6 +17,17 @@ from tools.run_daily import (
 
 
 class DailyRunnerTest(unittest.TestCase):
+    @staticmethod
+    def weak_public_fixture(processed="20260915", pending_samples=0, records=None, html_pending=None):
+        records = records or []
+        html_pending = pending_samples if html_pending is None else html_pending
+        html = f"processed={processed} Pending: {html_pending}"
+        for row in records:
+            if row.get("evaluation_status") != "evaluated":
+                html += f" {row.get('signal_date')} → {row.get('target_date')} · <b>PENDING</b>"
+        return {"processed_signal_date": processed, "prediction_use": False,
+                "pending_samples": pending_samples, "records": records}, html
+
     def test_repo_root_and_date_command(self):
         command = daily_command("20260906", ROOT / "data/local_capture/20260906/morning")
         self.assertEqual(command[0], __import__("sys").executable)
@@ -45,11 +56,11 @@ class DailyRunnerTest(unittest.TestCase):
         ok, message = validate_weak_ma(processed_date)
         self.assertTrue(ok, message)
 
-    def test_public_output_check_20260914(self):
-        ok, detail = validate_public_web_outputs("20260914")
+    def test_public_output_check_20260915(self):
+        ok, detail = validate_public_web_outputs("20260915")
         self.assertTrue(ok, detail)
-        self.assertEqual(detail["checks"]["05_cycle_public"]["latest_date"], "20260914")
-        self.assertEqual(detail["checks"]["07_wave_public"]["current"], "20260914->20260915")
+        self.assertEqual(detail["checks"]["05_cycle_public"]["latest_date"], "20260915")
+        self.assertEqual(detail["checks"]["07_wave_public"]["current"], "20260915->20260916")
 
     def test_public_output_missing_fixture_is_incomplete(self):
         original_root = daily_runner.ROOT
@@ -62,6 +73,36 @@ class DailyRunnerTest(unittest.TestCase):
                 self.assertEqual(detail["checks"]["05_cycle_public"]["status"], "INCOMPLETE")
             finally:
                 daily_runner.ROOT = original_root
+
+    def test_weak_public_zero_pending_is_ok(self):
+        summary, html = self.weak_public_fixture()
+        ok, target = daily_runner._validate_weak_ma_public(summary, html, "20260915", "20260916")
+        self.assertTrue(ok)
+        self.assertIsNone(target)
+
+    def test_weak_public_pending_target_is_ok(self):
+        records = [{"signal_date": "20260915", "target_date": "20260916", "evaluation_status": "pending"}]
+        summary, html = self.weak_public_fixture(pending_samples=1, records=records)
+        ok, target = daily_runner._validate_weak_ma_public(summary, html, "20260915", "20260916")
+        self.assertTrue(ok)
+        self.assertEqual(target, "20260916")
+
+    def test_weak_public_pending_target_missing_is_incomplete(self):
+        records = [{"signal_date": "20260915", "target_date": None, "evaluation_status": "pending"}]
+        summary, html = self.weak_public_fixture(pending_samples=1, records=records)
+        ok, _ = daily_runner._validate_weak_ma_public(summary, html, "20260915", "20260916")
+        self.assertFalse(ok)
+
+    def test_weak_public_pending_html_missing_is_incomplete(self):
+        records = [{"signal_date": "20260915", "target_date": "20260916", "evaluation_status": "pending"}]
+        summary, html = self.weak_public_fixture(pending_samples=1, records=records, html_pending=0)
+        ok, _ = daily_runner._validate_weak_ma_public(summary, html, "20260915", "20260916")
+        self.assertFalse(ok)
+
+    def test_weak_public_stale_processing_date_is_incomplete(self):
+        summary, html = self.weak_public_fixture(processed="20260914")
+        ok, _ = daily_runner._validate_weak_ma_public(summary, html, "20260915", "20260916")
+        self.assertFalse(ok)
 
     def test_wave_forward_validation_previous_current_and_failures(self):
         with tempfile.TemporaryDirectory() as temporary:

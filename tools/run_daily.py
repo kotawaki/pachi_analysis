@@ -114,6 +114,41 @@ def _json_contains_date(value: Any, date: str) -> bool:
     return False
 
 
+def _validate_weak_ma_public(summary: dict[str, Any], html: str, date: str, next_date: str) -> tuple[bool, str | None]:
+    """Validate Weak MA public output, including the valid zero-pending case."""
+    if summary.get("processed_signal_date") != date or summary.get("prediction_use") is not False:
+        return False, None
+    if date not in html:
+        return False, None
+
+    records = summary.get("records", [])
+    current_pending = [
+        row for row in records
+        if str(row.get("signal_date")) == date
+        and str(row.get("evaluation_status", "")).lower() != "evaluated"
+    ]
+    summary_pending = summary.get("pending_samples")
+    if summary_pending != len(current_pending):
+        return False, None
+
+    html_pending_match = re.search(r"Pending:\s*(\d+)", html, re.IGNORECASE)
+    if not html_pending_match or int(html_pending_match.group(1)) != len(current_pending):
+        return False, None
+
+    if not current_pending:
+        return True, None
+
+    if any(str(row.get("target_date")) != next_date for row in current_pending):
+        return False, None
+    pending_row_pattern = re.compile(
+        rf"{re.escape(date)}\s*→\s*{re.escape(next_date)}\s*·\s*<b>PENDING</b>",
+        re.IGNORECASE,
+    )
+    if len(pending_row_pattern.findall(html)) != len(current_pending):
+        return False, None
+    return True, next_date
+
+
 def validate_public_web_outputs(date: str) -> tuple[bool, dict[str, Any]]:
     """Validate the files actually read by the published 01-09 pages."""
     previous = _business_date(date, -1)
@@ -243,13 +278,8 @@ def validate_public_web_outputs(date: str) -> tuple[bool, dict[str, Any]]:
     weak_summary_path = ROOT / "wave_lab/cross_machine_analysis/tracking/wave_weak_ma_summary.json"
     weak_html = weak_html_path.read_text(encoding="utf-8", errors="ignore") if required(weak_html_path) else ""
     weak_summary = load_json(weak_summary_path) if required(weak_summary_path) else {}
-    weak_ok = (
-        weak_summary.get("processed_signal_date") == date
-        and weak_summary.get("prediction_use") is False
-        and date in weak_html
-        and next_date in weak_html
-    )
-    checks["09_weak_ma_public"] = {"processed_signal_date": weak_summary.get("processed_signal_date"), "pending_target": next_date if next_date in weak_html else None, "status": "OK" if weak_ok else "INCOMPLETE"}
+    weak_ok, weak_pending_target = _validate_weak_ma_public(weak_summary, weak_html, date, next_date)
+    checks["09_weak_ma_public"] = {"processed_signal_date": weak_summary.get("processed_signal_date"), "pending_target": weak_pending_target, "status": "OK" if weak_ok else "INCOMPLETE"}
 
     for key, value in checks.items():
         if isinstance(value, dict):
