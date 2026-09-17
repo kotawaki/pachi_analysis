@@ -1,0 +1,318 @@
+{
+  "processing_date": "20260917",
+  "repo_root": "C:\\kota\\pachi_analysis",
+  "capture_root": "C:\\kota\\pachi_analysis\\data\\local_capture\\20260917\\morning",
+  "stages": [
+    {
+      "name": "01_analyze",
+      "command": [
+        "analyze_pscube.py",
+        "<capture-root>"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 22.481,
+      "error": ""
+    },
+    {
+      "name": "02_canonical_ohlc",
+      "command": [
+        "copy analyze OHLC to csv/daily_ohlc/<date>"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0,
+      "error": ""
+    },
+    {
+      "name": "03_ohlc_web",
+      "command": [
+        "ohlc_chart.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1.792,
+      "error": ""
+    },
+    {
+      "name": "04_daily_ingest",
+      "command": [
+        "daily_ingest.py",
+        "--date",
+        "20260917",
+        "--skip-wave-weak-ma"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.589,
+      "error": ""
+    },
+    {
+      "name": "05_pachi_agents",
+      "command": [
+        "python",
+        "-m",
+        "pachi_agents.daily_run",
+        "--base-date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 2.007,
+      "error": ""
+    },
+    {
+      "name": "06_propagation",
+      "command": [
+        "propagation_lookup_html.py",
+        "--daytime-date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 4.994,
+      "error": ""
+    },
+    {
+      "name": "07_cycle_daytime",
+      "command": [
+        "cycle_watch.py / cycle_after_hit_analysis.py / intraday_hit_regime_analysis.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 869.015,
+      "error": ""
+    },
+    {
+      "name": "08_combined_signal",
+      "command": [
+        "combined_signal_analysis.py",
+        "--end",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 63.878,
+      "error": ""
+    },
+    {
+      "name": "09_group_ranking",
+      "command": [
+        "group_ranking.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 18.11,
+      "error": ""
+    },
+    {
+      "name": "10_wave_forward",
+      "command": [
+        "forward_evaluate.py / forward_update.py",
+        "20260916",
+        "20260917",
+        "20260918"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1.367,
+      "error": ""
+    },
+    {
+      "name": "11_signal_reliability",
+      "command": [
+        "export_signal_reliability.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.097,
+      "error": ""
+    },
+    {
+      "name": "12_state_snapshots",
+      "command": [
+        "export_state_snapshots.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1.284,
+      "error": ""
+    },
+    {
+      "name": "13_group_flow",
+      "command": [
+        "analyze_group_flow.py",
+        "--date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.255,
+      "error": ""
+    },
+    {
+      "name": "14_transition",
+      "command": [
+        "analyze_transition.py",
+        "--date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.142,
+      "error": ""
+    },
+    {
+      "name": "15_transition_validation",
+      "command": [
+        "transition_validation.py"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.135,
+      "error": ""
+    },
+    {
+      "name": "16_ma_position_research",
+      "command": [
+        "track_ma_position.py",
+        "--max-signal-date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.77,
+      "error": ""
+    },
+    {
+      "name": "17_tug_replay",
+      "command": [
+        "export_tug_replay.py",
+        "--date",
+        "20260917",
+        "g1..g9/all"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 1.325,
+      "error": ""
+    },
+    {
+      "name": "18_wave_weak_ma",
+      "command": [
+        "export_wave_weak_ma.py",
+        "--date",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 0.093,
+      "error": ""
+    },
+    {
+      "name": "final_validation",
+      "command": [
+        "validate_web_outputs",
+        "20260917"
+      ],
+      "status": "OK",
+      "elapsed_seconds": 989.105,
+      "error": ""
+    }
+  ],
+  "web_validation": {
+    "01_ohlc": true,
+    "02_propagation": true,
+    "03_combined": true,
+    "04_groups": true,
+    "05_cycle": true,
+    "06_pachi_agents": true,
+    "07_wave_lab": true,
+    "08_tug_replay": true,
+    "09_wave_weak_ma": true,
+    "07_detail": "07 previous evaluation and current Forward verified",
+    "09_detail": "09 evaluated actuals and current pending sample verified",
+    "06_detail": "06 prediction/result/reflection source and Web dates verified",
+    "08_detail": "08 g1 final values verified (4 machines)",
+    "public_output_status": "ALL READY",
+    "public_output_detail": {
+      "checks": {
+        "01_ohlc_public": {
+          "latest_date": "20260917",
+          "expected": "20260917",
+          "status": "OK"
+        },
+        "02_propagation_public": {
+          "latest_date": "20260917",
+          "expected": "20260917",
+          "status": "OK"
+        },
+        "03_combined_public": {
+          "latest_date": "20260917",
+          "expected": "20260917",
+          "status": "OK"
+        },
+        "04_groups_public": {
+          "latest_date": "20260917",
+          "expected": "20260917",
+          "status": "OK"
+        },
+        "05_cycle_public": {
+          "latest_date": "20260917",
+          "expected": "20260917",
+          "status": "OK"
+        },
+        "06_pachi_public": {
+          "prediction_date": "20260918",
+          "cutoff_date": "20260917",
+          "status": "OK"
+        },
+        "07_wave_public": {
+          "previous": "20260916->20260917",
+          "current": "20260917->20260918",
+          "status": "OK"
+        },
+        "08_tug_public": {
+          "latest_date": "20260917",
+          "groups": [
+            "all",
+            "g1",
+            "g2",
+            "g3",
+            "g4",
+            "g5",
+            "g6",
+            "g7",
+            "g8",
+            "g9"
+          ],
+          "skipped_machines": [],
+          "status": "OK"
+        },
+        "09_weak_ma_public": {
+          "processed_signal_date": "20260917",
+          "pending_target": "20260918",
+          "status": "OK"
+        }
+      },
+      "required_files": [
+        "docs/ohlc.html",
+        "docs/propagation_lookup.html",
+        "docs/combined_signal_analysis.html",
+        "docs/groups.html",
+        "docs/data/cycle_watch_config.json",
+        "docs/pachi_agents/data/latest_prediction.json",
+        "docs/pachi_agents/data/history.json",
+        "docs/pachi_agents/data/experience.json",
+        "docs/pachi_agents/data/latest_result.json",
+        "docs/pachi_agents/data/latest_reflection.json",
+        "docs/wave_lab/data/forward/20260916.json",
+        "docs/wave_lab/data/forward/20260917.json",
+        "docs/wave_lab/data/forward/history.json",
+        "docs/wave_lab/data/forward/latest.json",
+        "docs/wave_lab/data/forward/signal_reliability.json",
+        "docs/wave_lab/tug_replay/data/index.json",
+        "docs/wave_lab/tug_replay/data/20260917/all.json",
+        "docs/wave_lab/tug_replay/data/20260917/g1.json",
+        "docs/wave_lab/tug_replay/data/20260917/g2.json",
+        "docs/wave_lab/tug_replay/data/20260917/g3.json",
+        "docs/wave_lab/tug_replay/data/20260917/g4.json",
+        "docs/wave_lab/tug_replay/data/20260917/g5.json",
+        "docs/wave_lab/tug_replay/data/20260917/g6.json",
+        "docs/wave_lab/tug_replay/data/20260917/g7.json",
+        "docs/wave_lab/tug_replay/data/20260917/g8.json",
+        "docs/wave_lab/tug_replay/data/20260917/g9.json",
+        "docs/wave_weak_ma/index.html",
+        "wave_lab/cross_machine_analysis/tracking/wave_weak_ma_summary.json"
+      ],
+      "warnings": []
+    }
+  },
+  "public_output_status": "ALL READY",
+  "warnings": [],
+  "errors": [],
+  "daily_status": "DAILY COMPLETE",
+  "total_elapsed_seconds": 989.105
+}
