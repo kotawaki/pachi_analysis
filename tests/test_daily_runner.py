@@ -38,6 +38,9 @@ class DailyRunnerTest(unittest.TestCase):
     def test_stage_order(self):
         names = [stage["name"] for stage in planned_stages("20260906")]
         self.assertEqual(names[:4], ["01_analyze", "02_canonical_ohlc", "03_ohlc_web", "04_daily_ingest"])
+        self.assertNotIn("07_cycle_daytime", names)
+        self.assertEqual(names[4], "05_pachi_agents")
+        self.assertEqual(names[-2], "18_wave_weak_ma")
         self.assertLess(names.index("10_wave_forward"), names.index("18_wave_weak_ma"))
         self.assertEqual(names[-1], "final_validation")
 
@@ -56,11 +59,14 @@ class DailyRunnerTest(unittest.TestCase):
         ok, message = validate_weak_ma(processed_date)
         self.assertTrue(ok, message)
 
-    def test_public_output_check_20260915(self):
-        ok, detail = validate_public_web_outputs("20260915")
+    def test_public_output_check_latest(self):
+        latest = json.loads((ROOT / "docs/wave_lab/data/forward/latest.json").read_text(encoding="utf-8"))
+        date = latest["signal_date"]
+        ok, detail = validate_public_web_outputs(date)
         self.assertTrue(ok, detail)
-        self.assertEqual(detail["checks"]["05_cycle_public"]["latest_date"], "20260915")
-        self.assertEqual(detail["checks"]["07_wave_public"]["current"], "20260915->20260916")
+        self.assertNotIn("05_cycle_public", detail["checks"])
+        self.assertNotIn("docs/data/cycle_watch_config.json", detail["required_files"])
+        self.assertEqual(detail["checks"]["07_wave_public"]["current"], f"{date}->{latest['target_date']}")
 
     def test_public_output_missing_fixture_is_incomplete(self):
         original_root = daily_runner.ROOT
@@ -70,7 +76,7 @@ class DailyRunnerTest(unittest.TestCase):
                 ok, detail = validate_public_web_outputs("20260914")
                 self.assertFalse(ok)
                 self.assertEqual(detail["checks"]["01_ohlc_public"]["status"], "INCOMPLETE")
-                self.assertEqual(detail["checks"]["05_cycle_public"]["status"], "INCOMPLETE")
+                self.assertNotIn("05_cycle_public", detail["checks"])
             finally:
                 daily_runner.ROOT = original_root
 

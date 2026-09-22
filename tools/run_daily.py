@@ -70,7 +70,6 @@ def planned_stages(date: str) -> list[dict[str, Any]]:
         {"name": "04_daily_ingest", "command": ["daily_ingest.py", "--date", date, "--skip-wave-weak-ma"]},
         {"name": "05_pachi_agents", "command": ["python", "-m", "pachi_agents.daily_run", "--base-date", date]},
         {"name": "06_propagation", "command": ["propagation_lookup_html.py", "--daytime-date", date]},
-        {"name": "07_cycle_daytime", "command": ["cycle_watch.py / cycle_after_hit_analysis.py / intraday_hit_regime_analysis.py"]},
         {"name": "08_combined_signal", "command": ["combined_signal_analysis.py", "--end", date]},
         {"name": "09_group_ranking", "command": ["group_ranking.py"]},
         {"name": "10_wave_forward", "command": ["forward_evaluate.py / forward_update.py", previous, date, next_date]},
@@ -187,12 +186,6 @@ def validate_public_web_outputs(date: str) -> tuple[bool, dict[str, Any]]:
     iso = f"{date[:4]}-{date[4:6]}-{date[6:]}"
     groups_ok = isinstance(groups, dict) and iso in groups.get("dates", [])
     checks["04_groups_public"] = {"latest_date": date if groups_ok else None, "expected": date, "status": "OK" if groups_ok else "INCOMPLETE"}
-
-    cycle_path = ROOT / "docs/data/cycle_watch_config.json"
-    cycle = load_json(cycle_path) if required(cycle_path) else {}
-    cycle_latest = cycle.get("latest_data_date")
-    cycle_ok = cycle_latest == date
-    checks["05_cycle_public"] = {"latest_date": cycle_latest, "expected": date, "status": "OK" if cycle_ok else "INCOMPLETE"}
 
     latest_prediction_path = ROOT / "docs/pachi_agents/data/latest_prediction.json"
     pachi_history_path = ROOT / "docs/pachi_agents/data/history.json"
@@ -515,7 +508,6 @@ def elapsed_for_stage(name: str, child_elapsed: dict[str, Any]) -> float:
         "04_daily_ingest": ("daily_ingest",),
         "05_pachi_agents": (),
         "06_propagation": ("propagation_lookup",),
-        "07_cycle_daytime": ("cyclewatch_page", "cyclewatch_top", "cycle_after_hit", "intraday_hit_regime"),
         "08_combined_signal": ("combined_signal",),
         "09_group_ranking": ("group_ranking",),
         "10_wave_forward": ("07_wave_forward_evaluate", "07_wave_forward_lock"),

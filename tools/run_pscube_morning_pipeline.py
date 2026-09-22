@@ -87,11 +87,6 @@ def validate_web_outputs(date: str) -> dict[str, bool]:
     group_index = groups_web.get("dates", []).index(iso) if iso in groups_web.get("dates", []) else -1
     group_value = groups_web.get("z", {}).get("1", [None])[group_index] if group_index >= 0 else None
 
-    cycle_source_path = ROOT / "data" / "cycle_watch_config.json"
-    cycle_docs_path = ROOT / "docs" / "data" / "cycle_watch_config.json"
-    cycle_source = json.loads(cycle_source_path.read_text(encoding="utf-8")) if cycle_source_path.exists() else {}
-    cycle_docs = json.loads(cycle_docs_path.read_text(encoding="utf-8")) if cycle_docs_path.exists() else {}
-
     pachi_path = ROOT / "docs" / "pachi_agents" / "data" / "latest_prediction.json"
     pachi_text = pachi_path.read_text(encoding="utf-8") if pachi_path.exists() else ""
     pachi_payload = json.loads(pachi_text or "null")
@@ -111,7 +106,6 @@ def validate_web_outputs(date: str) -> dict[str, bool]:
         "02_propagation": bool(pair_web_value and date in pair_source.get("meta", {}).get("ingested_dates", []) and pair_web.get("meta", {}).get("to") == date and pair_web_value.get("count") is not None and pair_web_value.get("lift") is not None),
         "03_combined": date in combined and date in combined_report and ("prediction unavailable" in combined.lower() or "prediction" in combined.lower()),
         "04_groups": group_index >= 0 and group_value is not None,
-        "05_cycle": cycle_source.get("latest_data_date") == date and cycle_docs.get("latest_data_date") == date and cycle_source.get("machines", {}).get("046", {}).get("periods") == cycle_docs.get("machines", {}).get("046", {}).get("periods"),
         "06_pachi_agents": bool(pachi_payload and pachi_source) and pachi_payload.get("prediction_date") == pachi_source.get("prediction_date") and pachi_payload.get("cutoff_date") == date and "046" in pachi_text,
         "07_wave_lab": bool(forward_payload and latest_forward) and latest_forward.get("signal_date") == date and latest_forward.get("target_date") == forward_payload.get("target_date") and latest_forward.get("machine_counts") == forward_payload.get("machine_counts"),
         "08_tug_replay": bool(tug_payload) and tug_payload.get("date") == date and str(tug_payload.get("machines", [{}])[0].get("machine", "")) in text(tug_path),
@@ -380,27 +374,6 @@ def main() -> int:
             ],
         )
         run_step("group_ranking", ["group_ranking.py"])
-        run_step(
-            "cyclewatch_page",
-            ["cycle_watch.py", "page", "--date", next_date, "--refresh"],
-        )
-        run_step("cyclewatch_top", ["cycle_watch.py", "top", "--refresh"])
-        docs_data_dir = ROOT / "docs" / "data"
-        docs_data_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(
-            ROOT / "data" / "cycle_watch_config.json",
-            docs_data_dir / "cycle_watch_config.json",
-        )
-        run_step("cycle_after_hit", ["cycle_after_hit_analysis.py"])
-        run_step(
-            "intraday_hit_regime",
-            [
-                "intraday_hit_regime_analysis.py",
-                "--start", args.combined_start,
-                "--end", target_date,
-            ],
-        )
-
         pachi_agents_report: dict[str, object] | None = None
         if not args.skip_pachi_agents or args.pachi_agents or args.pachi_agents_dry_run:
             try:
@@ -461,10 +434,6 @@ def main() -> int:
             source = row.get("Source", "unknown")
             source_counts[source] = source_counts.get(source, 0) + 1
 
-        regime_payload = json.loads(
-            (ROOT / "data" / "intraday_hit_regime.json").read_text(encoding="utf-8")
-        )
-        latest_regime = regime_payload["days"][-1]
         summary = {
             "status": "ok" if daily_complete else "incomplete",
             "date": target_date,
@@ -478,17 +447,7 @@ def main() -> int:
             "prediction": prediction_summary(prediction_output),
             "legacy_prediction": legacy_prediction_status,
             "propagation": propagation_summary(next_date),
-            "intraday_regime": {
-                "date": latest_regime["date"],
-                "regime": latest_regime["regime"],
-                "hit_density": round(latest_regime["hit_density"], 4),
-                "adjusted_quality": round(latest_regime["adjusted_quality"], 4),
-                "source": latest_regime["source"],
-            },
             "history": pair_history_summary(),
-            "external_cyclewatch": (
-                f"python cycle_watch.py folders --date {target_date} --refresh"
-            ),
             "pachi_agents": pachi_agents_report,
             "web_validation": web_validation,
             "elapsed_seconds": {key: round(value, 3) for key, value in STEP_TIMES.items()},

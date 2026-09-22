@@ -38,13 +38,14 @@
 <main>
   <h1>周期hitタイマー</h1>
   <p class="note">当たりを押した時刻を基準に、登録周期の±5分窓を表示します。予測ではなく、実戦中の監視補助です。</p>
+  <p class="note">このページの周期設定JSONは朝に自動更新されません。履歴・手動設定用です。利用前に下記の設定日を確認してください。</p>
 
   <section class="panel">
     <div class="controls">
       <label>周期設定JSON：<input id="configFile" type="file" accept=".json,application/json"></label>
       <button id="clearConfig" class="secondary" type="button">設定を消去</button>
     </div>
-    <p id="configStatus" class="muted">まず data/cycle_watch_config.json を選択してください。</p>
+    <p id="configStatus" class="muted">保存済み設定の日付を確認してください。必要ならJSONを手動選択してください。</p>
   </section>
 
   <section class="panel">
@@ -126,7 +127,7 @@
     try {
       config = JSON.parse(await file.text());
       localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-      $("configStatus").textContent = `読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
+      $("configStatus").textContent = `保存済み設定（朝の更新停止）：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
       render();
     } catch (error) { $("configStatus").textContent = `JSON読み込みエラー：${error.message}`; }
   });
@@ -141,7 +142,7 @@
 
   try {
     const saved = localStorage.getItem(CONFIG_KEY);
-    if (saved) { config = JSON.parse(saved); $("configStatus").textContent = `読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`; }
+    if (saved) { config = JSON.parse(saved); $("configStatus").textContent = `保存済み設定（朝の更新停止）：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`; }
   } catch (_) { localStorage.removeItem(CONFIG_KEY); }
   async function loadFixedConfig() {
     try {
@@ -149,7 +150,7 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       config = await response.json();
       localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-      $("configStatus").textContent = `自動読み込み済み：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
+      $("configStatus").textContent = `保存済み設定を読込み（朝の更新停止）：${config.latest_data_date || "日付不明"} / ${Object.keys(config.machines || {}).length}台`;
       render();
     } catch (error) {
       if (!config) $("configStatus").textContent = "自動読み込み失敗。必要ならJSONを手動選択してください。";
