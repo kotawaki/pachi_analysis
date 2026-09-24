@@ -13,30 +13,73 @@ import sys
 import argparse
 import os
 import tempfile
+from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from wave_lab.fft_reconstruct import analyze, load_machine_rows, phase_convergence_analysis
-from wave_lab.universe import machines_for_signal_date
+from wave_lab.universe import machines_for_signal_date, is_protected_holiday
 
 
 TRACK = Path(__file__).resolve().parent / "tracking"
 SIGNAL_DATE = "2026-08-28"
 TARGET_DATE = "2026-08-29"
 MIN_ANALYSIS_ROWS = 4
-MACHINES = list(machines_for_signal_date("20260828"))
-GROUPS = {
-    "g1": ["046", "055", "064", "073"],
-    "g2": ["047", "056", "065", "074"],
-    "g3": ["039", "048", "057", "066", "075"],
-    "g4": ["040", "049", "058", "067", "076"],
-    "g5": ["041", "050", "059", "068", "077"],
-    "g6": ["042", "051", "060", "069"],
-    "g7": ["043", "052", "061", "070"],
-    "g8": ["044", "053", "062", "071"],
-    "g9": ["045", "054", "063", "072"],
-}
-MACHINE_GROUP = {machine: group for group, machines in GROUPS.items() for machine in machines}
+
+
+def load_machine_group_map(signal_date: str, *, root: Path = ROOT) -> dict[str, str]:
+    """Load and validate the group assignment for that date's Wave universe."""
+    universe = tuple(machines_for_signal_date(signal_date))
+    universe_set = set(universe)
+    assignments: dict[str, list[str]] = defaultdict(list)
+    path = root / "machine_master.csv"
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            try:
+                machine = f"{int(row['machine']):03d}"
+            except (KeyError, TypeError, ValueError) as error:
+                raise ValueError(f"invalid machine_master machine: {row!r}") from error
+            if machine not in universe_set:
+                continue
+            group_value = str(row.get("group", "")).strip()
+            if not group_value:
+                raise ValueError(f"Wave machine has no group in machine_master.csv: {machine}")
+            try:
+                group = f"g{int(group_value)}"
+            except ValueError as error:
+                raise ValueError(f"invalid group for Wave machine {machine}: {group_value!r}") from error
+            assignments[machine].append(group)
+
+    duplicates = sorted(machine for machine, groups in assignments.items() if len(groups) != 1)
+    if duplicates:
+        raise ValueError(f"duplicate Wave machine assignments in machine_master.csv: {duplicates}")
+    missing = sorted(universe_set - assignments.keys())
+    if missing:
+        raise ValueError(f"Wave machines missing group assignments in machine_master.csv: {missing}")
+
+    group_map = {machine: assignments[machine][0] for machine in universe}
+    if len(group_map) != len(universe):
+        raise ValueError(
+            f"group assignment count {len(group_map)} != Wave universe count {len(universe)}"
+        )
+    return group_map
+
+
+def group_machines_for_signal_date(
+    signal_date: str, *, root: Path = ROOT
+) -> tuple[dict[str, str], dict[str, list[str]]]:
+    """Return validated machine/group maps for the date's Wave universe."""
+    universe = tuple(machines_for_signal_date(signal_date))
+    group_map = load_machine_group_map(signal_date, root=root)
+    groups: dict[str, list[str]] = defaultdict(list)
+    for machine in universe:
+        groups[group_map[machine]].append(machine)
+    grouped_count = sum(len(group_machines) for group_machines in groups.values())
+    if grouped_count != len(universe):
+        raise ValueError(
+            f"group machine count {grouped_count} != Wave universe count {len(universe)}"
+        )
+    return group_map, dict(sorted(groups.items(), key=lambda item: int(item[0][1:])))
 
 
 def write_csv(path: Path, rows: list[dict]) -> None:
@@ -83,7 +126,7 @@ def lock_forward(signal_date: str, target_date: str, *, root: Path = ROOT) -> di
     """Safely lock one date; existing files are never overwritten."""
     signal_date = signal_date.replace("-", "")
     target_date = target_date.replace("-", "")
-    if signal_date == "20260827" or target_date == "20260827":
+    if is_protected_holiday(signal_date) or is_protected_holiday(target_date):
         return {"status": "error", "reason": "holiday_20260827_forbidden"}
     path = root / "docs" / "wave_lab" / "data" / "forward" / f"{signal_date}.json"
     if path.exists():
@@ -110,21 +153,42 @@ def lock_forward(signal_date: str, target_date: str, *, root: Path = ROOT) -> di
     return {"status": "ready", "path": str(path), "overwrite": False}
 
 
-def machine_signal(machine: str, signal_date: str | None = None, target_date: str | None = None) -> dict:
+def machine_signal(
+    machine: str,
+    signal_date: str | None = None,
+    target_date: str | None = None,
+    group_map: dict[str, str] | None = None,
+) -> dict:
     signal_date = signal_date or SIGNAL_DATE
     target_date = target_date or TARGET_DATE
+    group_map = group_map or load_machine_group_map(signal_date)
+    group = group_map[machine]
     rows = load_machine_rows(machine, signal_date)
     if len(rows) < MIN_ANALYSIS_ROWS:
         return {
-            "signal_date": signal_date, "target_date": target_date, "machine": machine,
-            "group": MACHINE_GROUP.get(machine), "machine_status": "insufficient_history",
-            "history_rows": len(rows), "history_required": MIN_ANALYSIS_ROWS,
+            "signal_date": signal_date,
+            "target_date": target_date,
+            "machine": machine,
+            "group": group,
+            "machine_status": "insufficient_history",
+            "history_rows": len(rows),
+            "history_required": MIN_ANALYSIS_ROWS,
             "analysis_error": "FFT解析には4件以上のOHLC履歴が必要です",
-            "wave_direction_pattern": None, "region": None, "convergence_score": None,
-            "UP_UP_UP": None, "RIGHT": None, "LOW_CONVERGENCE_RIGHT": None,
-            "DOWN_DOWN_DOWN": None, "ALL_3": None, "score": None,
-            "evaluation_status": "not_ready", "actual_bullish": "",
-            "actual_open": "", "actual_high": "", "actual_low": "", "actual_close": "",
+            "wave_direction_pattern": None,
+            "region": None,
+            "convergence_score": None,
+            "UP_UP_UP": None,
+            "RIGHT": None,
+            "LOW_CONVERGENCE_RIGHT": None,
+            "DOWN_DOWN_DOWN": None,
+            "ALL_3": None,
+            "score": None,
+            "evaluation_status": "not_ready",
+            "actual_bullish": "",
+            "actual_open": "",
+            "actual_high": "",
+            "actual_low": "",
+            "actual_close": "",
         }
     components, daily, _centered, _comparison = analyze(rows)
     convergence_rows, _threshold = phase_convergence_analysis(daily, components)
@@ -142,9 +206,11 @@ def machine_signal(machine: str, signal_date: str | None = None, target_date: st
         "signal_date": signal_date,
         "target_date": target_date,
         "machine": machine,
-        "group": MACHINE_GROUP.get(machine),
-        "machine_status": "ready", "history_rows": len(rows),
-        "history_required": MIN_ANALYSIS_ROWS, "analysis_error": "",
+        "group": group,
+        "machine_status": "ready",
+        "history_rows": len(rows),
+        "history_required": MIN_ANALYSIS_ROWS,
+        "analysis_error": "",
         "wave_direction_pattern": pattern,
         "region": region,
         "convergence_score": convergence,
@@ -177,9 +243,10 @@ def main() -> int:
         if check["status"] != "ready":
             print(json.dumps(check, ensure_ascii=False))
             return 0 if check["status"] == "skipped" else 2
+    universe = tuple(machines_for_signal_date(signal_date))
+    group_map, groups_for_date = group_machines_for_signal_date(signal_date, root=ROOT)
     TRACK.mkdir(parents=True, exist_ok=True)
-    machines = [machine_signal(machine, signal_date, target_date)
-                for machine in machines_for_signal_date(signal_date)]
+    machines = [machine_signal(machine, signal_date, target_date, group_map) for machine in universe]
 
     machine_fields = [
         "signal_date", "target_date", "machine", "group",
@@ -222,7 +289,7 @@ def main() -> int:
     write_csv(daily_path, daily_rows)
 
     groups = []
-    for group, group_machines in GROUPS.items():
+    for group, group_machines in groups_for_date.items():
         rows = [row for row in machines if row["machine"] in group_machines]
         signal_total = sum(row["score"] for row in rows)
         groups.append({
@@ -237,7 +304,7 @@ def main() -> int:
             "DOWN_DOWN_DOWN_count": sum(row["DOWN_DOWN_DOWN"] for row in rows),
             "direction_balance": sum(row["UP_UP_UP"] for row in rows) - sum(row["DOWN_DOWN_DOWN"] for row in rows),
             "group_signal_total": signal_total,
-            "group_signal_score": signal_total / len(rows),
+            "group_signal_score": signal_total / len(rows) if rows else 0,
             "evaluation_status": "pending",
         })
     ranked = sorted(groups, key=lambda row: (-row["group_signal_score"], row["group"]))

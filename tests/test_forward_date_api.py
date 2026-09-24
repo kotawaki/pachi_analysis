@@ -16,6 +16,12 @@ class ForwardDateApiTests(unittest.TestCase):
         root = Path(temp.name)
         (root / "docs/wave_lab/data/forward").mkdir(parents=True)
         (root / "csv/daily_ohlc/20260905").mkdir(parents=True)
+        (root / "machine_master.csv").write_text(
+            "machine,group,island\n" + "".join(
+                f"{machine},{(machine - 1) % 9 + 1},s1\n" for machine in range(39, 78)
+            ),
+            encoding="utf-8",
+        )
         return temp, root
 
     def write_forward(self, root, status="pending"):
@@ -73,9 +79,9 @@ class ForwardDateApiTests(unittest.TestCase):
         with temp:
             (root / "csv/analyze/20260905").mkdir(parents=True)
             (root / "csv/analyze/20260905/20260905_analyze.csv").write_text("x\n", encoding="utf-8")
-            fake_machine = lambda machine, signal_date=None, target_date=None: {
+            fake_machine = lambda machine, signal_date=None, target_date=None, group_map=None: {
                 "signal_date": signal_date, "target_date": target_date, "machine": machine,
-                "group": "g1", "wave_direction_pattern": "UP-UP-UP", "region": "RIGHT",
+                "group": group_map[machine], "wave_direction_pattern": "UP-UP-UP", "region": "RIGHT",
                 "convergence_score": 0.1, "UP_UP_UP": True, "RIGHT": True,
                 "LOW_CONVERGENCE_RIGHT": True, "DOWN_DOWN_DOWN": False, "ALL_3": True,
                 "score": 3, "evaluation_status": "pending", "actual_bullish": "",
