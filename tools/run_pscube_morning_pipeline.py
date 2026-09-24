@@ -116,6 +116,18 @@ def validate_web_outputs(date: str) -> dict[str, bool]:
     return checks
 
 
+def completion_validations(
+    web_validation: dict[str, bool], *, defer_wave_weak_ma: bool,
+) -> tuple[dict[str, bool], list[str]]:
+    """Return validations required now and validations intentionally deferred."""
+    required = dict(web_validation)
+    deferred: list[str] = []
+    if defer_wave_weak_ma:
+        required.pop("09_wave_weak_ma", None)
+        deferred.append("09_wave_weak_ma")
+    return required, deferred
+
+
 def execution_plan(date: str, previous_date: str, next_date: str) -> list[tuple[str, list[str]]]:
     """Return the existing date-scoped post-daily commands in runner order."""
     return [
@@ -424,7 +436,10 @@ def main() -> int:
         web_validation = validate_web_outputs(target_date)
         STEP_TIMES["final_validation"] = time.perf_counter() - final_validation_started
         print(f"elapsed[final_validation]={STEP_TIMES['final_validation']:.3f}s")
-        daily_complete = all(web_validation.values())
+        required_validations, deferred_validations = completion_validations(
+            web_validation, defer_wave_weak_ma=args.defer_wave_weak_ma,
+        )
+        daily_complete = all(required_validations.values())
         print("DAILY COMPLETE" if daily_complete else "DAILY INCOMPLETE")
 
         event_rows = csv_rows(event_source)
@@ -450,6 +465,7 @@ def main() -> int:
             "history": pair_history_summary(),
             "pachi_agents": pachi_agents_report,
             "web_validation": web_validation,
+            "deferred_validations": deferred_validations,
             "elapsed_seconds": {key: round(value, 3) for key, value in STEP_TIMES.items()},
             "total_elapsed_seconds": round(time.perf_counter() - pipeline_started, 3),
         }
