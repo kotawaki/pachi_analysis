@@ -1,0 +1,41 @@
+{
+  "signal_date": "20260924",
+  "target_date": "20260925",
+  "mode": "forward/prospective",
+  "max_input_date": "20260924",
+  "future_data_used": false,
+  "machines": 41,
+  "groups": 9,
+  "machine_counts": {
+    "UP_UP_UP_count": 7,
+    "RIGHT_count": 16,
+    "LOW_CONVERGENCE_RIGHT_count": 14,
+    "ANY_SIGNAL_count": 20,
+    "ALL_3_count": 2,
+    "DOWN_DOWN_DOWN_count": 8
+  },
+  "direction_balance": -1,
+  "score_distribution": {
+    "0": 21,
+    "1": 5,
+    "2": 13,
+    "3": 2
+  },
+  "ready_machines": 41,
+  "insufficient_history_machines": [],
+  "strong_groups": [],
+  "evaluation_status": "evaluated",
+  "actual_source": "csv/daily_ohlc/20260925/20260925_daily_ohlc.csv",
+  "evaluation": {
+    "actual_bullish_count": 19,
+    "actual_bullish_rate": 0.4634146341463415,
+    "actual_close_mean": 829.0243902439024,
+    "actual_close_median": -1689.0,
+    "actual_high_mean": 7477.90243902439,
+    "actual_low_mean": -8344.487804878048,
+    "actual_close_ge_5000_count": 14,
+    "actual_close_ge_10000_count": 9,
+    "actual_close_ge_15000_count": 7,
+    "actual_close_ge_20000_count": 3
+  }
+}
