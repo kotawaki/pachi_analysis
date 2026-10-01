@@ -69,7 +69,8 @@ def validate_web_outputs(date: str) -> dict[str, bool]:
     ohlc_web = embedded(ROOT / "docs" / "ohlc.html", "ALL_DATA")
     web_machine = ohlc_web.get("r39_77", {}).get("machines", {}).get("39", [])
     web_ohlc = next((row for row in web_machine if str(row.get("time", "")).replace("-", "") == date), None)
-    previous_iso = f"{date[:4]}-{date[4:6]}-{int(date[6:]) - 1:02d}"
+    previous_ymd = ymd_add(date, -1)
+    previous_iso = f"{previous_ymd[:4]}-{previous_ymd[4:6]}-{previous_ymd[6:]}"
     web_previous = next((row for row in web_machine if row.get("time") == previous_iso), None)
     source_0039 = next((row for row in ohlc_rows if str(int(row.get("Machine", "0"))).zfill(3) == "039"), None)
     expected_chart_close = None
