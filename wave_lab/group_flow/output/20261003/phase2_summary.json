@@ -1,0 +1,194 @@
+{
+  "date": "20261003",
+  "machines": 39,
+  "history_files": 39,
+  "status_values": {
+    "初当り": 186,
+    "継続": 526
+  },
+  "initial_definition": "source_status=初当り -> INITIAL",
+  "continuation_definition": "source_status=継続 -> CONTINUATION",
+  "ambiguity": "status is separated exactly as labeled; the label alone does not establish physical causality",
+  "initial_total": 186,
+  "continuation_total": 526,
+  "total_hit_activity": 712,
+  "machines_with_initial": 39,
+  "machines_with_continuation": 38,
+  "timeline": {
+    "start": "09:00",
+    "end": "23:20",
+    "step_minutes": 5,
+    "points": 174,
+    "interpolation": "previous-value hold"
+  },
+  "density_maxima": {
+    "initial": {
+      "5": {
+        "max": 5,
+        "times": [
+          "12:20",
+          "13:25",
+          "14:45"
+        ]
+      },
+      "10": {
+        "max": 7,
+        "times": [
+          "13:25",
+          "14:20",
+          "14:45"
+        ]
+      },
+      "30": {
+        "max": 16,
+        "times": [
+          "14:20",
+          "14:35",
+          "14:40",
+          "14:45"
+        ]
+      }
+    },
+    "continuation": {
+      "5": {
+        "max": 12,
+        "times": [
+          "12:40",
+          "15:05"
+        ]
+      },
+      "10": {
+        "max": 21,
+        "times": [
+          "12:40"
+        ]
+      },
+      "30": {
+        "max": 58,
+        "times": [
+          "12:30"
+        ]
+      }
+    },
+    "total": {
+      "5": {
+        "max": 15,
+        "times": [
+          "12:20",
+          "12:40"
+        ]
+      },
+      "10": {
+        "max": 25,
+        "times": [
+          "12:40"
+        ]
+      },
+      "30": {
+        "max": 68,
+        "times": [
+          "12:20"
+        ]
+      }
+    }
+  },
+  "phase1_high_density_comparison": {
+    "11:00": {
+      "time": "11:00",
+      "minute": 660,
+      "initial_5m": 0,
+      "continuation_5m": 3,
+      "total_5m": 3,
+      "initial_10m": 2,
+      "continuation_10m": 7,
+      "total_10m": 9,
+      "initial_30m": 10,
+      "continuation_30m": 31,
+      "total_30m": 41
+    },
+    "12:30": {
+      "time": "12:30",
+      "minute": 750,
+      "initial_5m": 2,
+      "continuation_5m": 11,
+      "total_5m": 13,
+      "initial_10m": 3,
+      "continuation_10m": 17,
+      "total_10m": 20,
+      "initial_30m": 9,
+      "continuation_30m": 58,
+      "total_30m": 67
+    },
+    "13:30": {
+      "time": "13:30",
+      "minute": 810,
+      "initial_5m": 2,
+      "continuation_5m": 8,
+      "total_5m": 10,
+      "initial_10m": 3,
+      "continuation_10m": 14,
+      "total_10m": 17,
+      "initial_30m": 12,
+      "continuation_30m": 32,
+      "total_30m": 44
+    },
+    "14:00": {
+      "time": "14:00",
+      "minute": 840,
+      "initial_5m": 3,
+      "continuation_5m": 6,
+      "total_5m": 9,
+      "initial_10m": 5,
+      "continuation_10m": 11,
+      "total_10m": 16,
+      "initial_30m": 13,
+      "continuation_30m": 35,
+      "total_30m": 48
+    },
+    "14:30": {
+      "time": "14:30",
+      "minute": 870,
+      "initial_5m": 1,
+      "continuation_5m": 6,
+      "total_5m": 7,
+      "initial_10m": 3,
+      "continuation_10m": 13,
+      "total_10m": 16,
+      "initial_30m": 14,
+      "continuation_30m": 33,
+      "total_30m": 47
+    },
+    "19:00": {
+      "time": "19:00",
+      "minute": 1140,
+      "initial_5m": 3,
+      "continuation_5m": 4,
+      "total_5m": 7,
+      "initial_10m": 3,
+      "continuation_10m": 9,
+      "total_10m": 12,
+      "initial_30m": 5,
+      "continuation_30m": 14,
+      "total_30m": 19
+    }
+  },
+  "phase1_match": {
+    "initial_count": 186,
+    "group_initial_counts": true,
+    "group_final_close": true,
+    "all39_final": 115495
+  },
+  "group_final_close": {
+    "g1": -18050,
+    "g2": -27840,
+    "g3": 23242,
+    "g4": 9662,
+    "g5": 7335,
+    "g6": 42030,
+    "g7": 8587,
+    "g8": 34085,
+    "g9": 36444
+  },
+  "all39_final": 115495,
+  "sum_group_equals_all39": true
+}
