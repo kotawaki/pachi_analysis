@@ -1,0 +1,196 @@
+{
+  "date": "20261008",
+  "machines": 39,
+  "history_files": 39,
+  "status_values": {
+    "初当り": 139,
+    "継続": 342
+  },
+  "initial_definition": "source_status=初当り -> INITIAL",
+  "continuation_definition": "source_status=継続 -> CONTINUATION",
+  "ambiguity": "status is separated exactly as labeled; the label alone does not establish physical causality",
+  "initial_total": 139,
+  "continuation_total": 342,
+  "total_hit_activity": 481,
+  "machines_with_initial": 38,
+  "machines_with_continuation": 38,
+  "timeline": {
+    "start": "09:00",
+    "end": "23:20",
+    "step_minutes": 5,
+    "points": 174,
+    "interpolation": "previous-value hold"
+  },
+  "density_maxima": {
+    "initial": {
+      "5": {
+        "max": 4,
+        "times": [
+          "12:55",
+          "15:00",
+          "16:00"
+        ]
+      },
+      "10": {
+        "max": 6,
+        "times": [
+          "14:55",
+          "15:15",
+          "15:55"
+        ]
+      },
+      "30": {
+        "max": 15,
+        "times": [
+          "14:55"
+        ]
+      }
+    },
+    "continuation": {
+      "5": {
+        "max": 7,
+        "times": [
+          "16:40",
+          "16:55"
+        ]
+      },
+      "10": {
+        "max": 12,
+        "times": [
+          "16:35",
+          "16:55"
+        ]
+      },
+      "30": {
+        "max": 31,
+        "times": [
+          "16:30",
+          "16:35"
+        ]
+      }
+    },
+    "total": {
+      "5": {
+        "max": 8,
+        "times": [
+          "16:35",
+          "16:40",
+          "16:55",
+          "17:20"
+        ]
+      },
+      "10": {
+        "max": 16,
+        "times": [
+          "16:35"
+        ]
+      },
+      "30": {
+        "max": 41,
+        "times": [
+          "16:30",
+          "16:35"
+        ]
+      }
+    }
+  },
+  "phase1_high_density_comparison": {
+    "11:00": {
+      "time": "11:00",
+      "minute": 660,
+      "initial_5m": 0,
+      "continuation_5m": 0,
+      "total_5m": 0,
+      "initial_10m": 2,
+      "continuation_10m": 2,
+      "total_10m": 4,
+      "initial_30m": 4,
+      "continuation_30m": 11,
+      "total_30m": 15
+    },
+    "12:30": {
+      "time": "12:30",
+      "minute": 750,
+      "initial_5m": 1,
+      "continuation_5m": 0,
+      "total_5m": 1,
+      "initial_10m": 3,
+      "continuation_10m": 1,
+      "total_10m": 4,
+      "initial_30m": 8,
+      "continuation_30m": 10,
+      "total_30m": 18
+    },
+    "13:30": {
+      "time": "13:30",
+      "minute": 810,
+      "initial_5m": 1,
+      "continuation_5m": 1,
+      "total_5m": 2,
+      "initial_10m": 2,
+      "continuation_10m": 2,
+      "total_10m": 4,
+      "initial_30m": 8,
+      "continuation_30m": 10,
+      "total_30m": 18
+    },
+    "14:00": {
+      "time": "14:00",
+      "minute": 840,
+      "initial_5m": 2,
+      "continuation_5m": 3,
+      "total_5m": 5,
+      "initial_10m": 2,
+      "continuation_10m": 7,
+      "total_10m": 9,
+      "initial_30m": 8,
+      "continuation_30m": 16,
+      "total_30m": 24
+    },
+    "14:30": {
+      "time": "14:30",
+      "minute": 870,
+      "initial_5m": 1,
+      "continuation_5m": 1,
+      "total_5m": 2,
+      "initial_10m": 1,
+      "continuation_10m": 4,
+      "total_10m": 5,
+      "initial_30m": 7,
+      "continuation_30m": 13,
+      "total_30m": 20
+    },
+    "19:00": {
+      "time": "19:00",
+      "minute": 1140,
+      "initial_5m": 1,
+      "continuation_5m": 1,
+      "total_5m": 2,
+      "initial_10m": 2,
+      "continuation_10m": 1,
+      "total_10m": 3,
+      "initial_30m": 3,
+      "continuation_30m": 10,
+      "total_30m": 13
+    }
+  },
+  "phase1_match": {
+    "initial_count": 139,
+    "group_initial_counts": true,
+    "group_final_close": true,
+    "all39_final": -2101
+  },
+  "group_final_close": {
+    "g1": 40571,
+    "g2": 20690,
+    "g3": 4958,
+    "g4": 3129,
+    "g5": -2417,
+    "g6": 8200,
+    "g7": -22847,
+    "g8": -23652,
+    "g9": -30733
+  },
+  "all39_final": -2101,
+  "sum_group_equals_all39": true
+}
