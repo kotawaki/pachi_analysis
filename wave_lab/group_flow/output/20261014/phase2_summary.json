@@ -1,0 +1,192 @@
+{
+  "date": "20261014",
+  "machines": 39,
+  "history_files": 39,
+  "status_values": {
+    "初当り": 128,
+    "継続": 313
+  },
+  "initial_definition": "source_status=初当り -> INITIAL",
+  "continuation_definition": "source_status=継続 -> CONTINUATION",
+  "ambiguity": "status is separated exactly as labeled; the label alone does not establish physical causality",
+  "initial_total": 128,
+  "continuation_total": 313,
+  "total_hit_activity": 441,
+  "machines_with_initial": 38,
+  "machines_with_continuation": 36,
+  "timeline": {
+    "start": "09:00",
+    "end": "23:20",
+    "step_minutes": 5,
+    "points": 174,
+    "interpolation": "previous-value hold"
+  },
+  "density_maxima": {
+    "initial": {
+      "5": {
+        "max": 5,
+        "times": [
+          "17:20"
+        ]
+      },
+      "10": {
+        "max": 9,
+        "times": [
+          "17:20"
+        ]
+      },
+      "30": {
+        "max": 15,
+        "times": [
+          "17:20"
+        ]
+      }
+    },
+    "continuation": {
+      "5": {
+        "max": 9,
+        "times": [
+          "14:10"
+        ]
+      },
+      "10": {
+        "max": 13,
+        "times": [
+          "14:10",
+          "14:20",
+          "14:25",
+          "14:30"
+        ]
+      },
+      "30": {
+        "max": 39,
+        "times": [
+          "14:10"
+        ]
+      }
+    },
+    "total": {
+      "5": {
+        "max": 10,
+        "times": [
+          "14:10",
+          "14:25",
+          "14:35"
+        ]
+      },
+      "10": {
+        "max": 16,
+        "times": [
+          "14:20",
+          "14:25",
+          "14:30"
+        ]
+      },
+      "30": {
+        "max": 47,
+        "times": [
+          "14:10"
+        ]
+      }
+    }
+  },
+  "phase1_high_density_comparison": {
+    "11:00": {
+      "time": "11:00",
+      "minute": 660,
+      "initial_5m": 0,
+      "continuation_5m": 0,
+      "total_5m": 0,
+      "initial_10m": 0,
+      "continuation_10m": 2,
+      "total_10m": 2,
+      "initial_30m": 3,
+      "continuation_30m": 15,
+      "total_30m": 18
+    },
+    "12:30": {
+      "time": "12:30",
+      "minute": 750,
+      "initial_5m": 0,
+      "continuation_5m": 3,
+      "total_5m": 3,
+      "initial_10m": 3,
+      "continuation_10m": 8,
+      "total_10m": 11,
+      "initial_30m": 7,
+      "continuation_30m": 17,
+      "total_30m": 24
+    },
+    "13:30": {
+      "time": "13:30",
+      "minute": 810,
+      "initial_5m": 0,
+      "continuation_5m": 2,
+      "total_5m": 2,
+      "initial_10m": 0,
+      "continuation_10m": 3,
+      "total_10m": 3,
+      "initial_30m": 6,
+      "continuation_30m": 15,
+      "total_30m": 21
+    },
+    "14:00": {
+      "time": "14:00",
+      "minute": 840,
+      "initial_5m": 3,
+      "continuation_5m": 1,
+      "total_5m": 4,
+      "initial_10m": 4,
+      "continuation_10m": 4,
+      "total_10m": 8,
+      "initial_30m": 9,
+      "continuation_30m": 30,
+      "total_30m": 39
+    },
+    "14:30": {
+      "time": "14:30",
+      "minute": 870,
+      "initial_5m": 1,
+      "continuation_5m": 5,
+      "total_5m": 6,
+      "initial_10m": 3,
+      "continuation_10m": 13,
+      "total_10m": 16,
+      "initial_30m": 6,
+      "continuation_30m": 23,
+      "total_30m": 29
+    },
+    "19:00": {
+      "time": "19:00",
+      "minute": 1140,
+      "initial_5m": 0,
+      "continuation_5m": 1,
+      "total_5m": 1,
+      "initial_10m": 1,
+      "continuation_10m": 2,
+      "total_10m": 3,
+      "initial_30m": 3,
+      "continuation_30m": 5,
+      "total_30m": 8
+    }
+  },
+  "phase1_match": {
+    "initial_count": 128,
+    "group_initial_counts": true,
+    "group_final_close": true,
+    "all39_final": -5680
+  },
+  "group_final_close": {
+    "g1": -24334,
+    "g2": -35052,
+    "g3": 4736,
+    "g4": 19698,
+    "g5": -16642,
+    "g6": 8667,
+    "g7": 3537,
+    "g8": 2909,
+    "g9": 30801
+  },
+  "all39_final": -5680,
+  "sum_group_equals_all39": true
+}
