@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-10-16T21:31:26.960144+00:00",
+    "generated_at": "2026-10-17T22:11:04.018871+00:00",
     "prospective_start_date": "20260828",
     "evaluated_dates": [
       "20260828",
@@ -51,10 +51,11 @@
       "20261012",
       "20261013",
       "20261014",
-      "20261015"
+      "20261015",
+      "20261016"
     ],
     "pending_dates": [
-      "20261016"
+      "20261017"
     ],
     "source_type": "derived from locked prospective Forward JSON",
     "source_files": [
@@ -107,37 +108,38 @@
       "20261013.json",
       "20261014.json",
       "20261015.json",
-      "20261016.json"
+      "20261016.json",
+      "20261017.json"
     ],
     "prediction_use": false,
     "signal_recalculation": false,
     "historical_backfill": false
   },
   "today": {
-    "signal_date": "20261016",
-    "target_date": "20261017",
+    "signal_date": "20261017",
+    "target_date": "20261018",
     "evaluation_status": "pending",
     "machines": [
       {
         "machine": "018",
         "group": "g9",
         "signals": {
-          "UP_UP_UP": true,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
-          "DOWN_DOWN_DOWN": false,
-          "ALL_3": true
+          "UP_UP_UP": false,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
+          "DOWN_DOWN_DOWN": true,
+          "ALL_3": false
         },
-        "combination": "ALL_3",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 0,
-            "samples": 8,
+            "samples": 9,
             "bullish_rate": 0.0,
-            "pending_count": 1,
+            "pending_count": 0,
             "dates": [
               "20260911",
               "20260912",
@@ -146,31 +148,34 @@
               "20260923",
               "20260927",
               "20261010",
-              "20261014"
+              "20261014",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 1,
-            "samples": 3,
-            "bullish_rate": 0.3333333333333333,
-            "pending_count": 1,
+            "samples": 4,
+            "bullish_rate": 0.25,
+            "pending_count": 0,
             "dates": [
               "20260920",
               "20261009",
-              "20261012"
+              "20261012",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 1,
-            "samples": 3,
-            "bullish_rate": 0.3333333333333333,
-            "pending_count": 1,
+            "samples": 4,
+            "bullish_rate": 0.25,
+            "pending_count": 0,
             "dates": [
               "20260920",
               "20261009",
-              "20261012"
+              "20261012",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -178,7 +183,7 @@
             "bullish_hits": 3,
             "samples": 6,
             "bullish_rate": 0.5,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260919",
               "20260924",
@@ -191,10 +196,12 @@
           "ALL_3": {
             "key": "ALL_3",
             "bullish_hits": 0,
-            "samples": 0,
-            "bullish_rate": null,
-            "pending_count": 1,
-            "dates": []
+            "samples": 1,
+            "bullish_rate": 0.0,
+            "pending_count": 0,
+            "dates": [
+              "20261016"
+            ]
           },
           "ALL_2_UP_RIGHT": {
             "key": "ALL_2_UP_RIGHT",
@@ -436,15 +443,16 @@
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
             "bullish_hits": 2,
-            "samples": 5,
-            "bullish_rate": 0.4,
+            "samples": 6,
+            "bullish_rate": 0.3333333333333333,
             "pending_count": 1,
             "dates": [
               "20260831",
               "20260905",
               "20260909",
               "20260918",
-              "20260922"
+              "20260922",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -514,7 +522,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
         "combination": null,
@@ -569,7 +577,7 @@
             "bullish_hits": 3,
             "samples": 7,
             "bullish_rate": 0.42857142857142855,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260830",
               "20260831",
@@ -642,7 +650,7 @@
         "group": "g5",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
+          "RIGHT": true,
           "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
@@ -669,7 +677,7 @@
             "bullish_hits": 6,
             "samples": 11,
             "bullish_rate": 0.5454545454545454,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260901",
               "20260913",
@@ -941,12 +949,12 @@
         "group": "g7",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
-          "LOW_CONVERGENCE_RIGHT": false,
+          "RIGHT": true,
+          "LOW_CONVERGENCE_RIGHT": true,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": null,
+        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -969,7 +977,7 @@
             "bullish_hits": 5,
             "samples": 14,
             "bullish_rate": 0.35714285714285715,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260901",
               "20260914",
@@ -992,7 +1000,7 @@
             "bullish_hits": 4,
             "samples": 13,
             "bullish_rate": 0.3076923076923077,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260901",
               "20260914",
@@ -1059,7 +1067,7 @@
             "bullish_hits": 4,
             "samples": 11,
             "bullish_rate": 0.36363636363636365,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260901",
               "20260914",
@@ -1079,7 +1087,7 @@
             "bullish_hits": 5,
             "samples": 12,
             "bullish_rate": 0.4166666666666667,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260901",
               "20260914",
@@ -1102,12 +1110,12 @@
         "group": "g8",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -1131,10 +1139,10 @@
           },
           "RIGHT": {
             "key": "RIGHT",
-            "bullish_hits": 4,
-            "samples": 9,
-            "bullish_rate": 0.4444444444444444,
-            "pending_count": 1,
+            "bullish_hits": 5,
+            "samples": 10,
+            "bullish_rate": 0.5,
+            "pending_count": 0,
             "dates": [
               "20260903",
               "20260908",
@@ -1144,15 +1152,16 @@
               "20260930",
               "20261003",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
-            "bullish_hits": 4,
-            "samples": 8,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "bullish_hits": 5,
+            "samples": 9,
+            "bullish_rate": 0.5555555555555556,
+            "pending_count": 0,
             "dates": [
               "20260903",
               "20260908",
@@ -1161,7 +1170,8 @@
               "20260930",
               "20261003",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -1210,30 +1220,32 @@
           },
           "ALL_2_RIGHT_LOWCONV_RIGHT": {
             "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
-            "bullish_hits": 3,
-            "samples": 5,
-            "bullish_rate": 0.6,
-            "pending_count": 1,
+            "bullish_hits": 4,
+            "samples": 6,
+            "bullish_rate": 0.6666666666666666,
+            "pending_count": 0,
             "dates": [
               "20260903",
               "20260908",
               "20260930",
               "20261003",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
-            "bullish_hits": 3,
-            "samples": 5,
-            "bullish_rate": 0.6,
-            "pending_count": 1,
+            "bullish_hits": 4,
+            "samples": 6,
+            "bullish_rate": 0.6666666666666666,
+            "pending_count": 0,
             "dates": [
               "20260903",
               "20260908",
               "20260930",
               "20261003",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           }
         }
@@ -1243,12 +1255,12 @@
         "group": "g9",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -1272,9 +1284,9 @@
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 7,
-            "samples": 14,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "samples": 15,
+            "bullish_rate": 0.4666666666666667,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260904",
@@ -1289,15 +1301,16 @@
               "20260930",
               "20261001",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 6,
-            "samples": 11,
-            "bullish_rate": 0.5454545454545454,
-            "pending_count": 1,
+            "samples": 12,
+            "bullish_rate": 0.5,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260912",
@@ -1309,7 +1322,8 @@
               "20260930",
               "20261001",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -1359,9 +1373,9 @@
           "ALL_2_RIGHT_LOWCONV_RIGHT": {
             "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
             "bullish_hits": 4,
-            "samples": 8,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "samples": 9,
+            "bullish_rate": 0.4444444444444444,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260916",
@@ -1370,15 +1384,16 @@
               "20260924",
               "20260930",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           },
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
             "bullish_hits": 4,
-            "samples": 8,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "samples": 9,
+            "bullish_rate": 0.4444444444444444,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260916",
@@ -1387,7 +1402,8 @@
               "20260924",
               "20260930",
               "20261008",
-              "20261010"
+              "20261010",
+              "20261016"
             ]
           }
         }
@@ -1397,7 +1413,7 @@
         "group": "g1",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
+          "RIGHT": true,
           "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
@@ -1425,7 +1441,7 @@
             "bullish_hits": 4,
             "samples": 13,
             "bullish_rate": 0.3076923076923077,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260829",
@@ -1574,9 +1590,9 @@
           },
           "RIGHT": {
             "key": "RIGHT",
-            "bullish_hits": 3,
-            "samples": 9,
-            "bullish_rate": 0.3333333333333333,
+            "bullish_hits": 4,
+            "samples": 10,
+            "bullish_rate": 0.4,
             "pending_count": 1,
             "dates": [
               "20260915",
@@ -1587,14 +1603,15 @@
               "20260927",
               "20260929",
               "20260930",
-              "20261015"
+              "20261015",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
-            "bullish_hits": 1,
-            "samples": 6,
-            "bullish_rate": 0.16666666666666666,
+            "bullish_hits": 2,
+            "samples": 7,
+            "bullish_rate": 0.2857142857142857,
             "pending_count": 1,
             "dates": [
               "20260915",
@@ -1602,7 +1619,8 @@
               "20260926",
               "20260927",
               "20260929",
-              "20260930"
+              "20260930",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -1649,26 +1667,28 @@
           },
           "ALL_2_RIGHT_LOWCONV_RIGHT": {
             "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
-            "bullish_hits": 1,
-            "samples": 3,
-            "bullish_rate": 0.3333333333333333,
+            "bullish_hits": 2,
+            "samples": 4,
+            "bullish_rate": 0.5,
             "pending_count": 1,
             "dates": [
               "20260915",
               "20260926",
-              "20260929"
+              "20260929",
+              "20261016"
             ]
           },
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
-            "bullish_hits": 1,
-            "samples": 3,
-            "bullish_rate": 0.3333333333333333,
+            "bullish_hits": 2,
+            "samples": 4,
+            "bullish_rate": 0.5,
             "pending_count": 1,
             "dates": [
               "20260915",
               "20260926",
-              "20260929"
+              "20260929",
+              "20261016"
             ]
           }
         }
@@ -1680,7 +1700,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
         "combination": null,
@@ -1735,7 +1755,7 @@
             "bullish_hits": 2,
             "samples": 4,
             "bullish_rate": 0.5,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260911",
               "20260917",
@@ -1955,7 +1975,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
         "combination": null,
@@ -2026,7 +2046,7 @@
             "bullish_hits": 1,
             "samples": 2,
             "bullish_rate": 0.5,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260912",
               "20261011"
@@ -2177,8 +2197,8 @@
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
             "bullish_hits": 3,
-            "samples": 8,
-            "bullish_rate": 0.375,
+            "samples": 9,
+            "bullish_rate": 0.3333333333333333,
             "pending_count": 1,
             "dates": [
               "20260902",
@@ -2188,7 +2208,8 @@
               "20261003",
               "20261004",
               "20261006",
-              "20261014"
+              "20261014",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -2411,12 +2432,12 @@
         "group": "g8",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
-          "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": true,
+          "RIGHT": true,
+          "LOW_CONVERGENCE_RIGHT": true,
+          "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": null,
+        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -2437,7 +2458,7 @@
             "bullish_hits": 8,
             "samples": 11,
             "bullish_rate": 0.7272727272727273,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -2457,7 +2478,7 @@
             "bullish_hits": 6,
             "samples": 9,
             "bullish_rate": 0.6666666666666666,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -2472,15 +2493,16 @@
           },
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
-            "bullish_hits": 0,
-            "samples": 4,
-            "bullish_rate": 0.0,
-            "pending_count": 1,
+            "bullish_hits": 1,
+            "samples": 5,
+            "bullish_rate": 0.2,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260905",
               "20260919",
-              "20260924"
+              "20260924",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -2512,7 +2534,7 @@
             "bullish_hits": 6,
             "samples": 9,
             "bullish_rate": 0.6666666666666666,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -2530,7 +2552,7 @@
             "bullish_hits": 6,
             "samples": 9,
             "bullish_rate": 0.6666666666666666,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -3146,7 +3168,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": true,
+          "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
         "combination": null,
@@ -3206,17 +3228,18 @@
           },
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
-            "bullish_hits": 2,
-            "samples": 6,
-            "bullish_rate": 0.3333333333333333,
-            "pending_count": 1,
+            "bullish_hits": 3,
+            "samples": 7,
+            "bullish_rate": 0.42857142857142855,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260911",
               "20260916",
               "20260922",
               "20261011",
-              "20261013"
+              "20261013",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -3286,7 +3309,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": true,
+          "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
         "combination": null,
@@ -3342,15 +3365,16 @@
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
             "bullish_hits": 2,
-            "samples": 5,
-            "bullish_rate": 0.4,
-            "pending_count": 1,
+            "samples": 6,
+            "bullish_rate": 0.3333333333333333,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260920",
               "20261004",
               "20261009",
-              "20261015"
+              "20261015",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -3419,7 +3443,7 @@
         "group": "g6",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": true,
+          "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
@@ -3446,9 +3470,9 @@
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 3,
-            "samples": 9,
-            "bullish_rate": 0.3333333333333333,
-            "pending_count": 1,
+            "samples": 10,
+            "bullish_rate": 0.3,
+            "pending_count": 0,
             "dates": [
               "20260907",
               "20260912",
@@ -3458,7 +3482,8 @@
               "20260927",
               "20261003",
               "20261004",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
@@ -3552,22 +3577,22 @@
         "machine": "061",
         "group": "g7",
         "signals": {
-          "UP_UP_UP": true,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "UP_UP_UP": false,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
-          "ALL_3": true
+          "ALL_3": false
         },
-        "combination": "ALL_3",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 6,
-            "samples": 9,
-            "bullish_rate": 0.6666666666666666,
-            "pending_count": 1,
+            "samples": 10,
+            "bullish_rate": 0.6,
+            "pending_count": 0,
             "dates": [
               "20260829",
               "20260831",
@@ -3577,15 +3602,16 @@
               "20260915",
               "20260925",
               "20260930",
-              "20261005"
+              "20261005",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 11,
-            "samples": 16,
-            "bullish_rate": 0.6875,
-            "pending_count": 1,
+            "samples": 17,
+            "bullish_rate": 0.6470588235294118,
+            "pending_count": 0,
             "dates": [
               "20260828",
               "20260902",
@@ -3602,15 +3628,16 @@
               "20261008",
               "20261009",
               "20261010",
-              "20261013"
+              "20261013",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 11,
-            "samples": 16,
-            "bullish_rate": 0.6875,
-            "pending_count": 1,
+            "samples": 17,
+            "bullish_rate": 0.6470588235294118,
+            "pending_count": 0,
             "dates": [
               "20260828",
               "20260902",
@@ -3627,7 +3654,8 @@
               "20261008",
               "20261009",
               "20261010",
-              "20261013"
+              "20261013",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -3644,13 +3672,14 @@
           "ALL_3": {
             "key": "ALL_3",
             "bullish_hits": 3,
-            "samples": 3,
-            "bullish_rate": 1.0,
-            "pending_count": 1,
+            "samples": 4,
+            "bullish_rate": 0.75,
+            "pending_count": 0,
             "dates": [
               "20260915",
               "20260925",
-              "20261005"
+              "20261005",
+              "20261016"
             ]
           },
           "ALL_2_UP_RIGHT": {
@@ -3719,34 +3748,35 @@
         "machine": "062",
         "group": "g8",
         "signals": {
-          "UP_UP_UP": true,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "UP_UP_UP": false,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
-          "ALL_3": true
+          "ALL_3": false
         },
-        "combination": "ALL_3",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 0,
-            "samples": 3,
+            "samples": 4,
             "bullish_rate": 0.0,
-            "pending_count": 1,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260907",
-              "20260921"
+              "20260921",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 6,
-            "samples": 12,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "samples": 13,
+            "bullish_rate": 0.46153846153846156,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260914",
@@ -3759,15 +3789,16 @@
               "20261011",
               "20261013",
               "20261014",
-              "20261015"
+              "20261015",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 6,
-            "samples": 10,
-            "bullish_rate": 0.6,
-            "pending_count": 1,
+            "samples": 11,
+            "bullish_rate": 0.5454545454545454,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260914",
@@ -3778,7 +3809,8 @@
               "20261007",
               "20261011",
               "20261014",
-              "20261015"
+              "20261015",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -3800,10 +3832,12 @@
           "ALL_3": {
             "key": "ALL_3",
             "bullish_hits": 0,
-            "samples": 0,
-            "bullish_rate": null,
-            "pending_count": 1,
-            "dates": []
+            "samples": 1,
+            "bullish_rate": 0.0,
+            "pending_count": 0,
+            "dates": [
+              "20261016"
+            ]
           },
           "ALL_2_UP_RIGHT": {
             "key": "ALL_2_UP_RIGHT",
@@ -3866,12 +3900,12 @@
         "group": "g9",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -3890,9 +3924,9 @@
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 5,
-            "samples": 12,
-            "bullish_rate": 0.4166666666666667,
-            "pending_count": 1,
+            "samples": 13,
+            "bullish_rate": 0.38461538461538464,
+            "pending_count": 0,
             "dates": [
               "20260901",
               "20260902",
@@ -3905,15 +3939,16 @@
               "20260926",
               "20261003",
               "20261005",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 5,
-            "samples": 12,
-            "bullish_rate": 0.4166666666666667,
-            "pending_count": 1,
+            "samples": 13,
+            "bullish_rate": 0.38461538461538464,
+            "pending_count": 0,
             "dates": [
               "20260901",
               "20260902",
@@ -3926,7 +3961,8 @@
               "20260926",
               "20261003",
               "20261005",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -3969,9 +4005,9 @@
           "ALL_2_RIGHT_LOWCONV_RIGHT": {
             "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
             "bullish_hits": 5,
-            "samples": 12,
-            "bullish_rate": 0.4166666666666667,
-            "pending_count": 1,
+            "samples": 13,
+            "bullish_rate": 0.38461538461538464,
+            "pending_count": 0,
             "dates": [
               "20260901",
               "20260902",
@@ -3984,15 +4020,16 @@
               "20260926",
               "20261003",
               "20261005",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
             "bullish_hits": 5,
-            "samples": 12,
-            "bullish_rate": 0.4166666666666667,
-            "pending_count": 1,
+            "samples": 13,
+            "bullish_rate": 0.38461538461538464,
+            "pending_count": 0,
             "dates": [
               "20260901",
               "20260902",
@@ -4005,7 +4042,8 @@
               "20260926",
               "20261003",
               "20261005",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           }
         }
@@ -4015,12 +4053,12 @@
         "group": "g1",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
-          "LOW_CONVERGENCE_RIGHT": false,
+          "RIGHT": true,
+          "LOW_CONVERGENCE_RIGHT": true,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": null,
+        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -4043,7 +4081,7 @@
             "bullish_hits": 7,
             "samples": 12,
             "bullish_rate": 0.5833333333333334,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260829",
               "20260902",
@@ -4064,7 +4102,7 @@
             "bullish_hits": 6,
             "samples": 11,
             "bullish_rate": 0.5454545454545454,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260829",
               "20260902",
@@ -4127,7 +4165,7 @@
             "bullish_hits": 6,
             "samples": 11,
             "bullish_rate": 0.5454545454545454,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260829",
               "20260902",
@@ -4147,7 +4185,7 @@
             "bullish_hits": 7,
             "samples": 12,
             "bullish_rate": 0.5833333333333334,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260829",
               "20260902",
@@ -4331,34 +4369,35 @@
         "machine": "066",
         "group": "g3",
         "signals": {
-          "UP_UP_UP": true,
+          "UP_UP_UP": false,
           "RIGHT": true,
           "LOW_CONVERGENCE_RIGHT": true,
           "DOWN_DOWN_DOWN": false,
-          "ALL_3": true
+          "ALL_3": false
         },
-        "combination": "ALL_3",
+        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
-            "bullish_hits": 2,
-            "samples": 4,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "bullish_hits": 3,
+            "samples": 5,
+            "bullish_rate": 0.6,
+            "pending_count": 0,
             "dates": [
               "20260905",
               "20260919",
               "20260922",
-              "20261006"
+              "20261006",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
-            "bullish_hits": 5,
-            "samples": 11,
-            "bullish_rate": 0.45454545454545453,
+            "bullish_hits": 6,
+            "samples": 12,
+            "bullish_rate": 0.5,
             "pending_count": 1,
             "dates": [
               "20260902",
@@ -4371,14 +4410,15 @@
               "20261004",
               "20261005",
               "20261006",
-              "20261014"
+              "20261014",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
-            "bullish_hits": 4,
-            "samples": 8,
-            "bullish_rate": 0.5,
+            "bullish_hits": 5,
+            "samples": 9,
+            "bullish_rate": 0.5555555555555556,
             "pending_count": 1,
             "dates": [
               "20260902",
@@ -4388,7 +4428,8 @@
               "20260921",
               "20261001",
               "20261005",
-              "20261014"
+              "20261014",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -4410,11 +4451,13 @@
           },
           "ALL_3": {
             "key": "ALL_3",
-            "bullish_hits": 0,
-            "samples": 0,
-            "bullish_rate": null,
-            "pending_count": 1,
-            "dates": []
+            "bullish_hits": 1,
+            "samples": 1,
+            "bullish_rate": 1.0,
+            "pending_count": 0,
+            "dates": [
+              "20261016"
+            ]
           },
           "ALL_2_UP_RIGHT": {
             "key": "ALL_2_UP_RIGHT",
@@ -4439,7 +4482,7 @@
             "bullish_hits": 4,
             "samples": 8,
             "bullish_rate": 0.5,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260902",
               "20260904",
@@ -4456,7 +4499,7 @@
             "bullish_hits": 5,
             "samples": 9,
             "bullish_rate": 0.5555555555555556,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260902",
               "20260904",
@@ -4475,22 +4518,22 @@
         "machine": "067",
         "group": "g4",
         "signals": {
-          "UP_UP_UP": true,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "UP_UP_UP": false,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
-          "ALL_3": true
+          "ALL_3": false
         },
-        "combination": "ALL_3",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 5,
-            "samples": 9,
-            "bullish_rate": 0.5555555555555556,
-            "pending_count": 1,
+            "samples": 10,
+            "bullish_rate": 0.5,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260906",
@@ -4500,15 +4543,16 @@
               "20260921",
               "20260924",
               "20260929",
-              "20261002"
+              "20261002",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 6,
-            "samples": 9,
-            "bullish_rate": 0.6666666666666666,
-            "pending_count": 1,
+            "samples": 10,
+            "bullish_rate": 0.6,
+            "pending_count": 0,
             "dates": [
               "20260829",
               "20260831",
@@ -4518,15 +4562,16 @@
               "20260924",
               "20260928",
               "20261006",
-              "20261011"
+              "20261011",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 5,
-            "samples": 7,
-            "bullish_rate": 0.7142857142857143,
-            "pending_count": 1,
+            "samples": 8,
+            "bullish_rate": 0.625,
+            "pending_count": 0,
             "dates": [
               "20260829",
               "20260831",
@@ -4534,7 +4579,8 @@
               "20260916",
               "20260924",
               "20261006",
-              "20261011"
+              "20261011",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -4555,12 +4601,13 @@
           "ALL_3": {
             "key": "ALL_3",
             "bullish_hits": 1,
-            "samples": 2,
-            "bullish_rate": 0.5,
-            "pending_count": 1,
+            "samples": 3,
+            "bullish_rate": 0.3333333333333333,
+            "pending_count": 0,
             "dates": [
               "20260906",
-              "20260924"
+              "20260924",
+              "20261016"
             ]
           },
           "ALL_2_UP_RIGHT": {
@@ -4613,7 +4660,7 @@
         "machine": "068",
         "group": "g5",
         "signals": {
-          "UP_UP_UP": true,
+          "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
@@ -4626,11 +4673,12 @@
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 0,
-            "samples": 1,
+            "samples": 2,
             "bullish_rate": 0.0,
-            "pending_count": 1,
+            "pending_count": 0,
             "dates": [
-              "20260915"
+              "20260915",
+              "20261016"
             ]
           },
           "RIGHT": {
@@ -4900,12 +4948,12 @@
         "group": "g7",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": true,
-          "LOW_CONVERGENCE_RIGHT": true,
+          "RIGHT": false,
+          "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -4928,9 +4976,9 @@
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 4,
-            "samples": 17,
-            "bullish_rate": 0.23529411764705882,
-            "pending_count": 1,
+            "samples": 18,
+            "bullish_rate": 0.2222222222222222,
+            "pending_count": 0,
             "dates": [
               "20260828",
               "20260831",
@@ -4948,15 +4996,16 @@
               "20261003",
               "20261005",
               "20261006",
-              "20261009"
+              "20261009",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
             "key": "LOW_CONVERGENCE_RIGHT",
             "bullish_hits": 4,
-            "samples": 15,
-            "bullish_rate": 0.26666666666666666,
-            "pending_count": 1,
+            "samples": 16,
+            "bullish_rate": 0.25,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260901",
@@ -4972,7 +5021,8 @@
               "20261003",
               "20261005",
               "20261006",
-              "20261009"
+              "20261009",
+              "20261016"
             ]
           },
           "DOWN_DOWN_DOWN": {
@@ -5020,9 +5070,9 @@
           "ALL_2_RIGHT_LOWCONV_RIGHT": {
             "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
             "bullish_hits": 4,
-            "samples": 14,
-            "bullish_rate": 0.2857142857142857,
-            "pending_count": 1,
+            "samples": 15,
+            "bullish_rate": 0.26666666666666666,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260901",
@@ -5037,15 +5087,16 @@
               "20261003",
               "20261005",
               "20261006",
-              "20261009"
+              "20261009",
+              "20261016"
             ]
           },
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
             "bullish_hits": 4,
-            "samples": 15,
-            "bullish_rate": 0.26666666666666666,
-            "pending_count": 1,
+            "samples": 16,
+            "bullish_rate": 0.25,
+            "pending_count": 0,
             "dates": [
               "20260831",
               "20260901",
@@ -5061,7 +5112,8 @@
               "20261003",
               "20261005",
               "20261006",
-              "20261009"
+              "20261009",
+              "20261016"
             ]
           }
         }
@@ -5073,7 +5125,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
         "combination": null,
@@ -5144,7 +5196,7 @@
             "bullish_hits": 5,
             "samples": 5,
             "bullish_rate": 1.0,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260907",
               "20260911",
@@ -5293,15 +5345,16 @@
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
             "bullish_hits": 4,
-            "samples": 5,
-            "bullish_rate": 0.8,
+            "samples": 6,
+            "bullish_rate": 0.6666666666666666,
             "pending_count": 1,
             "dates": [
               "20260904",
               "20260909",
               "20260910",
               "20260911",
-              "20260917"
+              "20260917",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -5380,7 +5433,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": true,
+          "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
         "combination": null,
@@ -5436,16 +5489,17 @@
           },
           "DOWN_DOWN_DOWN": {
             "key": "DOWN_DOWN_DOWN",
-            "bullish_hits": 3,
-            "samples": 5,
-            "bullish_rate": 0.6,
-            "pending_count": 1,
+            "bullish_hits": 4,
+            "samples": 6,
+            "bullish_rate": 0.6666666666666666,
+            "pending_count": 0,
             "dates": [
               "20260909",
               "20260924",
               "20260925",
               "20260930",
-              "20261001"
+              "20261001",
+              "20261016"
             ]
           },
           "ALL_3": {
@@ -5516,7 +5570,7 @@
           "UP_UP_UP": false,
           "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
         "combination": null,
@@ -5585,7 +5639,7 @@
             "bullish_hits": 0,
             "samples": 2,
             "bullish_rate": 0.0,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260920",
               "20261013"
@@ -5662,13 +5716,13 @@
         "machine": "075",
         "group": "g3",
         "signals": {
-          "UP_UP_UP": false,
-          "RIGHT": false,
+          "UP_UP_UP": true,
+          "RIGHT": true,
           "LOW_CONVERGENCE_RIGHT": false,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": null,
+        "combination": "ALL_2_UP_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -5677,7 +5731,7 @@
             "bullish_hits": 8,
             "samples": 11,
             "bullish_rate": 0.7272727272727273,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260829",
@@ -5697,7 +5751,7 @@
             "bullish_hits": 9,
             "samples": 17,
             "bullish_rate": 0.5294117647058824,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -5771,7 +5825,7 @@
             "bullish_hits": 2,
             "samples": 2,
             "bullish_rate": 1.0,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20261007"
@@ -5809,7 +5863,7 @@
             "bullish_hits": 6,
             "samples": 12,
             "bullish_rate": 0.5,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260828",
               "20260830",
@@ -5832,12 +5886,12 @@
         "group": "g4",
         "signals": {
           "UP_UP_UP": false,
-          "RIGHT": false,
-          "LOW_CONVERGENCE_RIGHT": false,
+          "RIGHT": true,
+          "LOW_CONVERGENCE_RIGHT": true,
           "DOWN_DOWN_DOWN": false,
           "ALL_3": false
         },
-        "combination": null,
+        "combination": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
@@ -5864,7 +5918,7 @@
             "bullish_hits": 2,
             "samples": 6,
             "bullish_rate": 0.3333333333333333,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260902",
               "20260908",
@@ -5879,7 +5933,7 @@
             "bullish_hits": 1,
             "samples": 4,
             "bullish_rate": 0.25,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260908",
               "20260919",
@@ -5936,7 +5990,7 @@
             "bullish_hits": 0,
             "samples": 2,
             "bullish_rate": 0.0,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260908",
               "20260925"
@@ -5947,7 +6001,7 @@
             "bullish_hits": 1,
             "samples": 3,
             "bullish_rate": 0.3333333333333333,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260902",
               "20260908",
@@ -5960,22 +6014,22 @@
         "machine": "077",
         "group": "g5",
         "signals": {
-          "UP_UP_UP": true,
-          "RIGHT": true,
+          "UP_UP_UP": false,
+          "RIGHT": false,
           "LOW_CONVERGENCE_RIGHT": false,
-          "DOWN_DOWN_DOWN": false,
+          "DOWN_DOWN_DOWN": true,
           "ALL_3": false
         },
-        "combination": "ALL_2_UP_RIGHT",
+        "combination": null,
         "actual_bullish": null,
         "evaluation_status": "pending",
         "history": {
           "UP_UP_UP": {
             "key": "UP_UP_UP",
             "bullish_hits": 5,
-            "samples": 7,
-            "bullish_rate": 0.7142857142857143,
-            "pending_count": 1,
+            "samples": 8,
+            "bullish_rate": 0.625,
+            "pending_count": 0,
             "dates": [
               "20260904",
               "20260908",
@@ -5983,15 +6037,16 @@
               "20260920",
               "20260921",
               "20260923",
-              "20260928"
+              "20260928",
+              "20261016"
             ]
           },
           "RIGHT": {
             "key": "RIGHT",
             "bullish_hits": 4,
-            "samples": 10,
-            "bullish_rate": 0.4,
-            "pending_count": 1,
+            "samples": 11,
+            "bullish_rate": 0.36363636363636365,
+            "pending_count": 0,
             "dates": [
               "20260830",
               "20260906",
@@ -6002,7 +6057,8 @@
               "20261003",
               "20261005",
               "20261007",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           },
           "LOW_CONVERGENCE_RIGHT": {
@@ -6029,7 +6085,7 @@
             "bullish_hits": 3,
             "samples": 5,
             "bullish_rate": 0.6,
-            "pending_count": 0,
+            "pending_count": 1,
             "dates": [
               "20260829",
               "20260907",
@@ -6049,10 +6105,12 @@
           "ALL_2_UP_RIGHT": {
             "key": "ALL_2_UP_RIGHT",
             "bullish_hits": 0,
-            "samples": 0,
-            "bullish_rate": null,
-            "pending_count": 1,
-            "dates": []
+            "samples": 1,
+            "bullish_rate": 0.0,
+            "pending_count": 0,
+            "dates": [
+              "20261016"
+            ]
           },
           "ALL_2_UP_LOWCONV_RIGHT": {
             "key": "ALL_2_UP_LOWCONV_RIGHT",
@@ -6084,9 +6142,9 @@
           "ALL_2_TOTAL": {
             "key": "ALL_2_TOTAL",
             "bullish_hits": 4,
-            "samples": 10,
-            "bullish_rate": 0.4,
-            "pending_count": 1,
+            "samples": 11,
+            "bullish_rate": 0.36363636363636365,
+            "pending_count": 0,
             "dates": [
               "20260830",
               "20260906",
@@ -6097,7 +6155,8 @@
               "20261003",
               "20261005",
               "20261007",
-              "20261008"
+              "20261008",
+              "20261016"
             ]
           }
         }
@@ -6107,10 +6166,10 @@
   "global_signal_stats": {
     "UP_UP_UP": {
       "key": "UP_UP_UP",
-      "bullish_hits": 112,
-      "samples": 249,
-      "bullish_rate": 0.4497991967871486,
-      "pending_count": 7,
+      "bullish_hits": 113,
+      "samples": 256,
+      "bullish_rate": 0.44140625,
+      "pending_count": 1,
       "dates": [
         "20260828",
         "20260829",
@@ -6160,15 +6219,16 @@
         "20261012",
         "20261013",
         "20261014",
-        "20261015"
+        "20261015",
+        "20261016"
       ]
     },
     "RIGHT": {
       "key": "RIGHT",
-      "bullish_hits": 207,
-      "samples": 459,
-      "bullish_rate": 0.45098039215686275,
-      "pending_count": 12,
+      "bullish_hits": 210,
+      "samples": 471,
+      "bullish_rate": 0.445859872611465,
+      "pending_count": 9,
       "dates": [
         "20260828",
         "20260829",
@@ -6218,318 +6278,15 @@
         "20261012",
         "20261013",
         "20261014",
-        "20261015"
+        "20261015",
+        "20261016"
       ]
     },
     "LOW_CONVERGENCE_RIGHT": {
       "key": "LOW_CONVERGENCE_RIGHT",
-      "bullish_hits": 173,
-      "samples": 379,
-      "bullish_rate": 0.45646437994722955,
-      "pending_count": 10,
-      "dates": [
-        "20260828",
-        "20260829",
-        "20260830",
-        "20260831",
-        "20260901",
-        "20260902",
-        "20260903",
-        "20260904",
-        "20260905",
-        "20260906",
-        "20260907",
-        "20260908",
-        "20260909",
-        "20260910",
-        "20260911",
-        "20260912",
-        "20260913",
-        "20260914",
-        "20260915",
-        "20260916",
-        "20260917",
-        "20260918",
-        "20260919",
-        "20260920",
-        "20260921",
-        "20260922",
-        "20260923",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927",
-        "20260928",
-        "20260929",
-        "20260930",
-        "20261001",
-        "20261002",
-        "20261003",
-        "20261004",
-        "20261005",
-        "20261006",
-        "20261007",
-        "20261008",
-        "20261009",
-        "20261010",
-        "20261011",
-        "20261012",
-        "20261013",
-        "20261014",
-        "20261015"
-      ]
-    },
-    "DOWN_DOWN_DOWN": {
-      "key": "DOWN_DOWN_DOWN",
-      "bullish_hits": 112,
-      "samples": 229,
-      "bullish_rate": 0.4890829694323144,
-      "pending_count": 7,
-      "dates": [
-        "20260828",
-        "20260829",
-        "20260830",
-        "20260831",
-        "20260901",
-        "20260902",
-        "20260903",
-        "20260904",
-        "20260905",
-        "20260906",
-        "20260907",
-        "20260908",
-        "20260909",
-        "20260910",
-        "20260911",
-        "20260912",
-        "20260913",
-        "20260914",
-        "20260915",
-        "20260916",
-        "20260917",
-        "20260918",
-        "20260919",
-        "20260920",
-        "20260921",
-        "20260922",
-        "20260923",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927",
-        "20260928",
-        "20260929",
-        "20260930",
-        "20261001",
-        "20261002",
-        "20261003",
-        "20261004",
-        "20261005",
-        "20261006",
-        "20261007",
-        "20261008",
-        "20261009",
-        "20261010",
-        "20261011",
-        "20261012",
-        "20261013",
-        "20261014",
-        "20261015"
-      ]
-    },
-    "ALL_3": {
-      "key": "ALL_3",
-      "bullish_hits": 21,
-      "samples": 50,
-      "bullish_rate": 0.42,
-      "pending_count": 5,
-      "dates": [
-        "20260828",
-        "20260829",
-        "20260830",
-        "20260902",
-        "20260903",
-        "20260906",
-        "20260908",
-        "20260909",
-        "20260910",
-        "20260911",
-        "20260912",
-        "20260913",
-        "20260914",
-        "20260915",
-        "20260916",
-        "20260917",
-        "20260918",
-        "20260919",
-        "20260920",
-        "20260921",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927",
-        "20260928",
-        "20260929",
-        "20260930",
-        "20261001",
-        "20261003",
-        "20261004",
-        "20261005",
-        "20261007",
-        "20261008",
-        "20261010",
-        "20261013"
-      ]
-    }
-  },
-  "exact_combination_stats": {
-    "ALL_3": {
-      "key": "ALL_3",
-      "bullish_hits": 21,
-      "samples": 50,
-      "bullish_rate": 0.42,
-      "pending_count": 5,
-      "dates": [
-        "20260828",
-        "20260829",
-        "20260830",
-        "20260902",
-        "20260903",
-        "20260906",
-        "20260908",
-        "20260909",
-        "20260910",
-        "20260911",
-        "20260912",
-        "20260913",
-        "20260914",
-        "20260915",
-        "20260916",
-        "20260917",
-        "20260918",
-        "20260919",
-        "20260920",
-        "20260921",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927",
-        "20260928",
-        "20260929",
-        "20260930",
-        "20261001",
-        "20261003",
-        "20261004",
-        "20261005",
-        "20261007",
-        "20261008",
-        "20261010",
-        "20261013"
-      ]
-    },
-    "ALL_2_UP_RIGHT": {
-      "key": "ALL_2_UP_RIGHT",
-      "bullish_hits": 14,
-      "samples": 32,
-      "bullish_rate": 0.4375,
-      "pending_count": 1,
-      "dates": [
-        "20260828",
-        "20260902",
-        "20260906",
-        "20260910",
-        "20260911",
-        "20260913",
-        "20260914",
-        "20260918",
-        "20260921",
-        "20260922",
-        "20260923",
-        "20260924",
-        "20260929",
-        "20261002",
-        "20261004",
-        "20261005",
-        "20261006",
-        "20261007",
-        "20261009",
-        "20261010",
-        "20261011",
-        "20261014",
-        "20261015"
-      ]
-    },
-    "ALL_2_UP_LOWCONV_RIGHT": {
-      "key": "ALL_2_UP_LOWCONV_RIGHT",
-      "bullish_hits": 0,
-      "samples": 0,
-      "bullish_rate": null,
-      "pending_count": 0,
-      "dates": []
-    },
-    "ALL_2_RIGHT_LOWCONV_RIGHT": {
-      "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
-      "bullish_hits": 152,
-      "samples": 329,
-      "bullish_rate": 0.46200607902735563,
-      "pending_count": 5,
-      "dates": [
-        "20260828",
-        "20260829",
-        "20260830",
-        "20260831",
-        "20260901",
-        "20260902",
-        "20260903",
-        "20260904",
-        "20260905",
-        "20260906",
-        "20260907",
-        "20260908",
-        "20260909",
-        "20260910",
-        "20260911",
-        "20260912",
-        "20260913",
-        "20260914",
-        "20260915",
-        "20260916",
-        "20260917",
-        "20260918",
-        "20260919",
-        "20260920",
-        "20260921",
-        "20260922",
-        "20260923",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927",
-        "20260928",
-        "20260929",
-        "20260930",
-        "20261001",
-        "20261002",
-        "20261003",
-        "20261004",
-        "20261005",
-        "20261006",
-        "20261007",
-        "20261008",
-        "20261009",
-        "20261010",
-        "20261011",
-        "20261012",
-        "20261013",
-        "20261014",
-        "20261015"
-      ]
-    },
-    "ALL_2_TOTAL": {
-      "key": "ALL_2_TOTAL",
-      "bullish_hits": 166,
-      "samples": 361,
-      "bullish_rate": 0.4598337950138504,
+      "bullish_hits": 176,
+      "samples": 389,
+      "bullish_rate": 0.4524421593830334,
       "pending_count": 6,
       "dates": [
         "20260828",
@@ -6580,7 +6337,318 @@
         "20261012",
         "20261013",
         "20261014",
-        "20261015"
+        "20261015",
+        "20261016"
+      ]
+    },
+    "DOWN_DOWN_DOWN": {
+      "key": "DOWN_DOWN_DOWN",
+      "bullish_hits": 115,
+      "samples": 236,
+      "bullish_rate": 0.4872881355932203,
+      "pending_count": 10,
+      "dates": [
+        "20260828",
+        "20260829",
+        "20260830",
+        "20260831",
+        "20260901",
+        "20260902",
+        "20260903",
+        "20260904",
+        "20260905",
+        "20260906",
+        "20260907",
+        "20260908",
+        "20260909",
+        "20260910",
+        "20260911",
+        "20260912",
+        "20260913",
+        "20260914",
+        "20260915",
+        "20260916",
+        "20260917",
+        "20260918",
+        "20260919",
+        "20260920",
+        "20260921",
+        "20260922",
+        "20260923",
+        "20260924",
+        "20260925",
+        "20260926",
+        "20260927",
+        "20260928",
+        "20260929",
+        "20260930",
+        "20261001",
+        "20261002",
+        "20261003",
+        "20261004",
+        "20261005",
+        "20261006",
+        "20261007",
+        "20261008",
+        "20261009",
+        "20261010",
+        "20261011",
+        "20261012",
+        "20261013",
+        "20261014",
+        "20261015",
+        "20261016"
+      ]
+    },
+    "ALL_3": {
+      "key": "ALL_3",
+      "bullish_hits": 22,
+      "samples": 55,
+      "bullish_rate": 0.4,
+      "pending_count": 0,
+      "dates": [
+        "20260828",
+        "20260829",
+        "20260830",
+        "20260902",
+        "20260903",
+        "20260906",
+        "20260908",
+        "20260909",
+        "20260910",
+        "20260911",
+        "20260912",
+        "20260913",
+        "20260914",
+        "20260915",
+        "20260916",
+        "20260917",
+        "20260918",
+        "20260919",
+        "20260920",
+        "20260921",
+        "20260924",
+        "20260925",
+        "20260926",
+        "20260927",
+        "20260928",
+        "20260929",
+        "20260930",
+        "20261001",
+        "20261003",
+        "20261004",
+        "20261005",
+        "20261007",
+        "20261008",
+        "20261010",
+        "20261013",
+        "20261016"
+      ]
+    }
+  },
+  "exact_combination_stats": {
+    "ALL_3": {
+      "key": "ALL_3",
+      "bullish_hits": 22,
+      "samples": 55,
+      "bullish_rate": 0.4,
+      "pending_count": 0,
+      "dates": [
+        "20260828",
+        "20260829",
+        "20260830",
+        "20260902",
+        "20260903",
+        "20260906",
+        "20260908",
+        "20260909",
+        "20260910",
+        "20260911",
+        "20260912",
+        "20260913",
+        "20260914",
+        "20260915",
+        "20260916",
+        "20260917",
+        "20260918",
+        "20260919",
+        "20260920",
+        "20260921",
+        "20260924",
+        "20260925",
+        "20260926",
+        "20260927",
+        "20260928",
+        "20260929",
+        "20260930",
+        "20261001",
+        "20261003",
+        "20261004",
+        "20261005",
+        "20261007",
+        "20261008",
+        "20261010",
+        "20261013",
+        "20261016"
+      ]
+    },
+    "ALL_2_UP_RIGHT": {
+      "key": "ALL_2_UP_RIGHT",
+      "bullish_hits": 14,
+      "samples": 33,
+      "bullish_rate": 0.42424242424242425,
+      "pending_count": 1,
+      "dates": [
+        "20260828",
+        "20260902",
+        "20260906",
+        "20260910",
+        "20260911",
+        "20260913",
+        "20260914",
+        "20260918",
+        "20260921",
+        "20260922",
+        "20260923",
+        "20260924",
+        "20260929",
+        "20261002",
+        "20261004",
+        "20261005",
+        "20261006",
+        "20261007",
+        "20261009",
+        "20261010",
+        "20261011",
+        "20261014",
+        "20261015",
+        "20261016"
+      ]
+    },
+    "ALL_2_UP_LOWCONV_RIGHT": {
+      "key": "ALL_2_UP_LOWCONV_RIGHT",
+      "bullish_hits": 0,
+      "samples": 0,
+      "bullish_rate": null,
+      "pending_count": 0,
+      "dates": []
+    },
+    "ALL_2_RIGHT_LOWCONV_RIGHT": {
+      "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
+      "bullish_hits": 154,
+      "samples": 334,
+      "bullish_rate": 0.46107784431137727,
+      "pending_count": 6,
+      "dates": [
+        "20260828",
+        "20260829",
+        "20260830",
+        "20260831",
+        "20260901",
+        "20260902",
+        "20260903",
+        "20260904",
+        "20260905",
+        "20260906",
+        "20260907",
+        "20260908",
+        "20260909",
+        "20260910",
+        "20260911",
+        "20260912",
+        "20260913",
+        "20260914",
+        "20260915",
+        "20260916",
+        "20260917",
+        "20260918",
+        "20260919",
+        "20260920",
+        "20260921",
+        "20260922",
+        "20260923",
+        "20260924",
+        "20260925",
+        "20260926",
+        "20260927",
+        "20260928",
+        "20260929",
+        "20260930",
+        "20261001",
+        "20261002",
+        "20261003",
+        "20261004",
+        "20261005",
+        "20261006",
+        "20261007",
+        "20261008",
+        "20261009",
+        "20261010",
+        "20261011",
+        "20261012",
+        "20261013",
+        "20261014",
+        "20261015",
+        "20261016"
+      ]
+    },
+    "ALL_2_TOTAL": {
+      "key": "ALL_2_TOTAL",
+      "bullish_hits": 168,
+      "samples": 367,
+      "bullish_rate": 0.45776566757493187,
+      "pending_count": 7,
+      "dates": [
+        "20260828",
+        "20260829",
+        "20260830",
+        "20260831",
+        "20260901",
+        "20260902",
+        "20260903",
+        "20260904",
+        "20260905",
+        "20260906",
+        "20260907",
+        "20260908",
+        "20260909",
+        "20260910",
+        "20260911",
+        "20260912",
+        "20260913",
+        "20260914",
+        "20260915",
+        "20260916",
+        "20260917",
+        "20260918",
+        "20260919",
+        "20260920",
+        "20260921",
+        "20260922",
+        "20260923",
+        "20260924",
+        "20260925",
+        "20260926",
+        "20260927",
+        "20260928",
+        "20260929",
+        "20260930",
+        "20261001",
+        "20261002",
+        "20261003",
+        "20261004",
+        "20261005",
+        "20261006",
+        "20261007",
+        "20261008",
+        "20261009",
+        "20261010",
+        "20261011",
+        "20261012",
+        "20261013",
+        "20261014",
+        "20261015",
+        "20261016"
       ]
     }
   },
@@ -6637,15 +6705,16 @@
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
         "bullish_hits": 2,
-        "samples": 5,
-        "bullish_rate": 0.4,
+        "samples": 6,
+        "bullish_rate": 0.3333333333333333,
         "pending_count": 1,
         "dates": [
           "20260831",
           "20260905",
           "20260909",
           "20260918",
-          "20260922"
+          "20260922",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -6708,7 +6777,7 @@
         "bullish_hits": 3,
         "samples": 7,
         "bullish_rate": 0.42857142857142855,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260830",
           "20260831",
@@ -6747,7 +6816,7 @@
         "bullish_hits": 6,
         "samples": 11,
         "bullish_rate": 0.5454545454545454,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260901",
           "20260913",
@@ -6906,7 +6975,7 @@
         "bullish_hits": 5,
         "samples": 14,
         "bullish_rate": 0.35714285714285715,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260901",
           "20260914",
@@ -6929,7 +6998,7 @@
         "bullish_hits": 4,
         "samples": 13,
         "bullish_rate": 0.3076923076923077,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260901",
           "20260914",
@@ -6995,10 +7064,10 @@
       },
       "RIGHT": {
         "key": "RIGHT",
-        "bullish_hits": 4,
-        "samples": 9,
-        "bullish_rate": 0.4444444444444444,
-        "pending_count": 1,
+        "bullish_hits": 5,
+        "samples": 10,
+        "bullish_rate": 0.5,
+        "pending_count": 0,
         "dates": [
           "20260903",
           "20260908",
@@ -7008,15 +7077,16 @@
           "20260930",
           "20261003",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
-        "bullish_hits": 4,
-        "samples": 8,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "bullish_hits": 5,
+        "samples": 9,
+        "bullish_rate": 0.5555555555555556,
+        "pending_count": 0,
         "dates": [
           "20260903",
           "20260908",
@@ -7025,7 +7095,8 @@
           "20260930",
           "20261003",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -7078,9 +7149,9 @@
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 7,
-        "samples": 14,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 15,
+        "bullish_rate": 0.4666666666666667,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260904",
@@ -7095,15 +7166,16 @@
           "20260930",
           "20261001",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 6,
-        "samples": 11,
-        "bullish_rate": 0.5454545454545454,
-        "pending_count": 1,
+        "samples": 12,
+        "bullish_rate": 0.5,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260912",
@@ -7115,7 +7187,8 @@
           "20260930",
           "20261001",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -7167,7 +7240,7 @@
         "bullish_hits": 4,
         "samples": 13,
         "bullish_rate": 0.3076923076923077,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260829",
@@ -7248,9 +7321,9 @@
       },
       "RIGHT": {
         "key": "RIGHT",
-        "bullish_hits": 3,
-        "samples": 9,
-        "bullish_rate": 0.3333333333333333,
+        "bullish_hits": 4,
+        "samples": 10,
+        "bullish_rate": 0.4,
         "pending_count": 1,
         "dates": [
           "20260915",
@@ -7261,14 +7334,15 @@
           "20260927",
           "20260929",
           "20260930",
-          "20261015"
+          "20261015",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
-        "bullish_hits": 1,
-        "samples": 6,
-        "bullish_rate": 0.16666666666666666,
+        "bullish_hits": 2,
+        "samples": 7,
+        "bullish_rate": 0.2857142857142857,
         "pending_count": 1,
         "dates": [
           "20260915",
@@ -7276,7 +7350,8 @@
           "20260926",
           "20260927",
           "20260929",
-          "20260930"
+          "20260930",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -7355,7 +7430,7 @@
         "bullish_hits": 2,
         "samples": 4,
         "bullish_rate": 0.5,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260911",
           "20260917",
@@ -7520,7 +7595,7 @@
         "bullish_hits": 1,
         "samples": 2,
         "bullish_rate": 0.5,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260912",
           "20261011"
@@ -7604,8 +7679,8 @@
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
         "bullish_hits": 3,
-        "samples": 8,
-        "bullish_rate": 0.375,
+        "samples": 9,
+        "bullish_rate": 0.3333333333333333,
         "pending_count": 1,
         "dates": [
           "20260902",
@@ -7615,7 +7690,8 @@
           "20261003",
           "20261004",
           "20261006",
-          "20261014"
+          "20261014",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -7731,7 +7807,7 @@
         "bullish_hits": 8,
         "samples": 11,
         "bullish_rate": 0.7272727272727273,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -7751,7 +7827,7 @@
         "bullish_hits": 6,
         "samples": 9,
         "bullish_rate": 0.6666666666666666,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -7766,15 +7842,16 @@
       },
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
-        "bullish_hits": 0,
-        "samples": 4,
-        "bullish_rate": 0.0,
-        "pending_count": 1,
+        "bullish_hits": 1,
+        "samples": 5,
+        "bullish_rate": 0.2,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260905",
           "20260919",
-          "20260924"
+          "20260924",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -8166,17 +8243,18 @@
       },
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
-        "bullish_hits": 2,
-        "samples": 6,
-        "bullish_rate": 0.3333333333333333,
-        "pending_count": 1,
+        "bullish_hits": 3,
+        "samples": 7,
+        "bullish_rate": 0.42857142857142855,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260911",
           "20260916",
           "20260922",
           "20261011",
-          "20261013"
+          "20261013",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -8240,15 +8318,16 @@
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
         "bullish_hits": 2,
-        "samples": 5,
-        "bullish_rate": 0.4,
-        "pending_count": 1,
+        "samples": 6,
+        "bullish_rate": 0.3333333333333333,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260920",
           "20261004",
           "20261009",
-          "20261015"
+          "20261015",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -8279,9 +8358,9 @@
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 3,
-        "samples": 9,
-        "bullish_rate": 0.3333333333333333,
-        "pending_count": 1,
+        "samples": 10,
+        "bullish_rate": 0.3,
+        "pending_count": 0,
         "dates": [
           "20260907",
           "20260912",
@@ -8291,7 +8370,8 @@
           "20260927",
           "20261003",
           "20261004",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
@@ -8338,9 +8418,9 @@
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 6,
-        "samples": 9,
-        "bullish_rate": 0.6666666666666666,
-        "pending_count": 1,
+        "samples": 10,
+        "bullish_rate": 0.6,
+        "pending_count": 0,
         "dates": [
           "20260829",
           "20260831",
@@ -8350,15 +8430,16 @@
           "20260915",
           "20260925",
           "20260930",
-          "20261005"
+          "20261005",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 11,
-        "samples": 16,
-        "bullish_rate": 0.6875,
-        "pending_count": 1,
+        "samples": 17,
+        "bullish_rate": 0.6470588235294118,
+        "pending_count": 0,
         "dates": [
           "20260828",
           "20260902",
@@ -8375,15 +8456,16 @@
           "20261008",
           "20261009",
           "20261010",
-          "20261013"
+          "20261013",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 11,
-        "samples": 16,
-        "bullish_rate": 0.6875,
-        "pending_count": 1,
+        "samples": 17,
+        "bullish_rate": 0.6470588235294118,
+        "pending_count": 0,
         "dates": [
           "20260828",
           "20260902",
@@ -8400,7 +8482,8 @@
           "20261008",
           "20261009",
           "20261010",
-          "20261013"
+          "20261013",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -8417,13 +8500,14 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 3,
-        "samples": 3,
-        "bullish_rate": 1.0,
-        "pending_count": 1,
+        "samples": 4,
+        "bullish_rate": 0.75,
+        "pending_count": 0,
         "dates": [
           "20260915",
           "20260925",
-          "20261005"
+          "20261005",
+          "20261016"
         ]
       }
     },
@@ -8431,21 +8515,22 @@
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 0,
-        "samples": 3,
+        "samples": 4,
         "bullish_rate": 0.0,
-        "pending_count": 1,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260907",
-          "20260921"
+          "20260921",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 6,
-        "samples": 12,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 13,
+        "bullish_rate": 0.46153846153846156,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260914",
@@ -8458,15 +8543,16 @@
           "20261011",
           "20261013",
           "20261014",
-          "20261015"
+          "20261015",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 6,
-        "samples": 10,
-        "bullish_rate": 0.6,
-        "pending_count": 1,
+        "samples": 11,
+        "bullish_rate": 0.5454545454545454,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260914",
@@ -8477,7 +8563,8 @@
           "20261007",
           "20261011",
           "20261014",
-          "20261015"
+          "20261015",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -8499,10 +8586,12 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "samples": 1,
+        "bullish_rate": 0.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       }
     },
     "063": {
@@ -8521,9 +8610,9 @@
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 5,
-        "samples": 12,
-        "bullish_rate": 0.4166666666666667,
-        "pending_count": 1,
+        "samples": 13,
+        "bullish_rate": 0.38461538461538464,
+        "pending_count": 0,
         "dates": [
           "20260901",
           "20260902",
@@ -8536,15 +8625,16 @@
           "20260926",
           "20261003",
           "20261005",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 5,
-        "samples": 12,
-        "bullish_rate": 0.4166666666666667,
-        "pending_count": 1,
+        "samples": 13,
+        "bullish_rate": 0.38461538461538464,
+        "pending_count": 0,
         "dates": [
           "20260901",
           "20260902",
@@ -8557,7 +8647,8 @@
           "20260926",
           "20261003",
           "20261005",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -8602,7 +8693,7 @@
         "bullish_hits": 7,
         "samples": 12,
         "bullish_rate": 0.5833333333333334,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260829",
           "20260902",
@@ -8623,7 +8714,7 @@
         "bullish_hits": 6,
         "samples": 11,
         "bullish_rate": 0.5454545454545454,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260829",
           "20260902",
@@ -8759,22 +8850,23 @@
     "066": {
       "UP_UP_UP": {
         "key": "UP_UP_UP",
-        "bullish_hits": 2,
-        "samples": 4,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "bullish_hits": 3,
+        "samples": 5,
+        "bullish_rate": 0.6,
+        "pending_count": 0,
         "dates": [
           "20260905",
           "20260919",
           "20260922",
-          "20261006"
+          "20261006",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
-        "bullish_hits": 5,
-        "samples": 11,
-        "bullish_rate": 0.45454545454545453,
+        "bullish_hits": 6,
+        "samples": 12,
+        "bullish_rate": 0.5,
         "pending_count": 1,
         "dates": [
           "20260902",
@@ -8787,14 +8879,15 @@
           "20261004",
           "20261005",
           "20261006",
-          "20261014"
+          "20261014",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
-        "bullish_hits": 4,
-        "samples": 8,
-        "bullish_rate": 0.5,
+        "bullish_hits": 5,
+        "samples": 9,
+        "bullish_rate": 0.5555555555555556,
         "pending_count": 1,
         "dates": [
           "20260902",
@@ -8804,7 +8897,8 @@
           "20260921",
           "20261001",
           "20261005",
-          "20261014"
+          "20261014",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -8826,20 +8920,22 @@
       },
       "ALL_3": {
         "key": "ALL_3",
-        "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "bullish_hits": 1,
+        "samples": 1,
+        "bullish_rate": 1.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       }
     },
     "067": {
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 5,
-        "samples": 9,
-        "bullish_rate": 0.5555555555555556,
-        "pending_count": 1,
+        "samples": 10,
+        "bullish_rate": 0.5,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260906",
@@ -8849,15 +8945,16 @@
           "20260921",
           "20260924",
           "20260929",
-          "20261002"
+          "20261002",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 6,
-        "samples": 9,
-        "bullish_rate": 0.6666666666666666,
-        "pending_count": 1,
+        "samples": 10,
+        "bullish_rate": 0.6,
+        "pending_count": 0,
         "dates": [
           "20260829",
           "20260831",
@@ -8867,15 +8964,16 @@
           "20260924",
           "20260928",
           "20261006",
-          "20261011"
+          "20261011",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 5,
-        "samples": 7,
-        "bullish_rate": 0.7142857142857143,
-        "pending_count": 1,
+        "samples": 8,
+        "bullish_rate": 0.625,
+        "pending_count": 0,
         "dates": [
           "20260829",
           "20260831",
@@ -8883,7 +8981,8 @@
           "20260916",
           "20260924",
           "20261006",
-          "20261011"
+          "20261011",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -8904,12 +9003,13 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 1,
-        "samples": 2,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 3,
+        "bullish_rate": 0.3333333333333333,
+        "pending_count": 0,
         "dates": [
           "20260906",
-          "20260924"
+          "20260924",
+          "20261016"
         ]
       }
     },
@@ -8917,11 +9017,12 @@
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 0,
-        "samples": 1,
+        "samples": 2,
         "bullish_rate": 0.0,
-        "pending_count": 1,
+        "pending_count": 0,
         "dates": [
-          "20260915"
+          "20260915",
+          "20261016"
         ]
       },
       "RIGHT": {
@@ -9085,9 +9186,9 @@
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 4,
-        "samples": 17,
-        "bullish_rate": 0.23529411764705882,
-        "pending_count": 1,
+        "samples": 18,
+        "bullish_rate": 0.2222222222222222,
+        "pending_count": 0,
         "dates": [
           "20260828",
           "20260831",
@@ -9105,15 +9206,16 @@
           "20261003",
           "20261005",
           "20261006",
-          "20261009"
+          "20261009",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 4,
-        "samples": 15,
-        "bullish_rate": 0.26666666666666666,
-        "pending_count": 1,
+        "samples": 16,
+        "bullish_rate": 0.25,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260901",
@@ -9129,7 +9231,8 @@
           "20261003",
           "20261005",
           "20261006",
-          "20261009"
+          "20261009",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -9222,7 +9325,7 @@
         "bullish_hits": 5,
         "samples": 5,
         "bullish_rate": 1.0,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260907",
           "20260911",
@@ -9304,15 +9407,16 @@
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
         "bullish_hits": 4,
-        "samples": 5,
-        "bullish_rate": 0.8,
+        "samples": 6,
+        "bullish_rate": 0.6666666666666666,
         "pending_count": 1,
         "dates": [
           "20260904",
           "20260909",
           "20260910",
           "20260911",
-          "20260917"
+          "20260917",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -9374,16 +9478,17 @@
       },
       "DOWN_DOWN_DOWN": {
         "key": "DOWN_DOWN_DOWN",
-        "bullish_hits": 3,
-        "samples": 5,
-        "bullish_rate": 0.6,
-        "pending_count": 1,
+        "bullish_hits": 4,
+        "samples": 6,
+        "bullish_rate": 0.6666666666666666,
+        "pending_count": 0,
         "dates": [
           "20260909",
           "20260924",
           "20260925",
           "20260930",
-          "20261001"
+          "20261001",
+          "20261016"
         ]
       },
       "ALL_3": {
@@ -9460,7 +9565,7 @@
         "bullish_hits": 0,
         "samples": 2,
         "bullish_rate": 0.0,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260920",
           "20261013"
@@ -9484,7 +9589,7 @@
         "bullish_hits": 8,
         "samples": 11,
         "bullish_rate": 0.7272727272727273,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260829",
@@ -9504,7 +9609,7 @@
         "bullish_hits": 9,
         "samples": 17,
         "bullish_rate": 0.5294117647058824,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -9598,7 +9703,7 @@
         "bullish_hits": 2,
         "samples": 6,
         "bullish_rate": 0.3333333333333333,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260902",
           "20260908",
@@ -9613,7 +9718,7 @@
         "bullish_hits": 1,
         "samples": 4,
         "bullish_rate": 0.25,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260908",
           "20260919",
@@ -9652,9 +9757,9 @@
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 5,
-        "samples": 7,
-        "bullish_rate": 0.7142857142857143,
-        "pending_count": 1,
+        "samples": 8,
+        "bullish_rate": 0.625,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260908",
@@ -9662,15 +9767,16 @@
           "20260920",
           "20260921",
           "20260923",
-          "20260928"
+          "20260928",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 4,
-        "samples": 10,
-        "bullish_rate": 0.4,
-        "pending_count": 1,
+        "samples": 11,
+        "bullish_rate": 0.36363636363636365,
+        "pending_count": 0,
         "dates": [
           "20260830",
           "20260906",
@@ -9681,7 +9787,8 @@
           "20261003",
           "20261005",
           "20261007",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
@@ -9708,7 +9815,7 @@
         "bullish_hits": 3,
         "samples": 5,
         "bullish_rate": 0.6,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260829",
           "20260907",
@@ -9730,9 +9837,9 @@
       "UP_UP_UP": {
         "key": "UP_UP_UP",
         "bullish_hits": 0,
-        "samples": 8,
+        "samples": 9,
         "bullish_rate": 0.0,
-        "pending_count": 1,
+        "pending_count": 0,
         "dates": [
           "20260911",
           "20260912",
@@ -9741,31 +9848,34 @@
           "20260923",
           "20260927",
           "20261010",
-          "20261014"
+          "20261014",
+          "20261016"
         ]
       },
       "RIGHT": {
         "key": "RIGHT",
         "bullish_hits": 1,
-        "samples": 3,
-        "bullish_rate": 0.3333333333333333,
-        "pending_count": 1,
+        "samples": 4,
+        "bullish_rate": 0.25,
+        "pending_count": 0,
         "dates": [
           "20260920",
           "20261009",
-          "20261012"
+          "20261012",
+          "20261016"
         ]
       },
       "LOW_CONVERGENCE_RIGHT": {
         "key": "LOW_CONVERGENCE_RIGHT",
         "bullish_hits": 1,
-        "samples": 3,
-        "bullish_rate": 0.3333333333333333,
-        "pending_count": 1,
+        "samples": 4,
+        "bullish_rate": 0.25,
+        "pending_count": 0,
         "dates": [
           "20260920",
           "20261009",
-          "20261012"
+          "20261012",
+          "20261016"
         ]
       },
       "DOWN_DOWN_DOWN": {
@@ -9773,7 +9883,7 @@
         "bullish_hits": 3,
         "samples": 6,
         "bullish_rate": 0.5,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260919",
           "20260924",
@@ -9786,10 +9896,12 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "samples": 1,
+        "bullish_rate": 0.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       }
     },
     "019": {
@@ -10147,7 +10259,7 @@
         "bullish_hits": 4,
         "samples": 11,
         "bullish_rate": 0.36363636363636365,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260901",
           "20260914",
@@ -10167,7 +10279,7 @@
         "bullish_hits": 5,
         "samples": 12,
         "bullish_rate": 0.4166666666666667,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260901",
           "20260914",
@@ -10215,30 +10327,32 @@
       },
       "ALL_2_RIGHT_LOWCONV_RIGHT": {
         "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
-        "bullish_hits": 3,
-        "samples": 5,
-        "bullish_rate": 0.6,
-        "pending_count": 1,
+        "bullish_hits": 4,
+        "samples": 6,
+        "bullish_rate": 0.6666666666666666,
+        "pending_count": 0,
         "dates": [
           "20260903",
           "20260908",
           "20260930",
           "20261003",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
-        "bullish_hits": 3,
-        "samples": 5,
-        "bullish_rate": 0.6,
-        "pending_count": 1,
+        "bullish_hits": 4,
+        "samples": 6,
+        "bullish_rate": 0.6666666666666666,
+        "pending_count": 0,
         "dates": [
           "20260903",
           "20260908",
           "20260930",
           "20261003",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       }
     },
@@ -10274,9 +10388,9 @@
       "ALL_2_RIGHT_LOWCONV_RIGHT": {
         "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "bullish_hits": 4,
-        "samples": 8,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 9,
+        "bullish_rate": 0.4444444444444444,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260916",
@@ -10285,15 +10399,16 @@
           "20260924",
           "20260930",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       },
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
         "bullish_hits": 4,
-        "samples": 8,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 9,
+        "bullish_rate": 0.4444444444444444,
+        "pending_count": 0,
         "dates": [
           "20260904",
           "20260916",
@@ -10302,7 +10417,8 @@
           "20260924",
           "20260930",
           "20261008",
-          "20261010"
+          "20261010",
+          "20261016"
         ]
       }
     },
@@ -10404,26 +10520,28 @@
       },
       "ALL_2_RIGHT_LOWCONV_RIGHT": {
         "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
-        "bullish_hits": 1,
-        "samples": 3,
-        "bullish_rate": 0.3333333333333333,
+        "bullish_hits": 2,
+        "samples": 4,
+        "bullish_rate": 0.5,
         "pending_count": 1,
         "dates": [
           "20260915",
           "20260926",
-          "20260929"
+          "20260929",
+          "20261016"
         ]
       },
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
-        "bullish_hits": 1,
-        "samples": 3,
-        "bullish_rate": 0.3333333333333333,
+        "bullish_hits": 2,
+        "samples": 4,
+        "bullish_rate": 0.5,
         "pending_count": 1,
         "dates": [
           "20260915",
           "20260926",
-          "20260929"
+          "20260929",
+          "20261016"
         ]
       }
     },
@@ -10772,7 +10890,7 @@
         "bullish_hits": 6,
         "samples": 9,
         "bullish_rate": 0.6666666666666666,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -10790,7 +10908,7 @@
         "bullish_hits": 6,
         "samples": 9,
         "bullish_rate": 0.6666666666666666,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -11246,13 +11364,14 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 3,
-        "samples": 3,
-        "bullish_rate": 1.0,
-        "pending_count": 1,
+        "samples": 4,
+        "bullish_rate": 0.75,
+        "pending_count": 0,
         "dates": [
           "20260915",
           "20260925",
-          "20261005"
+          "20261005",
+          "20261016"
         ]
       },
       "ALL_2_UP_RIGHT": {
@@ -11320,10 +11439,12 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "samples": 1,
+        "bullish_rate": 0.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       },
       "ALL_2_UP_RIGHT": {
         "key": "ALL_2_UP_RIGHT",
@@ -11408,9 +11529,9 @@
       "ALL_2_RIGHT_LOWCONV_RIGHT": {
         "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "bullish_hits": 5,
-        "samples": 12,
-        "bullish_rate": 0.4166666666666667,
-        "pending_count": 1,
+        "samples": 13,
+        "bullish_rate": 0.38461538461538464,
+        "pending_count": 0,
         "dates": [
           "20260901",
           "20260902",
@@ -11423,15 +11544,16 @@
           "20260926",
           "20261003",
           "20261005",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       },
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
         "bullish_hits": 5,
-        "samples": 12,
-        "bullish_rate": 0.4166666666666667,
-        "pending_count": 1,
+        "samples": 13,
+        "bullish_rate": 0.38461538461538464,
+        "pending_count": 0,
         "dates": [
           "20260901",
           "20260902",
@@ -11444,7 +11566,8 @@
           "20260926",
           "20261003",
           "20261005",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       }
     },
@@ -11480,7 +11603,7 @@
         "bullish_hits": 6,
         "samples": 11,
         "bullish_rate": 0.5454545454545454,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260829",
           "20260902",
@@ -11500,7 +11623,7 @@
         "bullish_hits": 7,
         "samples": 12,
         "bullish_rate": 0.5833333333333334,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260829",
           "20260902",
@@ -11590,11 +11713,13 @@
     "066": {
       "ALL_3": {
         "key": "ALL_3",
-        "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "bullish_hits": 1,
+        "samples": 1,
+        "bullish_rate": 1.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       },
       "ALL_2_UP_RIGHT": {
         "key": "ALL_2_UP_RIGHT",
@@ -11619,7 +11744,7 @@
         "bullish_hits": 4,
         "samples": 8,
         "bullish_rate": 0.5,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260902",
           "20260904",
@@ -11636,7 +11761,7 @@
         "bullish_hits": 5,
         "samples": 9,
         "bullish_rate": 0.5555555555555556,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260902",
           "20260904",
@@ -11654,12 +11779,13 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 1,
-        "samples": 2,
-        "bullish_rate": 0.5,
-        "pending_count": 1,
+        "samples": 3,
+        "bullish_rate": 0.3333333333333333,
+        "pending_count": 0,
         "dates": [
           "20260906",
-          "20260924"
+          "20260924",
+          "20261016"
         ]
       },
       "ALL_2_UP_RIGHT": {
@@ -11867,9 +11993,9 @@
       "ALL_2_RIGHT_LOWCONV_RIGHT": {
         "key": "ALL_2_RIGHT_LOWCONV_RIGHT",
         "bullish_hits": 4,
-        "samples": 14,
-        "bullish_rate": 0.2857142857142857,
-        "pending_count": 1,
+        "samples": 15,
+        "bullish_rate": 0.26666666666666666,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260901",
@@ -11884,15 +12010,16 @@
           "20261003",
           "20261005",
           "20261006",
-          "20261009"
+          "20261009",
+          "20261016"
         ]
       },
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
         "bullish_hits": 4,
-        "samples": 15,
-        "bullish_rate": 0.26666666666666666,
-        "pending_count": 1,
+        "samples": 16,
+        "bullish_rate": 0.25,
+        "pending_count": 0,
         "dates": [
           "20260831",
           "20260901",
@@ -11908,7 +12035,8 @@
           "20261003",
           "20261005",
           "20261006",
-          "20261009"
+          "20261009",
+          "20261016"
         ]
       }
     },
@@ -12196,7 +12324,7 @@
         "bullish_hits": 2,
         "samples": 2,
         "bullish_rate": 1.0,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20261007"
@@ -12234,7 +12362,7 @@
         "bullish_hits": 6,
         "samples": 12,
         "bullish_rate": 0.5,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260828",
           "20260830",
@@ -12286,7 +12414,7 @@
         "bullish_hits": 0,
         "samples": 2,
         "bullish_rate": 0.0,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260908",
           "20260925"
@@ -12297,7 +12425,7 @@
         "bullish_hits": 1,
         "samples": 3,
         "bullish_rate": 0.3333333333333333,
-        "pending_count": 0,
+        "pending_count": 1,
         "dates": [
           "20260902",
           "20260908",
@@ -12317,10 +12445,12 @@
       "ALL_2_UP_RIGHT": {
         "key": "ALL_2_UP_RIGHT",
         "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "samples": 1,
+        "bullish_rate": 0.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       },
       "ALL_2_UP_LOWCONV_RIGHT": {
         "key": "ALL_2_UP_LOWCONV_RIGHT",
@@ -12352,9 +12482,9 @@
       "ALL_2_TOTAL": {
         "key": "ALL_2_TOTAL",
         "bullish_hits": 4,
-        "samples": 10,
-        "bullish_rate": 0.4,
-        "pending_count": 1,
+        "samples": 11,
+        "bullish_rate": 0.36363636363636365,
+        "pending_count": 0,
         "dates": [
           "20260830",
           "20260906",
@@ -12365,7 +12495,8 @@
           "20261003",
           "20261005",
           "20261007",
-          "20261008"
+          "20261008",
+          "20261016"
         ]
       }
     },
@@ -12373,10 +12504,12 @@
       "ALL_3": {
         "key": "ALL_3",
         "bullish_hits": 0,
-        "samples": 0,
-        "bullish_rate": null,
-        "pending_count": 1,
-        "dates": []
+        "samples": 1,
+        "bullish_rate": 0.0,
+        "pending_count": 0,
+        "dates": [
+          "20261016"
+        ]
       },
       "ALL_2_UP_RIGHT": {
         "key": "ALL_2_UP_RIGHT",

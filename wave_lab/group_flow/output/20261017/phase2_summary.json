@@ -1,0 +1,194 @@
+{
+  "date": "20261017",
+  "machines": 39,
+  "history_files": 39,
+  "status_values": {
+    "初当り": 153,
+    "継続": 354
+  },
+  "initial_definition": "source_status=初当り -> INITIAL",
+  "continuation_definition": "source_status=継続 -> CONTINUATION",
+  "ambiguity": "status is separated exactly as labeled; the label alone does not establish physical causality",
+  "initial_total": 153,
+  "continuation_total": 354,
+  "total_hit_activity": 507,
+  "machines_with_initial": 39,
+  "machines_with_continuation": 35,
+  "timeline": {
+    "start": "09:00",
+    "end": "23:20",
+    "step_minutes": 5,
+    "points": 174,
+    "interpolation": "previous-value hold"
+  },
+  "density_maxima": {
+    "initial": {
+      "5": {
+        "max": 5,
+        "times": [
+          "12:55"
+        ]
+      },
+      "10": {
+        "max": 9,
+        "times": [
+          "12:50"
+        ]
+      },
+      "30": {
+        "max": 18,
+        "times": [
+          "12:30"
+        ]
+      }
+    },
+    "continuation": {
+      "5": {
+        "max": 10,
+        "times": [
+          "13:00"
+        ]
+      },
+      "10": {
+        "max": 16,
+        "times": [
+          "15:55"
+        ]
+      },
+      "30": {
+        "max": 40,
+        "times": [
+          "15:55"
+        ]
+      }
+    },
+    "total": {
+      "5": {
+        "max": 10,
+        "times": [
+          "11:30",
+          "13:00",
+          "14:10",
+          "15:55",
+          "16:05",
+          "16:15"
+        ]
+      },
+      "10": {
+        "max": 19,
+        "times": [
+          "12:55",
+          "14:05",
+          "15:55",
+          "16:00"
+        ]
+      },
+      "30": {
+        "max": 50,
+        "times": [
+          "15:50",
+          "15:55"
+        ]
+      }
+    }
+  },
+  "phase1_high_density_comparison": {
+    "11:00": {
+      "time": "11:00",
+      "minute": 660,
+      "initial_5m": 1,
+      "continuation_5m": 1,
+      "total_5m": 2,
+      "initial_10m": 2,
+      "continuation_10m": 4,
+      "total_10m": 6,
+      "initial_30m": 12,
+      "continuation_30m": 22,
+      "total_30m": 34
+    },
+    "12:30": {
+      "time": "12:30",
+      "minute": 750,
+      "initial_5m": 2,
+      "continuation_5m": 1,
+      "total_5m": 3,
+      "initial_10m": 5,
+      "continuation_10m": 2,
+      "total_10m": 7,
+      "initial_30m": 18,
+      "continuation_30m": 15,
+      "total_30m": 33
+    },
+    "13:30": {
+      "time": "13:30",
+      "minute": 810,
+      "initial_5m": 1,
+      "continuation_5m": 1,
+      "total_5m": 2,
+      "initial_10m": 2,
+      "continuation_10m": 3,
+      "total_10m": 5,
+      "initial_30m": 9,
+      "continuation_30m": 20,
+      "total_30m": 29
+    },
+    "14:00": {
+      "time": "14:00",
+      "minute": 840,
+      "initial_5m": 1,
+      "continuation_5m": 2,
+      "total_5m": 3,
+      "initial_10m": 3,
+      "continuation_10m": 9,
+      "total_10m": 12,
+      "initial_30m": 9,
+      "continuation_30m": 32,
+      "total_30m": 41
+    },
+    "14:30": {
+      "time": "14:30",
+      "minute": 870,
+      "initial_5m": 0,
+      "continuation_5m": 5,
+      "total_5m": 5,
+      "initial_10m": 0,
+      "continuation_10m": 10,
+      "total_10m": 10,
+      "initial_30m": 4,
+      "continuation_30m": 25,
+      "total_30m": 29
+    },
+    "19:00": {
+      "time": "19:00",
+      "minute": 1140,
+      "initial_5m": 0,
+      "continuation_5m": 0,
+      "total_5m": 0,
+      "initial_10m": 3,
+      "continuation_10m": 0,
+      "total_10m": 3,
+      "initial_30m": 6,
+      "continuation_30m": 9,
+      "total_30m": 15
+    }
+  },
+  "phase1_match": {
+    "initial_count": 153,
+    "group_initial_counts": true,
+    "group_final_close": true,
+    "all39_final": -203909
+  },
+  "group_final_close": {
+    "g1": -19281,
+    "g2": -11706,
+    "g3": -9379,
+    "g4": -13384,
+    "g5": -55437,
+    "g6": -36889,
+    "g7": -27112,
+    "g8": 34570,
+    "g9": -65291
+  },
+  "all39_final": -203909,
+  "sum_group_equals_all39": true
+}
