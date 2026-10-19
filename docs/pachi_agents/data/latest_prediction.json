@@ -1,7 +1,7 @@
 {
-  "prediction_date": "20261019",
-  "cutoff_date": "20261018",
-  "created_at": "2026-10-19T07:04:59.784646+09:00",
+  "prediction_date": "20261020",
+  "cutoff_date": "20261019",
+  "created_at": "2026-10-20T07:37:18.515100+09:00",
   "status": "locked",
   "logic_version": "pachi_agents_v1",
   "input_manifest": [
@@ -684,10 +684,10 @@
       "sha256": "d0f3e1706b196c5afa13f682c55f892470d61cb6c6b2f1eb977be14700dd4d95"
     },
     {
-      "kind": "snapshot",
-      "path": "csv\\replay\\20261012_snapshot.json",
-      "date": "20261012",
-      "sha256": "5a6efff937dcc3f6636a8bff6d114ed0ac5b70ca8244f9f945ea9c563fe71f53"
+      "kind": "ohlc",
+      "path": "csv\\daily_ohlc\\20261019\\20261019_daily_ohlc.csv",
+      "date": "20261019",
+      "sha256": "142166aeb83ebd2576bac1b1adb7276acc492e1a4d3ca564943437cfded136c9"
     },
     {
       "kind": "snapshot",
@@ -726,10 +726,16 @@
       "sha256": "54abe91c9f499a8339f331d3978e38492039af83f49da59ce7b9527608b80f88"
     },
     {
+      "kind": "snapshot",
+      "path": "csv\\replay\\20261019_snapshot.json",
+      "date": "20261019",
+      "sha256": "c1bc3b6229d3f58b0f1391b5c003bb999f9b2984af2972a1699fc9ff95f5b7ce"
+    },
+    {
       "kind": "propagation_history",
       "path": "pair_history.json",
-      "date": "20261018",
-      "sha256": "9331d8765964605d1cc9cb5b710d00c0137738f7864df85c52f1e5e552577ee8"
+      "date": "20261019",
+      "sha256": "7beb722a3b624ed298254bbf55717a04780ef87e3e2429c5eccb292e7d1ad197"
     },
     {
       "kind": "daytime_hits",
@@ -1486,78 +1492,78 @@
       "path": "csv\\daily_ohlc\\20261018\\20261018_daily_ohlc.csv",
       "date": "20261018",
       "sha256": "d0f3e1706b196c5afa13f682c55f892470d61cb6c6b2f1eb977be14700dd4d95"
+    },
+    {
+      "kind": "ohlc",
+      "path": "csv\\daily_ohlc\\20261019\\20261019_daily_ohlc.csv",
+      "date": "20261019",
+      "sha256": "142166aeb83ebd2576bac1b1adb7276acc492e1a4d3ca564943437cfded136c9"
     }
   ],
   "agents": {
     "pachio": {
       "logic_version": "pachi_agents_pachio_v1",
-      "primary_machine": "072",
+      "primary_machine": "012",
       "candidates": [
         {
-          "machine": "072",
-          "score": 6.6,
+          "machine": "012",
+          "score": 6.0,
           "confidence": 0.95,
           "signals": {
-            "history_days": 113,
-            "last_date": "20261018",
-            "ma5_slope": 3890.8,
-            "ma20_slope": 220.75,
-            "cycle_forecast": 7655,
+            "history_days": 43,
+            "last_date": "20261019",
+            "ma5_slope": 1454.8,
+            "ma20_slope": 603.7,
+            "cycle_forecast": 8903,
             "bullish_structure": true,
             "fibonacci_class": "blue",
-            "golden_cross_recent": true
+            "golden_cross_recent": false
           },
           "reason_codes": [
             "MA5_UP",
             "MA20_UP",
             "CYCLE_POSITIVE",
             "BULL_STRUCTURE",
-            "FIB_BLUE",
-            "GC_RECENT"
+            "FIB_BLUE"
           ],
           "experience_adjustment": {
-            "base_score": 8.25,
-            "reason_adjustment": -1.4439,
-            "combo_adjustment": -2.0792,
-            "confidence_adjustment": -0.0891,
-            "adjustment_cap": 1.65,
-            "final_score": 6.6,
-            "experience_sample_count": 358,
+            "base_score": 7.5,
+            "reason_adjustment": -1.136,
+            "combo_adjustment": -1.4941,
+            "confidence_adjustment": -0.0818,
+            "adjustment_cap": 1.5,
+            "final_score": 6.0,
+            "experience_sample_count": 343,
             "used_stats": [
               "BULL_STRUCTURE",
               "CYCLE_POSITIVE",
               "FIB_BLUE",
-              "GC_RECENT",
               "MA20_UP",
               "MA5_UP",
               "BULL_STRUCTURE+CYCLE_POSITIVE",
               "BULL_STRUCTURE+FIB_BLUE",
-              "BULL_STRUCTURE+GC_RECENT",
               "BULL_STRUCTURE+MA20_UP",
               "BULL_STRUCTURE+MA5_UP",
               "CYCLE_POSITIVE+FIB_BLUE",
-              "CYCLE_POSITIVE+GC_RECENT",
               "CYCLE_POSITIVE+MA20_UP",
               "CYCLE_POSITIVE+MA5_UP",
               "FIB_BLUE+MA20_UP",
               "FIB_BLUE+MA5_UP",
-              "GC_RECENT+MA20_UP",
-              "GC_RECENT+MA5_UP",
               "MA20_UP+MA5_UP",
               "confidence:gte_0_85"
             ]
           }
         },
         {
-          "machine": "056",
+          "machine": "074",
           "score": 5.0,
           "confidence": 0.95,
           "signals": {
-            "history_days": 113,
-            "last_date": "20261018",
-            "ma5_slope": 3402.8,
-            "ma20_slope": 370.05,
-            "cycle_forecast": -9251,
+            "history_days": 114,
+            "last_date": "20261019",
+            "ma5_slope": 4229.0,
+            "ma20_slope": 297.4,
+            "cycle_forecast": -519,
             "bullish_structure": true,
             "fibonacci_class": "blue",
             "golden_cross_recent": true
@@ -1572,12 +1578,12 @@
           ],
           "experience_adjustment": {
             "base_score": 6.25,
-            "reason_adjustment": -1.0784,
-            "combo_adjustment": -1.4206,
-            "confidence_adjustment": -0.0675,
+            "reason_adjustment": -1.093,
+            "combo_adjustment": -1.4451,
+            "confidence_adjustment": -0.0682,
             "adjustment_cap": 1.25,
             "final_score": 5.0,
-            "experience_sample_count": 303,
+            "experience_sample_count": 308,
             "used_stats": [
               "BULL_STRUCTURE",
               "CYCLE_NEGATIVE",
@@ -1603,15 +1609,15 @@
           }
         },
         {
-          "machine": "058",
+          "machine": "159",
           "score": 4.2,
           "confidence": 0.938,
           "signals": {
-            "history_days": 113,
-            "last_date": "20261018",
-            "ma5_slope": 620.8,
-            "ma20_slope": 120.7,
-            "cycle_forecast": 1981,
+            "history_days": 80,
+            "last_date": "20261019",
+            "ma5_slope": 89.0,
+            "ma20_slope": 417.8,
+            "cycle_forecast": 4588,
             "bullish_structure": false,
             "fibonacci_class": "none",
             "golden_cross_recent": true
@@ -1624,12 +1630,12 @@
           ],
           "experience_adjustment": {
             "base_score": 5.25,
-            "reason_adjustment": -0.5563,
-            "combo_adjustment": -0.4812,
-            "confidence_adjustment": -0.0567,
+            "reason_adjustment": -0.567,
+            "combo_adjustment": -0.4973,
+            "confidence_adjustment": -0.0573,
             "adjustment_cap": 1.05,
             "final_score": 4.2,
-            "experience_sample_count": 263,
+            "experience_sample_count": 267,
             "used_stats": [
               "CYCLE_POSITIVE",
               "GC_RECENT",
@@ -1646,76 +1652,86 @@
           }
         },
         {
-          "machine": "1179",
-          "score": 3.869,
-          "confidence": 0.875,
+          "machine": "153",
+          "score": 4.2,
+          "confidence": 0.938,
           "signals": {
-            "history_days": 70,
-            "last_date": "20260906",
-            "ma5_slope": 85.4,
-            "ma20_slope": 27.55,
-            "cycle_forecast": 927,
+            "history_days": 114,
+            "last_date": "20261019",
+            "ma5_slope": 8772.8,
+            "ma20_slope": 977.7,
+            "cycle_forecast": 6559,
             "bullish_structure": false,
             "fibonacci_class": "none",
-            "golden_cross_recent": false
+            "golden_cross_recent": true
           },
           "reason_codes": [
             "MA5_UP",
             "MA20_UP",
-            "CYCLE_POSITIVE"
+            "CYCLE_POSITIVE",
+            "GC_RECENT"
           ],
           "experience_adjustment": {
-            "base_score": 4.5,
-            "reason_adjustment": -0.3643,
-            "combo_adjustment": -0.218,
-            "confidence_adjustment": -0.0486,
-            "adjustment_cap": 0.9,
-            "final_score": 3.869,
-            "experience_sample_count": 243,
+            "base_score": 5.25,
+            "reason_adjustment": -0.567,
+            "combo_adjustment": -0.4973,
+            "confidence_adjustment": -0.0573,
+            "adjustment_cap": 1.05,
+            "final_score": 4.2,
+            "experience_sample_count": 267,
             "used_stats": [
               "CYCLE_POSITIVE",
+              "GC_RECENT",
               "MA20_UP",
               "MA5_UP",
+              "CYCLE_POSITIVE+GC_RECENT",
               "CYCLE_POSITIVE+MA20_UP",
               "CYCLE_POSITIVE+MA5_UP",
+              "GC_RECENT+MA20_UP",
+              "GC_RECENT+MA5_UP",
               "MA20_UP+MA5_UP",
               "confidence:gte_0_85"
             ]
           }
         },
         {
-          "machine": "1015",
-          "score": 3.869,
-          "confidence": 0.875,
+          "machine": "152",
+          "score": 4.2,
+          "confidence": 0.938,
           "signals": {
-            "history_days": 62,
-            "last_date": "20260906",
-            "ma5_slope": 263.2,
-            "ma20_slope": 64.9,
-            "cycle_forecast": 320,
+            "history_days": 114,
+            "last_date": "20261019",
+            "ma5_slope": 6366.2,
+            "ma20_slope": 876.0,
+            "cycle_forecast": 7552,
             "bullish_structure": false,
             "fibonacci_class": "none",
-            "golden_cross_recent": false
+            "golden_cross_recent": true
           },
           "reason_codes": [
             "MA5_UP",
             "MA20_UP",
-            "CYCLE_POSITIVE"
+            "CYCLE_POSITIVE",
+            "GC_RECENT"
           ],
           "experience_adjustment": {
-            "base_score": 4.5,
-            "reason_adjustment": -0.3643,
-            "combo_adjustment": -0.218,
-            "confidence_adjustment": -0.0486,
-            "adjustment_cap": 0.9,
-            "final_score": 3.869,
-            "experience_sample_count": 243,
+            "base_score": 5.25,
+            "reason_adjustment": -0.567,
+            "combo_adjustment": -0.4973,
+            "confidence_adjustment": -0.0573,
+            "adjustment_cap": 1.05,
+            "final_score": 4.2,
+            "experience_sample_count": 267,
             "used_stats": [
               "CYCLE_POSITIVE",
+              "GC_RECENT",
               "MA20_UP",
               "MA5_UP",
+              "CYCLE_POSITIVE+GC_RECENT",
               "CYCLE_POSITIVE+MA20_UP",
               "CYCLE_POSITIVE+MA5_UP",
+              "GC_RECENT+MA20_UP",
+              "GC_RECENT+MA5_UP",
               "MA20_UP+MA5_UP",
               "confidence:gte_0_85"
             ]
@@ -1723,53 +1739,47 @@
         }
       ],
       "confidence": 0.95,
-      "comment": "072番を、MA・周期・チャート構造の合算スコアで本命指名しました。",
+      "comment": "012番を、MA・周期・チャート構造の合算スコアで本命指名しました。",
       "signals": {
-        "history_days": 113,
-        "last_date": "20261018",
-        "ma5_slope": 3890.8,
-        "ma20_slope": 220.75,
-        "cycle_forecast": 7655,
+        "history_days": 43,
+        "last_date": "20261019",
+        "ma5_slope": 1454.8,
+        "ma20_slope": 603.7,
+        "cycle_forecast": 8903,
         "bullish_structure": true,
         "fibonacci_class": "blue",
-        "golden_cross_recent": true
+        "golden_cross_recent": false
       },
       "reason_codes": [
         "MA5_UP",
         "MA20_UP",
         "CYCLE_POSITIVE",
         "BULL_STRUCTURE",
-        "FIB_BLUE",
-        "GC_RECENT"
+        "FIB_BLUE"
       ],
       "experience_adjustment": {
-        "base_score": 8.25,
-        "reason_adjustment": -1.4439,
-        "combo_adjustment": -2.0792,
-        "confidence_adjustment": -0.0891,
-        "adjustment_cap": 1.65,
-        "final_score": 6.6,
-        "experience_sample_count": 358,
+        "base_score": 7.5,
+        "reason_adjustment": -1.136,
+        "combo_adjustment": -1.4941,
+        "confidence_adjustment": -0.0818,
+        "adjustment_cap": 1.5,
+        "final_score": 6.0,
+        "experience_sample_count": 343,
         "used_stats": [
           "BULL_STRUCTURE",
           "CYCLE_POSITIVE",
           "FIB_BLUE",
-          "GC_RECENT",
           "MA20_UP",
           "MA5_UP",
           "BULL_STRUCTURE+CYCLE_POSITIVE",
           "BULL_STRUCTURE+FIB_BLUE",
-          "BULL_STRUCTURE+GC_RECENT",
           "BULL_STRUCTURE+MA20_UP",
           "BULL_STRUCTURE+MA5_UP",
           "CYCLE_POSITIVE+FIB_BLUE",
-          "CYCLE_POSITIVE+GC_RECENT",
           "CYCLE_POSITIVE+MA20_UP",
           "CYCLE_POSITIVE+MA5_UP",
           "FIB_BLUE+MA20_UP",
           "FIB_BLUE+MA5_UP",
-          "GC_RECENT+MA20_UP",
-          "GC_RECENT+MA5_UP",
           "MA20_UP+MA5_UP",
           "confidence:gte_0_85"
         ]
@@ -1777,21 +1787,21 @@
     },
     "pachiko": {
       "logic_version": "pachi_agents_pachiko_v1",
-      "primary_machine": "046",
+      "primary_machine": "077",
       "candidates": [
         {
-          "machine": "046",
-          "score": 6.7411,
+          "machine": "077",
+          "score": 6.711,
           "confidence": 0.9,
           "signals": {
-            "propagation_best_mean_lift": 4.75,
-            "propagation_repeat_days": 42,
-            "group": "1",
+            "propagation_best_mean_lift": 4.275,
+            "propagation_repeat_days": 43,
+            "group": "5",
             "group_strength": 1.0,
-            "daytime_hit_days_7": 3,
-            "cycle_forecast": 13160,
-            "cycle_history_days": 113,
-            "same_condition_records": 42
+            "daytime_hit_days_7": 4,
+            "cycle_forecast": 7481,
+            "cycle_history_days": 114,
+            "same_condition_records": 43
           },
           "reason_codes": [
             "PROPAGATION_REPEATED",
@@ -1801,12 +1811,12 @@
           ],
           "experience_adjustment": {
             "base_score": 6.75,
-            "reason_adjustment": -0.0075,
-            "combo_adjustment": 0.0002,
-            "confidence_adjustment": -0.0015,
+            "reason_adjustment": -0.0225,
+            "combo_adjustment": -0.0135,
+            "confidence_adjustment": -0.003,
             "adjustment_cap": 1.35,
-            "final_score": 6.7411,
-            "experience_sample_count": 354,
+            "final_score": 6.711,
+            "experience_sample_count": 358,
             "used_stats": [
               "CYCLE_POSITIVE",
               "DAYTIME_HIT_RECENT",
@@ -1823,18 +1833,18 @@
           }
         },
         {
-          "machine": "061",
-          "score": 6.2418,
+          "machine": "046",
+          "score": 6.711,
           "confidence": 0.9,
           "signals": {
-            "propagation_best_mean_lift": 8.71,
-            "propagation_repeat_days": 44,
-            "group": "7",
+            "propagation_best_mean_lift": 4.75,
+            "propagation_repeat_days": 42,
+            "group": "1",
             "group_strength": 1.0,
-            "daytime_hit_days_7": 2,
-            "cycle_forecast": 625,
-            "cycle_history_days": 113,
-            "same_condition_records": 44
+            "daytime_hit_days_7": 3,
+            "cycle_forecast": 19027,
+            "cycle_history_days": 114,
+            "same_condition_records": 42
           },
           "reason_codes": [
             "PROPAGATION_REPEATED",
@@ -1843,13 +1853,13 @@
             "CYCLE_POSITIVE"
           ],
           "experience_adjustment": {
-            "base_score": 6.25,
-            "reason_adjustment": -0.0069,
-            "combo_adjustment": 0.0001,
-            "confidence_adjustment": -0.0014,
-            "adjustment_cap": 1.25,
-            "final_score": 6.2418,
-            "experience_sample_count": 354,
+            "base_score": 6.75,
+            "reason_adjustment": -0.0225,
+            "combo_adjustment": -0.0135,
+            "confidence_adjustment": -0.003,
+            "adjustment_cap": 1.35,
+            "final_score": 6.711,
+            "experience_sample_count": 358,
             "used_stats": [
               "CYCLE_POSITIVE",
               "DAYTIME_HIT_RECENT",
@@ -1867,7 +1877,7 @@
         },
         {
           "machine": "058",
-          "score": 6.2418,
+          "score": 6.2139,
           "confidence": 0.9,
           "signals": {
             "propagation_best_mean_lift": 6.017,
@@ -1875,8 +1885,8 @@
             "group": "4",
             "group_strength": 1.0,
             "daytime_hit_days_7": 2,
-            "cycle_forecast": 1981,
-            "cycle_history_days": 113,
+            "cycle_forecast": 9207,
+            "cycle_history_days": 114,
             "same_condition_records": 52
           },
           "reason_codes": [
@@ -1887,12 +1897,12 @@
           ],
           "experience_adjustment": {
             "base_score": 6.25,
-            "reason_adjustment": -0.0069,
-            "combo_adjustment": 0.0001,
-            "confidence_adjustment": -0.0014,
+            "reason_adjustment": -0.0208,
+            "combo_adjustment": -0.0125,
+            "confidence_adjustment": -0.0028,
             "adjustment_cap": 1.25,
-            "final_score": 6.2418,
-            "experience_sample_count": 354,
+            "final_score": 6.2139,
+            "experience_sample_count": 358,
             "used_stats": [
               "CYCLE_POSITIVE",
               "DAYTIME_HIT_RECENT",
@@ -1910,7 +1920,7 @@
         },
         {
           "machine": "054",
-          "score": 6.2418,
+          "score": 6.2139,
           "confidence": 0.9,
           "signals": {
             "propagation_best_mean_lift": 5.63,
@@ -1918,8 +1928,8 @@
             "group": "9",
             "group_strength": 1.0,
             "daytime_hit_days_7": 2,
-            "cycle_forecast": 5256,
-            "cycle_history_days": 113,
+            "cycle_forecast": 438,
+            "cycle_history_days": 114,
             "same_condition_records": 45
           },
           "reason_codes": [
@@ -1930,12 +1940,12 @@
           ],
           "experience_adjustment": {
             "base_score": 6.25,
-            "reason_adjustment": -0.0069,
-            "combo_adjustment": 0.0001,
-            "confidence_adjustment": -0.0014,
+            "reason_adjustment": -0.0208,
+            "combo_adjustment": -0.0125,
+            "confidence_adjustment": -0.0028,
             "adjustment_cap": 1.25,
-            "final_score": 6.2418,
-            "experience_sample_count": 354,
+            "final_score": 6.2139,
+            "experience_sample_count": 358,
             "used_stats": [
               "CYCLE_POSITIVE",
               "DAYTIME_HIT_RECENT",
@@ -1953,7 +1963,7 @@
         },
         {
           "machine": "149",
-          "score": 5.7425,
+          "score": 5.7168,
           "confidence": 0.9,
           "signals": {
             "propagation_best_mean_lift": 5.344,
@@ -1961,8 +1971,8 @@
             "group": "5",
             "group_strength": 1.0,
             "daytime_hit_days_7": 1,
-            "cycle_forecast": 3901,
-            "cycle_history_days": 113,
+            "cycle_forecast": 6190,
+            "cycle_history_days": 114,
             "same_condition_records": 18
           },
           "reason_codes": [
@@ -1973,12 +1983,12 @@
           ],
           "experience_adjustment": {
             "base_score": 5.75,
-            "reason_adjustment": -0.0064,
-            "combo_adjustment": 0.0001,
-            "confidence_adjustment": -0.0013,
+            "reason_adjustment": -0.0192,
+            "combo_adjustment": -0.0115,
+            "confidence_adjustment": -0.0026,
             "adjustment_cap": 1.15,
-            "final_score": 5.7425,
-            "experience_sample_count": 354,
+            "final_score": 5.7168,
+            "experience_sample_count": 358,
             "used_stats": [
               "CYCLE_POSITIVE",
               "DAYTIME_HIT_RECENT",
@@ -1996,16 +2006,16 @@
         }
       ],
       "confidence": 0.9,
-      "comment": "046番を、伝播・グループ強度・日中hit・周期の統計証拠で本命指名しました。",
+      "comment": "077番を、伝播・グループ強度・日中hit・周期の統計証拠で本命指名しました。",
       "signals": {
-        "propagation_best_mean_lift": 4.75,
-        "propagation_repeat_days": 42,
-        "group": "1",
+        "propagation_best_mean_lift": 4.275,
+        "propagation_repeat_days": 43,
+        "group": "5",
         "group_strength": 1.0,
-        "daytime_hit_days_7": 3,
-        "cycle_forecast": 13160,
-        "cycle_history_days": 113,
-        "same_condition_records": 42
+        "daytime_hit_days_7": 4,
+        "cycle_forecast": 7481,
+        "cycle_history_days": 114,
+        "same_condition_records": 43
       },
       "reason_codes": [
         "PROPAGATION_REPEATED",
@@ -2015,12 +2025,12 @@
       ],
       "experience_adjustment": {
         "base_score": 6.75,
-        "reason_adjustment": -0.0075,
-        "combo_adjustment": 0.0002,
-        "confidence_adjustment": -0.0015,
+        "reason_adjustment": -0.0225,
+        "combo_adjustment": -0.0135,
+        "confidence_adjustment": -0.003,
         "adjustment_cap": 1.35,
-        "final_score": 6.7411,
-        "experience_sample_count": 354,
+        "final_score": 6.711,
+        "experience_sample_count": 358,
         "used_stats": [
           "CYCLE_POSITIVE",
           "DAYTIME_HIT_RECENT",
@@ -2038,65 +2048,19 @@
     },
     "pachikamisama": {
       "logic_version": "pachi_agents_pachikamisama_v1",
-      "honmei": "058",
-      "taikou": "072",
-      "ana": "046",
-      "confidence": 0.553,
+      "honmei": "012",
+      "taikou": "077",
+      "ana": "074",
+      "confidence": 0.24,
       "candidates": [
         {
-          "machine": "058",
-          "score": 1.1064,
-          "confidence": 0.553,
-          "signals": {
-            "pachio_rank": 3,
-            "pachiko_rank": 3,
-            "pachio_score": 4.2,
-            "pachiko_score": 6.2418,
-            "pachio_confidence": 0.938,
-            "pachiko_confidence": 0.9,
-            "pachio_contribution": 0.1579,
-            "pachiko_contribution": 0.1485,
-            "primary_agreement": false,
-            "candidate_overlap": true,
-            "both_top3": true,
-            "cross_agent_top5": true,
-            "diverse_signal_support": true
-          },
-          "reason_codes": [
-            "AGENT_DISAGREEMENT",
-            "CANDIDATE_OVERLAP",
-            "BOTH_TOP3",
-            "CROSS_AGENT_TOP5",
-            "HIGH_COMBINED_CONFIDENCE",
-            "PACHIO_WEIGHTED",
-            "DIVERSE_SIGNAL_SUPPORT"
-          ],
-          "candidate_origin": {
-            "agents": [
-              "pachio",
-              "pachiko"
-            ],
-            "pachio": {
-              "selected": true,
-              "rank": 3,
-              "is_primary": false
-            },
-            "pachiko": {
-              "selected": true,
-              "rank": 3,
-              "is_primary": false
-            },
-            "origin_type": "BOTH"
-          }
-        },
-        {
-          "machine": "072",
+          "machine": "012",
           "score": 0.4797,
           "confidence": 0.24,
           "signals": {
             "pachio_rank": 1,
             "pachiko_rank": null,
-            "pachio_score": 6.6,
+            "pachio_score": 6.0,
             "pachiko_score": null,
             "pachio_confidence": 0.95,
             "pachiko_confidence": null,
@@ -2130,14 +2094,14 @@
           }
         },
         {
-          "machine": "046",
+          "machine": "077",
           "score": 0.4455,
           "confidence": 0.223,
           "signals": {
             "pachio_rank": null,
             "pachiko_rank": 1,
             "pachio_score": null,
-            "pachiko_score": 6.7411,
+            "pachiko_score": 6.711,
             "pachio_confidence": null,
             "pachiko_confidence": 0.9,
             "pachio_contribution": 0.0,
@@ -2170,7 +2134,7 @@
           }
         },
         {
-          "machine": "056",
+          "machine": "074",
           "score": 0.2399,
           "confidence": 0.12,
           "signals": {
@@ -2210,14 +2174,14 @@
           }
         },
         {
-          "machine": "061",
+          "machine": "046",
           "score": 0.2228,
           "confidence": 0.111,
           "signals": {
             "pachio_rank": null,
             "pachiko_rank": 2,
             "pachio_score": null,
-            "pachiko_score": 6.2418,
+            "pachiko_score": 6.711,
             "pachio_confidence": null,
             "pachiko_confidence": 0.9,
             "pachio_contribution": 0.0,
@@ -2248,56 +2212,74 @@
             },
             "origin_type": "PACHIKO_ONLY"
           }
+        },
+        {
+          "machine": "159",
+          "score": 0.1579,
+          "confidence": 0.079,
+          "signals": {
+            "pachio_rank": 3,
+            "pachiko_rank": null,
+            "pachio_score": 4.2,
+            "pachiko_score": null,
+            "pachio_confidence": 0.938,
+            "pachiko_confidence": null,
+            "pachio_contribution": 0.1579,
+            "pachiko_contribution": 0.0,
+            "primary_agreement": false,
+            "candidate_overlap": false,
+            "both_top3": false,
+            "cross_agent_top5": false,
+            "diverse_signal_support": false
+          },
+          "reason_codes": [
+            "AGENT_DISAGREEMENT",
+            "PACHIO_WEIGHTED"
+          ],
+          "candidate_origin": {
+            "agents": [
+              "pachio"
+            ],
+            "pachio": {
+              "selected": true,
+              "rank": 3,
+              "is_primary": false
+            },
+            "pachiko": {
+              "selected": false,
+              "rank": null,
+              "is_primary": false
+            },
+            "origin_type": "PACHIO_ONLY"
+          }
         }
       ],
       "agent_weights": {
-        "pachio": 0.4786,
-        "pachiko": 0.5214
+        "pachio": 0.4788,
+        "pachiko": 0.5212
       },
       "signals": {
-        "pachio_rank": 3,
-        "pachiko_rank": 3,
-        "pachio_score": 4.2,
-        "pachiko_score": 6.2418,
-        "pachio_confidence": 0.938,
-        "pachiko_confidence": 0.9,
-        "pachio_contribution": 0.1579,
-        "pachiko_contribution": 0.1485,
+        "pachio_rank": 1,
+        "pachiko_rank": null,
+        "pachio_score": 6.0,
+        "pachiko_score": null,
+        "pachio_confidence": 0.95,
+        "pachiko_confidence": null,
+        "pachio_contribution": 0.4797,
+        "pachiko_contribution": 0.0,
         "primary_agreement": false,
-        "candidate_overlap": true,
-        "both_top3": true,
-        "cross_agent_top5": true,
-        "diverse_signal_support": true
+        "candidate_overlap": false,
+        "both_top3": false,
+        "cross_agent_top5": false,
+        "diverse_signal_support": false
       },
       "reason_codes": [
         "AGENT_DISAGREEMENT",
-        "CANDIDATE_OVERLAP",
-        "BOTH_TOP3",
-        "CROSS_AGENT_TOP5",
-        "HIGH_COMBINED_CONFIDENCE",
-        "PACHIO_WEIGHTED",
-        "DIVERSE_SIGNAL_SUPPORT"
+        "PACHIO_WEIGHTED"
       ],
-      "comment": "058番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
+      "comment": "012番を、パチお・パチこの順位、confidence、根拠の一致度から本命としました。",
       "role_origins": {
         "honmei": {
-          "agents": [
-            "pachio",
-            "pachiko"
-          ],
-          "pachio": {
-            "selected": true,
-            "rank": 3,
-            "is_primary": false
-          },
-          "pachiko": {
-            "selected": true,
-            "rank": 3,
-            "is_primary": false
-          },
-          "origin_type": "BOTH"
-        },
-        "taikou": {
           "agents": [
             "pachio"
           ],
@@ -2313,7 +2295,7 @@
           },
           "origin_type": "PACHIO_ONLY"
         },
-        "ana": {
+        "taikou": {
           "agents": [
             "pachiko"
           ],
@@ -2328,6 +2310,22 @@
             "is_primary": true
           },
           "origin_type": "PACHIKO_ONLY"
+        },
+        "ana": {
+          "agents": [
+            "pachio"
+          ],
+          "pachio": {
+            "selected": true,
+            "rank": 2,
+            "is_primary": false
+          },
+          "pachiko": {
+            "selected": false,
+            "rank": null,
+            "is_primary": false
+          },
+          "origin_type": "PACHIO_ONLY"
         }
       },
       "base_agent_weights": {
@@ -2335,8 +2333,8 @@
         "pachiko": 0.495
       },
       "experience_adjusted_weights": {
-        "pachio": 0.4786,
-        "pachiko": 0.5214
+        "pachio": 0.4788,
+        "pachiko": 0.5212
       },
       "experience_adjustment": {
         "base_agent_weights": {
@@ -2344,30 +2342,22 @@
           "pachiko": 0.495
         },
         "experience_adjusted_weights": {
-          "pachio": 0.4786,
-          "pachiko": 0.5214
+          "pachio": 0.4788,
+          "pachiko": 0.5212
         },
-        "weight_delta": 0.0264,
-        "experience_sample_count": 89,
+        "weight_delta": 0.0262,
+        "experience_sample_count": 90,
         "used_stats": [
           "pachio_summary",
           "pachiko_summary",
-          "condition:CANDIDATE_OVERLAP",
-          "condition:CROSS_AGENT_TOP5",
-          "condition:BOTH_TOP3",
-          "condition:DIVERSE_SIGNAL_SUPPORT",
           "condition:AGENT_DISAGREEMENT",
           "weight_pattern:balanced"
         ],
         "condition_rates": {
-          "CANDIDATE_OVERLAP": 0.3889,
-          "CROSS_AGENT_TOP5": 0.3889,
-          "BOTH_TOP3": 0.2308,
-          "DIVERSE_SIGNAL_SUPPORT": 0.3889,
-          "AGENT_DISAGREEMENT": 0.2989
+          "AGENT_DISAGREEMENT": 0.3068
         },
         "weight_pattern": "balanced",
-        "weight_pattern_rate": 0.2988505747126437,
+        "weight_pattern_rate": 0.3068181818181818,
         "max_weight_delta": 0.05
       }
     }
